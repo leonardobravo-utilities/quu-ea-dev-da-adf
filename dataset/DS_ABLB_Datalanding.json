@@ -1,0 +1,54 @@
+{
+	"name": "DS_ABLB_Datalanding",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueadadlslanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FolderPath": {
+				"type": "string"
+			},
+			"TargetFileName": {
+				"type": "string"
+			},
+			"ColumnDelimiter": {
+				"type": "string",
+				"defaultValue": ","
+			},
+			"QuoteCharacter": {
+				"type": "string",
+				"defaultValue": "\""
+			}
+		},
+		"folder": {
+			"name": "Framework"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().TargetFileName",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().FolderPath",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": {
+				"value": "@dataset().ColumnDelimiter",
+				"type": "Expression"
+			},
+			"rowDelimiter": "\n",
+			"escapeChar": "º",
+			"quoteChar": {
+				"value": "@dataset().QuoteCharacter",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	}
+}
