@@ -1,0 +1,33 @@
+{
+	"name": "LS_DBR_ADF_Job_Cluster",
+	"properties": {
+		"parameters": {
+			"databricksclusterid": {
+				"type": "string",
+				"defaultValue": "0417-051914-axons909"
+			},
+			"databrickssecretname": {
+				"type": "string",
+				"defaultValue": "databricks-token"
+			}
+		},
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://australiaeast.azuredatabricks.net",
+			"accessToken": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ADF_LS_AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().databrickssecretname",
+					"type": "Expression"
+				}
+			},
+			"existingClusterId": "@linkedService().databricksclusterid"
+		},
+		"description": "Azure Databricks Access Token"
+	}
+}
