@@ -7,9 +7,29 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
+		"LS_ASQL_EDWDiscovery_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery'"
+		},
+		"LS_ORAC_Framework_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ORAC_Framework'"
+		},
+		"LS_SQL_Framework_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'"
+		},
 		"ADF_LS_AKV_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://quu-ea-prd-da-key-vault.vault.azure.net/"
+		},
+		"LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint": {
+			"type": "string",
+			"defaultValue": "https://quueaprddadlslanding001.blob.core.windows.net"
+		},
+		"LS_SQL_Framework_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "@{linkedService().UserName}"
 		},
 		"containerUri": {
 			"type": "string",
@@ -38,8 +58,23 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"LS_ASQL_EDWDiscovery_connectionString": {
+						"value": "[parameters('LS_ASQL_EDWDiscovery_connectionString')]"
+					},
+					"LS_ORAC_Framework_connectionString": {
+						"value": "[parameters('LS_ORAC_Framework_connectionString')]"
+					},
+					"LS_SQL_Framework_connectionString": {
+						"value": "[parameters('LS_SQL_Framework_connectionString')]"
+					},
 					"ADF_LS_AKV_properties_typeProperties_baseUrl": {
 						"value": "[parameters('ADF_LS_AKV_properties_typeProperties_baseUrl')]"
+					},
+					"LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint": {
+						"value": "[parameters('LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint')]"
+					},
+					"LS_SQL_Framework_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]"
 					}
 				}
 			},
