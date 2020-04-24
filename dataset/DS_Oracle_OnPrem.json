@@ -1,0 +1,54 @@
+{
+	"name": "DS_Oracle_OnPrem",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ORAC_Framework",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"HostName": {
+					"value": "@dataset().HostName",
+					"type": "Expression"
+				},
+				"PortNo": {
+					"value": "@dataset().PortNo",
+					"type": "Expression"
+				},
+				"SID": {
+					"value": "@dataset().SID",
+					"type": "Expression"
+				},
+				"UserName": {
+					"value": "@dataset().UserName",
+					"type": "Expression"
+				},
+				"SecretName": {
+					"value": "@dataset().SecretPasswordName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"HostName": {
+				"type": "string"
+			},
+			"PortNo": {
+				"type": "string"
+			},
+			"SID": {
+				"type": "string"
+			},
+			"UserName": {
+				"type": "string"
+			},
+			"SecretPasswordName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Framework"
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": []
+	}
+}
