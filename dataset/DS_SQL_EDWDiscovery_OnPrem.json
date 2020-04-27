@@ -1,0 +1,51 @@
+{
+	"name": "DS_SQL_EDWDiscovery_OnPrem",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQL_Framework",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"Servername": {
+					"value": "@dataset().ServerName",
+					"type": "Expression"
+				},
+				"Databasename": {
+					"value": "@dataset().DatabaseName",
+					"type": "Expression"
+				},
+				"SecretPasswordName": {
+					"value": "@dataset().SecretPasswordName",
+					"type": "Expression"
+				},
+				"UserName": {
+					"value": "@dataset().UserName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"ServerName": {
+				"type": "string",
+				"defaultValue": "PRDC04-SQL"
+			},
+			"DatabaseName": {
+				"type": "string",
+				"defaultValue": "EDW_Discovery"
+			},
+			"UserName": {
+				"type": "string",
+				"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
+			},
+			"SecretPasswordName": {
+				"type": "string",
+				"defaultValue": "SVC-EBI-PRDC04-AGT"
+			}
+		},
+		"folder": {
+			"name": "Framework"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	}
+}
