@@ -27,9 +27,29 @@
 			"type": "string",
 			"defaultValue": "https://quueaprddadlslanding001.blob.core.windows.net"
 		},
+		"LS_FS_Globalscape_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\nfujprd200\\EBI_PROD_LANDING"
+		},
+		"LS_FS_Globalscape_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
 		"LS_SQL_Framework_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "@{linkedService().UserName}"
+		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "OpenWindows"
+		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
 		},
 		"containerUri": {
 			"type": "string",
@@ -73,12 +93,47 @@
 					"LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint": {
 						"value": "[parameters('LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint')]"
 					},
+					"LS_FS_Globalscape_properties_typeProperties_host": {
+						"value": "[parameters('LS_FS_Globalscape_properties_typeProperties_host')]"
+					},
+					"LS_FS_Globalscape_properties_typeProperties_userId": {
+						"value": "[parameters('LS_FS_Globalscape_properties_typeProperties_userId')]"
+					},
 					"LS_SQL_Framework_properties_typeProperties_userName": {
 						"value": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]"
 					}
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
+						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName')]"
+					},
+					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob": {
+						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob')]"
+					},
+					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_0')]"
+			]
 		}
 	]
 }

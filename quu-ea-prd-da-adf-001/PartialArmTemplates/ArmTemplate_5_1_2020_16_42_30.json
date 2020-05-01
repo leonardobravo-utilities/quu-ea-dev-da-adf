@@ -6,50 +6,6 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
-		},
-		"LS_ASQL_EDWDiscovery_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery'"
-		},
-		"LS_ORAC_Framework_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ORAC_Framework'"
-		},
-		"LS_SQL_Framework_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'"
-		},
-		"ADF_LS_AKV_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://quu-ea-prd-da-key-vault.vault.azure.net/"
-		},
-		"LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint": {
-			"type": "string",
-			"defaultValue": "https://quueaprddadlslanding001.blob.core.windows.net"
-		},
-		"LS_FS_Globalscape_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "\\\\nfujprd200\\EBI_PROD_LANDING"
-		},
-		"LS_FS_Globalscape_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
-		},
-		"LS_SQL_Framework_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "@{linkedService().UserName}"
-		},
-		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "OpenWindows"
-		},
-		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
 		}
 	},
 	"variables": {
@@ -99,8 +55,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -313,8 +268,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						}
 					}
@@ -331,9 +285,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_Framework_TRFM_BlobToASQL')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_Framework_TRFM_BlobToASQL')]"
 			]
 		},
 		{
@@ -352,8 +304,7 @@
 								"referenceName": "PL_ABN_SourceToBlob",
 								"type": "PipelineReference"
 							},
-							"waitOnCompletion": true,
-							"parameters": {}
+							"waitOnCompletion": true
 						}
 					},
 					{
@@ -373,8 +324,7 @@
 								"referenceName": "PL_ABN_BlobToASQL",
 								"type": "PipelineReference"
 							},
-							"waitOnCompletion": true,
-							"parameters": {}
+							"waitOnCompletion": true
 						}
 					}
 				],
@@ -431,8 +381,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -632,8 +581,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						}
 					}
@@ -654,8 +602,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_DM_SourcetoBlob_SqlServer')]"
 			]
 		},
@@ -694,8 +640,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -864,8 +809,7 @@
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
+											"type": "DatasetReference"
 										}
 									}
 								}
@@ -885,7 +829,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_DM_SourcetoBlob_File')]"
 			]
 		},
@@ -924,8 +867,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -1129,7 +1071,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_DM_SourcetoBlob_Delete_Oracle')]"
 			]
 		},
@@ -1168,8 +1109,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -1365,7 +1305,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_DM_SourcetoBlob_Delete_SqlServer')]"
 			]
 		},
@@ -1404,8 +1343,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -1551,7 +1489,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_DM_SourceToBlob_Oracle')]"
 			]
 		},
@@ -1590,8 +1527,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -1733,7 +1669,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_DM_SourcetoBlob_SqlServer')]"
 			]
 		},
@@ -1765,8 +1700,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						}
 					},
@@ -1799,8 +1733,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						}
 					},
@@ -1878,7 +1811,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlobDelete_SqlServer')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlobDelete_Oracle')]"
 			]
@@ -1918,8 +1850,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -2088,7 +2019,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_Migration_BlobToASQL')]"
 			]
 		},
@@ -2127,8 +2057,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -2278,7 +2207,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_Migration_SourceToBlob_SqlServer')]"
 			]
 		},
@@ -2317,8 +2245,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -2480,7 +2407,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_TRFM_BlobToASQL')]"
 			]
 		},
@@ -2512,8 +2438,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						}
 					},
@@ -2618,7 +2543,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlob_SqlServer')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
 			]
@@ -2789,8 +2713,7 @@
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
+											"type": "DatasetReference"
 										}
 									}
 								}
@@ -2817,8 +2740,7 @@
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
+											"type": "DatasetReference"
 										}
 									}
 								},
@@ -3037,8 +2959,7 @@
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
+											"type": "DatasetReference"
 										}
 									}
 								}
@@ -3137,10 +3058,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_Oracle_OnPrem')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_Datalanding')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]"
+				"[concat(variables('factoryId'), '/datasets/DS_Oracle_OnPrem')]"
 			]
 		},
 		{
@@ -3169,8 +3087,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						}
 					},
@@ -3695,11 +3612,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/datasets/DS_Oracle_OnPrem')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_Datalanding')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
+				"[concat(variables('factoryId'), '/datasets/DS_Oracle_OnPrem')]"
 			]
 		},
 		{
@@ -3728,8 +3641,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						}
 					},
@@ -4243,11 +4155,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/datasets/DS_SQL_EDWDiscovery_OnPrem')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_Datalanding')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_EDWDiscovery_OnPrem')]"
 			]
 		},
 		{
@@ -4509,9 +4417,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_File_Source')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_Datalanding')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
+				"[concat(variables('factoryId'), '/datasets/DS_File_Source')]"
 			]
 		},
 		{
@@ -4675,8 +4581,7 @@
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
+											"type": "DatasetReference"
 										}
 									}
 								}
@@ -4703,8 +4608,7 @@
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
+											"type": "DatasetReference"
 										}
 									}
 								},
@@ -4907,8 +4811,7 @@
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
+											"type": "DatasetReference"
 										}
 									}
 								}
@@ -5004,10 +4907,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_SQL_EDWDiscovery_OnPrem')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_Datalanding')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]"
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_EDWDiscovery_OnPrem')]"
 			]
 		},
 		{
@@ -5702,8 +5602,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -6007,13 +5906,7 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_DataLanding_FileExists')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_DataLanding_FizeSize')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Framework_Migration_SourceToBlob_SqlServer')]",
@@ -6183,8 +6076,7 @@
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
+											"type": "DatasetReference"
 										}
 									}
 								}
@@ -6211,8 +6103,7 @@
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
+											"type": "DatasetReference"
 										}
 									}
 								},
@@ -6415,8 +6306,7 @@
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
+											"type": "DatasetReference"
 										}
 									}
 								}
@@ -6615,10 +6505,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_SQL_EDWDiscovery_OnPrem')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_Datalanding')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]"
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_EDWDiscovery_OnPrem')]"
 			]
 		},
 		{
@@ -7278,8 +7165,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -7397,13 +7283,7 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_DataLanding_FileExists')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_DataLanding_FizeSize')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Openwindows_SourceToASQL')]",
@@ -7433,8 +7313,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						}
 					},
@@ -7565,7 +7444,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_Delete')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlob_SqlServer')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
@@ -7634,8 +7512,7 @@
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						}
 					}
@@ -7645,182 +7522,7 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_FileExists')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"blobcontainer": {
-						"type": "string"
-					},
-					"blobfolderpath": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": {
-							"value": "@dataset().blobfolderpath",
-							"type": "Expression"
-						},
-						"container": {
-							"value": "@dataset().blobcontainer",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_FizeSize')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"container": {
-						"type": "string"
-					},
-					"directory": {
-						"type": "string"
-					},
-					"file": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@dataset().file",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().directory",
-							"type": "Expression"
-						},
-						"container": {
-							"value": "@dataset().container",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_Datalanding')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"FolderPath": {
-						"type": "string"
-					},
-					"TargetFileName": {
-						"type": "string"
-					},
-					"ColumnDelimiter": {
-						"type": "string",
-						"defaultValue": ","
-					},
-					"QuoteCharacter": {
-						"type": "string",
-						"defaultValue": "\""
-					}
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@dataset().TargetFileName",
-							"type": "Expression"
-						},
-						"container": {
-							"value": "@dataset().FolderPath",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": {
-						"value": "@dataset().ColumnDelimiter",
-						"type": "Expression"
-					},
-					"rowDelimiter": "\n",
-					"escapeChar": "º",
-					"quoteChar": {
-						"value": "@dataset().QuoteCharacter",
-						"type": "Expression"
-					}
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ASQL_EDWDiscovery')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ASQL_EDWDiscovery",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_File_Source')]",
@@ -7927,12 +7629,9 @@
 				},
 				"annotations": [],
 				"type": "OracleTable",
-				"schema": [],
-				"typeProperties": {}
+				"schema": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ORAC_Framework')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_SQL_EDWDiscovery_OnPrem')]",
@@ -7984,90 +7683,9 @@
 				},
 				"annotations": [],
 				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_SQL_Framework')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ADF_LS_AKV')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "https://quu-ea-prd-da-key-vault.vault.azure.net/",
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('ADF_LS_AKV_properties_typeProperties_baseUrl')]"
-				}
+				"schema": []
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ABLB_quueadadlslanding001')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"serviceEndpoint": "[parameters('LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ASQL_EDWDiscovery')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_ASQL_EDWDiscovery_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_DBR_ADF_Job_Cluster')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Azure Databricks Access Token",
-				"parameters": {
-					"databricksclusterid": {
-						"type": "string",
-						"defaultValue": "0417-051914-axons909"
-					},
-					"databrickssecretname": {
-						"type": "string",
-						"defaultValue": "databricks-token"
-					}
-				},
-				"annotations": [],
-				"type": "AzureDatabricks",
-				"typeProperties": {
-					"domain": "https://australiaeast.azuredatabricks.net",
-					"accessToken": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": {
-							"value": "@linkedService().databrickssecretname",
-							"type": "Expression"
-						}
-					},
-					"existingClusterId": "@linkedService().databricksclusterid"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
-			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_FS_Globalscape')]",
@@ -8077,8 +7695,8 @@
 				"annotations": [],
 				"type": "FileServer",
 				"typeProperties": {
-					"host": "[parameters('LS_FS_Globalscape_properties_typeProperties_host')]",
-					"userId": "[parameters('LS_FS_Globalscape_properties_typeProperties_userId')]",
+					"host": "\\\\nfujprd200\\EBI_PROD_LANDING",
+					"userId": "urbanutilities\\SVC-EBI_PRDC04_AGT",
 					"password": {
 						"type": "AzureKeyVaultSecret",
 						"store": {
@@ -8093,108 +7711,7 @@
 					"type": "IntegrationRuntimeReference"
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedRuntime')]",
-				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ORAC_Framework')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"parameters": {
-					"HostName": {
-						"type": "string"
-					},
-					"PortNo": {
-						"type": "string"
-					},
-					"SID": {
-						"type": "string"
-					},
-					"UserName": {
-						"type": "string"
-					},
-					"SecretName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "Oracle",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_ORAC_Framework_connectionString')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": {
-							"value": "@linkedService().SecretName",
-							"type": "Expression"
-						}
-					}
-				},
-				"connectVia": {
-					"referenceName": "SelfHostedRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedRuntime')]",
-				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_SQL_Framework')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"parameters": {
-					"Servername": {
-						"type": "string",
-						"defaultValue": "PRDC04-SQL"
-					},
-					"Databasename": {
-						"type": "string",
-						"defaultValue": "EDW_DISCOVERY"
-					},
-					"SecretPasswordName": {
-						"type": "string",
-						"defaultValue": "svc-ebi-prdc04-agt"
-					},
-					"UserName": {
-						"type": "string",
-						"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
-					}
-				},
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_SQL_Framework_connectionString')]",
-					"userName": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": {
-							"value": "@linkedService().SecretPasswordName",
-							"type": "Expression"
-						}
-					}
-				},
-				"connectVia": {
-					"referenceName": "SelfHostedRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedRuntime')]",
-				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ABN_daily_trigger')]",
@@ -8209,8 +7726,7 @@
 						"pipelineReference": {
 							"referenceName": "PL_ABN_Main",
 							"type": "PipelineReference"
-						},
-						"parameters": {}
+						}
 					}
 				],
 				"type": "ScheduleTrigger",
@@ -8250,9 +7766,9 @@
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"SourceName": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL')]"
+							"SourceName": "OpenWindows",
+							"OnlySourceToBlob": true,
+							"OnlyBlobtoASQL": true
 						}
 					}
 				],
@@ -8277,17 +7793,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_Openwindows_SourceToASQL')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SelfHostedRuntime')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "Self hosted runtime gateway nfujprd298",
-				"typeProperties": {}
-			},
-			"dependsOn": []
 		}
 	]
 }
