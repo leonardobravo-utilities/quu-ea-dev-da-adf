@@ -1,0 +1,271 @@
+{
+	"name": "PL_ABN_BlobToASQL",
+	"properties": {
+		"description": "Process the ABN data in Databricks delta then move to Azure sql db",
+		"activities": [
+			{
+				"name": "usp_get_tablelist_by_sourceid",
+				"description": "Lookup activity to retrieve the list blob csv file need to be processed from the metadata table.",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "GetSourceID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[ETL].[usp_get_tablelist_by_sourceid]",
+						"storedProcedureParameters": {
+							"sourceid": {
+								"type": "Int32",
+								"value": {
+									"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEachABNFiles",
+				"description": "looping through the list of blob file.",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "usp_get_tablelist_by_sourceid",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('usp_get_tablelist_by_sourceid').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Exec_PL_Framework_TRFM_BlobToASQL",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Framework_TRFM_BlobToASQL",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": false,
+								"parameters": {
+									"blobcontainer": {
+										"value": "@item().TargetBlobContainer",
+										"type": "Expression"
+									},
+									"storageaccount": {
+										"value": "@item().StorageAccount",
+										"type": "Expression"
+									},
+									"blobfilename": {
+										"value": "@item().Data_Destination_Folder_Path",
+										"type": "Expression"
+									},
+									"columnlist": {
+										"value": "@if(equals(item().SourceName,'EDW_Discovery'), item().Source_Column_list,item().ColumnSchemaList)",
+										"type": "Expression"
+									},
+									"businesskeylist": {
+										"value": "@item().BusinessKeyColumnList",
+										"type": "Expression"
+									},
+									"deltastagingdbname": {
+										"value": "@item().DeltaStagingDbName",
+										"type": "Expression"
+									},
+									"deltatargetdbname": {
+										"value": "@item().DeltaTargetDbName",
+										"type": "Expression"
+									},
+									"deltastagetablename": {
+										"value": "@item().DeltaStagingTableName",
+										"type": "Expression"
+									},
+									"ColumnDelimiter": {
+										"value": "@item().ColumnDelimiter",
+										"type": "Expression"
+									},
+									"azuresqldbetllastmodifieddtm": {
+										"value": "@item().AzuresqldbMaxLastModifieddtm",
+										"type": "Expression"
+									},
+									"tableid": {
+										"value": "@item().TableID",
+										"type": "Expression"
+									},
+									"QuoteCharacter": {
+										"value": "@item().QuoteCharacter",
+										"type": "Expression"
+									},
+									"azuresqltemptablename": {
+										"value": "@item().azuresqltemptablename",
+										"type": "Expression"
+									},
+									"blobfolderpath": {
+										"value": "@item().TargetBlobFolderPath",
+										"type": "Expression"
+									},
+									"deltastagingtableparquetfilepath": {
+										"value": "@item().deltastagingtableparquetfilepath",
+										"type": "Expression"
+									},
+									"DbHostName": {
+										"value": "@item().DestinationHostName",
+										"type": "Expression"
+									},
+									"RowSource": {
+										"value": "@item().SourceName",
+										"type": "Expression"
+									},
+									"azuresqltargettablename": {
+										"value": "@item().AzuresqlTargetTableName",
+										"type": "Expression"
+									},
+									"skipcsvrows": "0",
+									"ETLMergeNotebookPath": {
+										"value": "@item().ETLMergeNotebookPath",
+										"type": "Expression"
+									},
+									"StoredProcNameMergeAzuresqltable": {
+										"value": "@item().StoredProcNameMergeAzuresqltable",
+										"type": "Expression"
+									},
+									"databricksclustername": {
+										"value": "@item().databricksclustername",
+										"type": "Expression"
+									},
+									"databricksclusterid": {
+										"value": "@item().databricksclusterid",
+										"type": "Expression"
+									},
+									"SourceTableName": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"skipchangedset": "0",
+									"databrickssecretname": {
+										"value": "@item().databrickssecretname",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "ETL_usp_delete_from_azuresqltable",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Exec_PL_Framework_TRFM_BlobToASQL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[ETL].[usp_delete_from_azuresqltable]",
+								"storedProcedureParameters": {
+									"table_source": {
+										"value": {
+											"value": "@item().AzuresqlTempTableName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"table_target": {
+										"value": {
+											"value": "@item().AzuresqlTargetTableName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"tableid": {
+										"value": {
+											"value": "@item().TableID",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_ASQL_EDWDiscovery",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "GetSourceID",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select SourceID FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
+							"type": "Expression"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Source_Name": {
+				"type": "string",
+				"defaultValue": "ABN"
+			}
+		},
+		"folder": {
+			"name": "ABN"
+		},
+		"annotations": []
+	}
+}
