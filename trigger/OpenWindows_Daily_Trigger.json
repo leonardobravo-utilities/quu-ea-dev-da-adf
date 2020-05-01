@@ -4,7 +4,19 @@
 		"description": "OpenWindows Daily Trigger",
 		"annotations": [],
 		"runtimeState": "Started",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Openwindows_SourceToASQL",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "OpenWindows",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
