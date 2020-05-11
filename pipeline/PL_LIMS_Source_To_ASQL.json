@@ -1,0 +1,95 @@
+{
+	"name": "PL_LIMS_Source_To_ASQL",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute_PL_EDWDiscovery_TRFM_BlobToASQL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute_PL_EDWDiscovery_SourceToBlob_SqlServer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceID": {
+							"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "GetSourceID",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select SourceID FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
+							"type": "Expression"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Execute_PL_EDWDiscovery_SourceToBlob_SqlServer",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "GetSourceID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_SqlServer",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceID": {
+							"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Source_Name": {
+				"type": "string",
+				"defaultValue": "LIMS"
+			}
+		},
+		"folder": {
+			"name": "LIMS"
+		},
+		"annotations": []
+	}
+}
