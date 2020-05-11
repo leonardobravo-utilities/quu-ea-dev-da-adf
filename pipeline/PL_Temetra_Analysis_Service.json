@@ -1,0 +1,34 @@
+{
+	"name": "PL_Temetra_Analysis_Service",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_Process_ssas_Model_Temetra",
+				"description": "Process Temetra Model analysis service",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ProcessModel",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"TenantID": "855f3711-2ce2-4c7e-af5b-a513f6f2ae6d",
+						"ClientID": "89ad5ef1-4924-43a2-9dca-37e65f827ef8",
+						"ClientSecret": "[QG2xdpLS5T1l9-/MoK-?ALgjk/Enf.-",
+						"SubscriptionID": "9426f31b-c8f9-4366-8d39-a5ed62fdd730",
+						"Region": "australiaeast",
+						"Server": "quueatstdaaas001",
+						"DatabaseName": "Temetra"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "Temetra"
+		},
+		"annotations": []
+	}
+}
