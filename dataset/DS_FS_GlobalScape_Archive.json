@@ -1,0 +1,48 @@
+{
+	"name": "DS_FS_GlobalScape_Archive",
+	"properties": {
+		"description": "Archive folder in GlobalScape",
+		"linkedServiceName": {
+			"referenceName": "LS_FS_Globalscape",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"filefolder": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"folderPath": {
+					"value": "@concat(dataset().filefolder,'\\Archive')",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": false,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "tag_id",
+				"type": "String"
+			},
+			{
+				"name": "time",
+				"type": "String"
+			},
+			{
+				"name": "counter",
+				"type": "String"
+			},
+			{
+				"name": "event",
+				"type": "String"
+			}
+		]
+	}
+}
