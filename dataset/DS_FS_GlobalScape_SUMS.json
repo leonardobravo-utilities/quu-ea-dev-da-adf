@@ -1,0 +1,53 @@
+{
+	"name": "DS_FS_GlobalScape_SUMS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_FS_Globalscape",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"filefolder": {
+				"type": "string",
+				"defaultValue": "\\\\Nfujprd200\\EBI_PROD_LANDING\\SUMS"
+			}
+		},
+		"folder": {
+			"name": "SUMS"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"folderPath": {
+					"value": "@dataset().filefolder",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"rowDelimiter": "\n",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			}
+		]
+	}
+}

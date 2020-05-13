@@ -1,0 +1,33 @@
+{
+	"name": "DS_ABLB_FS_SUMS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueadadlslanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"targetblobfoldername": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "SUMS"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": {
+					"value": "@dataset().targetblobfoldername",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"rowDelimiter": "\n",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
