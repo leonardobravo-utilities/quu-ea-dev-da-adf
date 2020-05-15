@@ -1,0 +1,82 @@
+{
+	"name": "PL_SUMS_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_SUMS_SourceToBlob",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SUMS_SourcetoBlob",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PL_SUMS_BlobToASQL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_SUMS_SourceToBlob",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SUMS_BlobToASQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Load_Type": {
+							"value": "@pipeline().parameters.Load_Type",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_SUMS_Daily_Consumption_And_Analysis",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_SUMS_BlobToASQL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SUMS_Daily_Consumption_And_Analysis",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Load_Type": {
+							"value": "@pipeline().parameters.Load_Type",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Load_Type": {
+				"type": "string",
+				"defaultValue": "Incremental"
+			}
+		},
+		"folder": {
+			"name": "SUMS"
+		},
+		"annotations": []
+	}
+}

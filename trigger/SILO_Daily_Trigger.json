@@ -1,0 +1,36 @@
+{
+	"name": "SILO_Daily_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Silo_Weather_Observations",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"Source_Name": "SILO",
+					"Silo_load_type": "Incremental_Load"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2020-05-15T00:47:00.000Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						4
+					]
+				}
+			}
+		}
+	}
+}

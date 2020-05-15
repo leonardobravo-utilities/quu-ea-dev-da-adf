@@ -1,0 +1,37 @@
+{
+	"name": "DS_FS_FTP",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_FS_FTP",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"Host": "ftp://ftp.bom.gov.au/"
+			}
+		},
+		"parameters": {
+			"FileFolderPath": {
+				"type": "string",
+				"defaultValue": "anon/gen/clim_data/IDCKWCDEA0/tables/qld/ brisbane"
+			},
+			"FileFolderName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "FtpServerLocation",
+				"folderPath": {
+					"value": "@concat(dataset().FileFolderPath,dataset().FileFolderName)",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": false,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

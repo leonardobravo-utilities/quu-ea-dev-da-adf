@@ -1,0 +1,44 @@
+{
+	"name": "PL_TFSCS_SourceToASQL",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute PL_TFSCS_DM_SourcetoBlob",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_TFSCS_DM_SourcetoBlob",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute PL_TFSCS_TRFM_BlobToASQL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute PL_TFSCS_DM_SourcetoBlob",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_TFSCS_TRFM_BlobToASQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Tanker Filling Station Card Services"
+		},
+		"annotations": []
+	}
+}

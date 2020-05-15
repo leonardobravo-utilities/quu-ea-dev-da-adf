@@ -1,0 +1,36 @@
+{
+	"name": "TEMETRA_Daily_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Temetra_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"databricks_cluster_id": "0417-051914-axons909",
+					"databricks_secret_name": "databricks-token"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2020-05-15T00:47:00.000Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						16
+					]
+				}
+			}
+		}
+	}
+}
