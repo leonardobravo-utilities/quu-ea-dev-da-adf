@@ -3,7 +3,19 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_LIWIS_SourceToAsql",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "LIWIS",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
