@@ -3,7 +3,18 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Silo_Weather_Observations",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"Source_Name": "SILO",
+					"Silo_load_type": "Incremental_Load"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
