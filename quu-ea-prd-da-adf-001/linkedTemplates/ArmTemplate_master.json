@@ -27,6 +27,10 @@
 			"type": "string",
 			"defaultValue": "https://quueaprddadlslanding001.blob.core.windows.net"
 		},
+		"LS_FS_FTP_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "@{linkedService().Host}"
+		},
 		"LS_FS_Globalscape_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "\\\\nfujprd200\\EBI_PROD_LANDING"
@@ -39,6 +43,34 @@
 			"type": "string",
 			"defaultValue": "@{linkedService().UserName}"
 		},
+		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "BOM Weather Data"
+		},
+		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name": {
+			"type": "string",
+			"defaultValue": "LIMS"
+		},
+		"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "LIWIS"
+		},
+		"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "OpenWindows"
@@ -50,6 +82,26 @@
 		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
+		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
+			"type": "string",
+			"defaultValue": "SILO"
+		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
+			"type": "string",
+			"defaultValue": "Incremental_Load"
+		},
+		"SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type": {
+			"type": "string",
+			"defaultValue": "Incremental"
+		},
+		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
+			"type": "string",
+			"defaultValue": "0417-051914-axons909"
+		},
+		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
+			"type": "string",
+			"defaultValue": "databricks-token"
 		},
 		"containerUri": {
 			"type": "string",
@@ -93,6 +145,9 @@
 					"LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint": {
 						"value": "[parameters('LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint')]"
 					},
+					"LS_FS_FTP_properties_typeProperties_host": {
+						"value": "[parameters('LS_FS_FTP_properties_typeProperties_host')]"
+					},
 					"LS_FS_Globalscape_properties_typeProperties_host": {
 						"value": "[parameters('LS_FS_Globalscape_properties_typeProperties_host')]"
 					},
@@ -119,6 +174,82 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
+						"value": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name')]"
+					},
+					"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
+						"value": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type')]"
+					},
+					"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
+						"value": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName')]"
+					},
+					"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlySourceToBlob": {
+						"value": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlySourceToBlob')]"
+					},
+					"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlyBlobtoASQL')]"
+					},
+					"LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name": {
+						"value": "[parameters('LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name')]"
+					},
+					"SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type": {
+						"value": "[parameters('SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type')]"
+					},
+					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
+						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id')]"
+					},
+					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
+						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name')]"
+					},
+					"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_SourceName": {
+						"value": "[parameters('LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_SourceName')]"
+					},
+					"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlySourceToBlob": {
+						"value": "[parameters('LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlySourceToBlob')]"
+					},
+					"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL')]"
 					},
 					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
 						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName')]"
@@ -132,7 +263,7 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_0')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_2')]"
 			]
 		}
 	]
