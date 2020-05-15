@@ -21,7 +21,7 @@
 							"type": "FtpReadSettings",
 							"recursive": false,
 							"wildcardFileName": {
-								"value": "brisbane-200901.csv",
+								"value": "@{concat(pipeline().parameters.STATION_POINT_NAME,'-',pipeline().parameters.yesterdayyear,pipeline().parameters.yesterdaymonth,'.csv')}",
 								"type": "Expression"
 							},
 							"useBinaryTransfer": true
