@@ -1,0 +1,226 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "quu-ea-prd-da-adf-001"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_BOM_CopyandTransformSourceFile')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy BOM file to Blob",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "FtpReadSettings",
+									"recursive": false,
+									"wildcardFileName": {
+										"value": "*.csv*",
+										"type": "Expression"
+									},
+									"useBinaryTransfer": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings",
+									"skipLineCount": 0
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_FS_FTP",
+								"type": "DatasetReference",
+								"parameters": {
+									"FileFolderPath": {
+										"value": "@pipeline().parameters.FileFolderPath",
+										"type": "Expression"
+									},
+									"FileFolderName": {
+										"value": "@pipeline().parameters.STATION_POINT_NAME",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ABLB_FS_Dataloading",
+								"type": "DatasetReference",
+								"parameters": {
+									"targetblobfoldername": {
+										"value": "@concat('bom-datalanding/',pipeline().parameters.STATION_POINT_NAME)",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "PL_BOM_TRFM_BlobFile",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "getlistofblobfile",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_BOM_TRFM_BlobFile",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"blobcontainer": {
+									"value": "@activity('getlistofblobfile').output.firstrow.TargetBlobContainer",
+									"type": "Expression"
+								},
+								"storageaccount": {
+									"value": "@activity('getlistofblobfile').output.firstrow.StorageAccount",
+									"type": "Expression"
+								},
+								"blobfilename": {
+									"value": "@concat(activity('getlistofblobfile').output.firstrow.TargetBlobContainer,'/',pipeline().parameters.STATION_POINT_NAME)",
+									"type": "Expression"
+								},
+								"columnlist": {
+									"value": "@activity('getlistofblobfile').output.firstrow.ColumnSchemaList",
+									"type": "Expression"
+								},
+								"ColumnDelimiter": {
+									"value": "@activity('getlistofblobfile').output.firstrow.ColumnDelimiter",
+									"type": "Expression"
+								},
+								"QuoteCharacter": {
+									"value": "@activity('getlistofblobfile').output.firstrow.QuoteCharacter",
+									"type": "Expression"
+								},
+								"STATION_POINT_NAME": {
+									"value": "@pipeline().parameters.STATION_POINT_NAME",
+									"type": "Expression"
+								},
+								"blobfolderpath": {
+									"value": "@pipeline().parameters.STATION_POINT_NAME",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "getlistofblobfile",
+						"description": "Lookup activity to retrieve the list blob csv file need to be processed from the metadata table.",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Copy BOM file to Blob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "ETL.usp_get_tablelist_by_sourceid_and_tableid",
+								"storedProcedureParameters": {
+									"sourceid": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.SourceID",
+											"type": "Expression"
+										}
+									},
+									"TableID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.TableID",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": true
+						}
+					}
+				],
+				"parameters": {
+					"Fileserverlocation": {
+						"type": "string"
+					},
+					"FileFolderPath": {
+						"type": "string"
+					},
+					"STATION_POINT_NAME": {
+						"type": "string"
+					},
+					"TableID": {
+						"type": "string"
+					},
+					"yesterdayyear": {
+						"type": "string"
+					},
+					"yesterdaymonth": {
+						"type": "string"
+					},
+					"SourceID": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "BOM"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		}
+	]
+}
