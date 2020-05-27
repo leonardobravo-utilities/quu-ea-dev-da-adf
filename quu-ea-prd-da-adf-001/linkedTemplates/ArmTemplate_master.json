@@ -71,6 +71,18 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "MDSProd"
+		},
+		"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "OpenWindows"
@@ -80,6 +92,18 @@
 			"defaultValue": true
 		},
 		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "REFERENCE"
+		},
+		"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
 		},
@@ -233,6 +257,24 @@
 					"LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name": {
 						"value": "[parameters('LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name')]"
 					},
+					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName": {
+						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName')]"
+					},
+					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlySourceToBlob": {
+						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlySourceToBlob')]"
+					},
+					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL')]"
+					},
+					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName": {
+						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName')]"
+					},
+					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob": {
+						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob')]"
+					},
+					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL')]"
+					},
 					"SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type": {
 						"value": "[parameters('SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type')]"
 					},
@@ -250,6 +292,26 @@
 					},
 					"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_2')]"
+			]
+		},
+		{
+			"name": "ArmTemplate_4",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
 						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName')]"
@@ -263,7 +325,7 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_2')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_3')]"
 			]
 		}
 	]
