@@ -1,0 +1,157 @@
+{
+	"name": "PL_LIWIS_SourceToAsql_copy1",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetSourceID",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+							"type": "Expression"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "CheckExecutionStatusForSourceToBlob",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "GetSourceID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@pipeline().parameters.OnlySourceToBlob",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Oracle",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "CheckExecutionStatusForBlobToASQL",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "CheckExecutionStatusForSourceToBlob",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@pipeline().parameters.OnlyBlobtoASQL",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "ExecutePL_TRFM_BLOBToASQL",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Execute Delete",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "CheckExecutionStatusForBlobToASQL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EDWDiscovery_Delete",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Source_Name": {
+							"value": "@pipeline().parameters.SourceName",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "LIWIS"
+			},
+			"OnlySourceToBlob": {
+				"type": "bool",
+				"defaultValue": true
+			},
+			"OnlyBlobtoASQL": {
+				"type": "bool",
+				"defaultValue": true
+			}
+		},
+		"folder": {
+			"name": "LIWIS"
+		},
+		"annotations": []
+	}
+}
