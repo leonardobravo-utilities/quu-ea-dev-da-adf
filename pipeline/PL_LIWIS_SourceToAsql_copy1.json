@@ -107,32 +107,6 @@
 						}
 					]
 				}
-			},
-			{
-				"name": "Execute Delete",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "CheckExecutionStatusForBlobToASQL",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "PL_EDWDiscovery_Delete",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Source_Name": {
-							"value": "@pipeline().parameters.SourceName",
-							"type": "Expression"
-						}
-					}
-				}
 			}
 		],
 		"parameters": {
