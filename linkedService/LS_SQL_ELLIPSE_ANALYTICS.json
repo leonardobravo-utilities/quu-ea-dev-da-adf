@@ -1,0 +1,30 @@
+{
+	"name": "LS_SQL_ELLIPSE_ANALYTICS",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ADF_LS_AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "ellipse-analytics-connection-string"
+			},
+			"userName": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ADF_LS_AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "svc-ebi-prdc04-agt"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHostedRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

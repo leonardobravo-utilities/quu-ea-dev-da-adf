@@ -10,7 +10,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@equals(pipeline().parameters.IncrementalLoadInd,1)",
+						"value": "@equals(pipeline().parameters.IncrementalLoadInd,'1')",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
@@ -122,7 +122,7 @@
 							],
 							"policy": {
 								"timeout": "7.00:00:00",
-								"retry": 0,
+								"retry": 3,
 								"retryIntervalInSeconds": 30
 							},
 							"userProperties": [],
@@ -361,7 +361,7 @@
 							],
 							"policy": {
 								"timeout": "7.00:00:00",
-								"retry": 0,
+								"retry": 3,
 								"retryIntervalInSeconds": 30
 							},
 							"userProperties": [],

@@ -223,7 +223,7 @@
 										"dependsOn": [],
 										"policy": {
 											"timeout": "7.00:00:00",
-											"retry": 0,
+											"retry": 1,
 											"retryIntervalInSeconds": 30,
 											"secureOutput": false,
 											"secureInput": false
@@ -276,7 +276,7 @@
 													"type": "Expression"
 												},
 												"azuresqldbetllastmodifieddtm": {
-													"value": "@formatDateTime(pipeline().parameters.azuresqldbetllastmodifieddtm,'yyyy-MM-dd hh:mm:ss.fff')",
+													"value": "@formatDateTime(pipeline().parameters.azuresqldbetllastmodifieddtm,'yyyy-MM-dd HH:mm:ss.fff')",
 													"type": "Expression"
 												},
 												"tableid": {
@@ -317,6 +317,14 @@
 												},
 												"skipbottomrows": {
 													"value": "@pipeline().parameters.skipbottomrows",
+													"type": "Expression"
+												},
+												"incrementalloadind": {
+													"value": "@pipeline().parameters.incrementalloadind",
+													"type": "Expression"
+												},
+												"checkfordeletesind": {
+													"value": "@pipeline().parameters.checkfordeletesind",
 													"type": "Expression"
 												}
 											}
@@ -747,6 +755,14 @@
 			},
 			"databrickssecretname": {
 				"type": "string"
+			},
+			"checkfordeletesind": {
+				"type": "string",
+				"defaultValue": "0"
+			},
+			"incrementalloadind": {
+				"type": "string",
+				"defaultValue": "0"
 			}
 		},
 		"variables": {
