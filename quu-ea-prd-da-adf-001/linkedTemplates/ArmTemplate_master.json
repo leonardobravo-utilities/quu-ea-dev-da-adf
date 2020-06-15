@@ -39,6 +39,14 @@
 			"type": "string",
 			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
+		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "ellipse-analytics-connection-string"
+		},
+		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT"
+		},
 		"LS_SQL_Framework_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "@{linkedService().UserName}"
@@ -160,9 +168,6 @@
 					"LS_ORAC_Framework_connectionString": {
 						"value": "[parameters('LS_ORAC_Framework_connectionString')]"
 					},
-					"LS_SQL_Framework_connectionString": {
-						"value": "[parameters('LS_SQL_Framework_connectionString')]"
-					},
 					"ADF_LS_AKV_properties_typeProperties_baseUrl": {
 						"value": "[parameters('ADF_LS_AKV_properties_typeProperties_baseUrl')]"
 					},
@@ -178,8 +183,11 @@
 					"LS_FS_Globalscape_properties_typeProperties_userId": {
 						"value": "[parameters('LS_FS_Globalscape_properties_typeProperties_userId')]"
 					},
-					"LS_SQL_Framework_properties_typeProperties_userName": {
-						"value": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]"
+					"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName')]"
+					},
+					"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -198,6 +206,12 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"LS_SQL_Framework_connectionString": {
+						"value": "[parameters('LS_SQL_Framework_connectionString')]"
+					},
+					"LS_SQL_Framework_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -257,33 +271,6 @@
 					"LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name": {
 						"value": "[parameters('LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name')]"
 					},
-					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName": {
-						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName')]"
-					},
-					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlySourceToBlob": {
-						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlySourceToBlob')]"
-					},
-					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL')]"
-					},
-					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName": {
-						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName')]"
-					},
-					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob": {
-						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob')]"
-					},
-					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL')]"
-					},
-					"SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type": {
-						"value": "[parameters('SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type')]"
-					},
-					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
-						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id')]"
-					},
-					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
-						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name')]"
-					},
 					"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_SourceName": {
 						"value": "[parameters('LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_SourceName')]"
 					},
@@ -292,6 +279,15 @@
 					},
 					"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL')]"
+					},
+					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName": {
+						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName')]"
+					},
+					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlySourceToBlob": {
+						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlySourceToBlob')]"
+					},
+					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL')]"
 					}
 				}
 			},
@@ -321,6 +317,24 @@
 					},
 					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL')]"
+					},
+					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName": {
+						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName')]"
+					},
+					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob": {
+						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob')]"
+					},
+					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL')]"
+					},
+					"SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type": {
+						"value": "[parameters('SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type')]"
+					},
+					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
+						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id')]"
+					},
+					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
+						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name')]"
 					}
 				}
 			},

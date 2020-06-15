@@ -39,6 +39,14 @@
 			"type": "string",
 			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
+		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "ellipse-analytics-connection-string"
+		},
+		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT"
+		},
 		"LS_SQL_Framework_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "@{linkedService().UserName}"
@@ -3407,6 +3415,10 @@
 												"value": "@item().skipcsvrows",
 												"type": "Expression"
 											},
+											"skipbottomrows": {
+												"value": "@item().skipbottomrows",
+												"type": "Expression"
+											},
 											"ETLMergeNotebookPath": {
 												"value": "@item().ETLMergeNotebookPath",
 												"type": "Expression"
@@ -3432,8 +3444,12 @@
 												"value": "@item().databrickssecretname",
 												"type": "Expression"
 											},
-											"skipbottomrows": {
-												"value": "@item().skipbottomrows",
+											"checkfordeletesind": {
+												"value": "@item().checkfordeletes",
+												"type": "Expression"
+											},
+											"incrementalloadind": {
+												"value": "@item().incrementalloadind",
 												"type": "Expression"
 											}
 										}
@@ -3457,6 +3473,224 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_TRFM_BlobToASQL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Ellipse9_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Wait for EA Job",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForSourceToBlob",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlySourceToBlob",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_SqlServer",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForBlobToASQL",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "CheckExecutionStatusForSourceToBlob",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyBlobtoASQL",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_TRFM_BLOBToASQL",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Wait for EA Job",
+						"type": "Until",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@and(contains(activity('Query EA Job History').output,'firstRow'), equals(activity('Query EA Job History').output.Firstrow['JobOutCome'],1))",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Query EA Job History",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"sqlReaderQuery": "Select top(1 ) SUCCESS  as JobOutCome from dbo.z_run_history \nwhere cast(START_TIME as date) = cast(GETDATE() as date)  \n\norder by RUN_ID desc",
+											"queryTimeout": "02:00:00"
+										},
+										"dataset": {
+											"referenceName": "DS_SQL_ELLIPSE_ANALYTICS",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								},
+								{
+									"name": "Wait If",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Query EA Job History",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@not(and(contains(activity('Query EA Job History').output,'firstRow'), equals(activity('Query EA Job History').output.Firstrow['JobOutCome'],1)))",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Wait",
+												"description": "",
+												"type": "Wait",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"waitTimeInSeconds": 600
+												}
+											}
+										]
+									}
+								}
+							],
+							"timeout": "01:00:00"
+						}
+					}
+				],
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "Ellipse9"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					}
+				},
+				"folder": {
+					"name": "Ellipse9"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlob_SqlServer')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]",
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_ELLIPSE_ANALYTICS')]"
 			]
 		},
 		{
@@ -3612,7 +3846,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"expression": {
-								"value": "@equals(pipeline().parameters.IncrementalLoadInd,1)",
+								"value": "@equals(pipeline().parameters.IncrementalLoadInd,'1')",
 								"type": "Expression"
 							},
 							"ifFalseActivities": [
@@ -3724,7 +3958,7 @@
 									],
 									"policy": {
 										"timeout": "7.00:00:00",
-										"retry": 0,
+										"retry": 3,
 										"retryIntervalInSeconds": 30
 									},
 									"userProperties": [],
@@ -3965,7 +4199,7 @@
 									],
 									"policy": {
 										"timeout": "7.00:00:00",
-										"retry": 0,
+										"retry": 3,
 										"retryIntervalInSeconds": 30
 									},
 									"userProperties": [],
@@ -5503,7 +5737,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"expression": {
-								"value": "@equals(pipeline().parameters.IncrementalLoadInd,1)",
+								"value": "@equals(pipeline().parameters.IncrementalLoadInd,'1')",
 								"type": "Expression"
 							},
 							"ifFalseActivities": [
@@ -5610,7 +5844,7 @@
 									],
 									"policy": {
 										"timeout": "7.00:00:00",
-										"retry": 0,
+										"retry": 3,
 										"retryIntervalInSeconds": 30
 									},
 									"userProperties": [],
@@ -5835,7 +6069,7 @@
 									],
 									"policy": {
 										"timeout": "7.00:00:00",
-										"retry": 0,
+										"retry": 3,
 										"retryIntervalInSeconds": 30
 									},
 									"userProperties": [],
@@ -7011,7 +7245,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"expression": {
-								"value": "@equals(pipeline().parameters.IncrementalLoadInd,1)",
+								"value": "@equals(pipeline().parameters.IncrementalLoadInd,'1')",
 								"type": "Expression"
 							},
 							"ifFalseActivities": [
@@ -7823,7 +8057,7 @@
 												"dependsOn": [],
 												"policy": {
 													"timeout": "7.00:00:00",
-													"retry": 0,
+													"retry": 1,
 													"retryIntervalInSeconds": 30,
 													"secureOutput": false,
 													"secureInput": false
@@ -7876,7 +8110,7 @@
 															"type": "Expression"
 														},
 														"azuresqldbetllastmodifieddtm": {
-															"value": "@formatDateTime(pipeline().parameters.azuresqldbetllastmodifieddtm,'yyyy-MM-dd hh:mm:ss.fff')",
+															"value": "@formatDateTime(pipeline().parameters.azuresqldbetllastmodifieddtm,'yyyy-MM-dd HH:mm:ss.fff')",
 															"type": "Expression"
 														},
 														"tableid": {
@@ -7917,6 +8151,14 @@
 														},
 														"skipbottomrows": {
 															"value": "@pipeline().parameters.skipbottomrows",
+															"type": "Expression"
+														},
+														"incrementalloadind": {
+															"value": "@pipeline().parameters.incrementalloadind",
+															"type": "Expression"
+														},
+														"checkfordeletesind": {
+															"value": "@pipeline().parameters.checkfordeletesind",
 															"type": "Expression"
 														}
 													}
@@ -8348,6 +8590,14 @@
 					},
 					"databrickssecretname": {
 						"type": "string"
+					},
+					"checkfordeletesind": {
+						"type": "string",
+						"defaultValue": "0"
+					},
+					"incrementalloadind": {
+						"type": "string",
+						"defaultValue": "0"
 					}
 				},
 				"variables": {
@@ -8595,32 +8845,6 @@
 								}
 							]
 						}
-					},
-					{
-						"name": "Execute Delete",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "CheckExecutionStatusForBlobToASQL",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_EDWDiscovery_Delete",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"Source_Name": {
-									"value": "@pipeline().parameters.SourceName",
-									"type": "Expression"
-								}
-							}
-						}
 					}
 				],
 				"parameters": {
@@ -8644,7 +8868,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_Delete')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlob_Oracle')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
 			]
@@ -8900,32 +9123,6 @@
 								}
 							]
 						}
-					},
-					{
-						"name": "ExecuteDelete",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "CheckExecutionStatusForBlobToASQL",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_EDWDiscovery_Delete",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"Source_Name": {
-									"value": "@pipeline().parameters.SourceName",
-									"type": "Expression"
-								}
-							}
-						}
 					}
 				],
 				"parameters": {
@@ -8949,7 +9146,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_Delete')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlob_SqlServer')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
 			]
@@ -11788,6 +11984,27 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_ELLIPSE_ANALYTICS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQL_ELLIPSE_ANALYTICS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Z_RUN_HISTORY"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_SQL_ELLIPSE_ANALYTICS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ADF_LS_AKV')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -11966,6 +12183,42 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_SQL_ELLIPSE_ANALYTICS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName')]"
+					},
+					"userName": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "svc-ebi-prdc04-agt"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedRuntime')]",
+				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_SQL_Framework')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -12095,6 +12348,34 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_BOM_SourceToAsql')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Ellipse9_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-06-15T07:28:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								18
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LIMS_Daily_Trigger')]",
