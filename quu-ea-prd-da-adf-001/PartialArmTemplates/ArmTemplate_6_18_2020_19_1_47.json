@@ -1,0 +1,277 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "quu-ea-prd-da-adf-001"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_SUMS_Daily_Consumption_And_Analysis')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SUMS_Daily_Consumption",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/SUMS/SUMS_DailyConsumption",
+							"baseParameters": {
+								"Load_Type": {
+									"value": "@pipeline().parameters.Load_Type",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@activity('GetSourceID').output.Firstrow['databricksclusterid']",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@activity('GetSourceID').output.Firstrow['databrickssecretname']",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID,databricksclusterid,databrickssecretname FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
+									"type": "Expression"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference"
+							}
+						}
+					},
+					{
+						"name": "SUMS_MovingAnalysis",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "SUMS_Daily_Consumption",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/SUMS/SUMS_MovingAnalysis",
+							"baseParameters": {
+								"Load_Type": {
+									"value": "@pipeline().parameters.Load_Type",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@activity('GetSourceID').output.Firstrow['databricksclusterid']",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@activity('GetSourceID').output.Firstrow['databrickssecretname']",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SUMS_KCA_Consumption",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "SUMS_MovingAnalysis",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/SUMS/SUMS_KCA_Consumption"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@activity('GetSourceID').output.Firstrow['databricksclusterid']",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@activity('GetSourceID').output.Firstrow['databrickssecretname']",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"parameters": {
+					"Source_Name": {
+						"type": "string",
+						"defaultValue": "SUMS"
+					},
+					"Load_Type": {
+						"type": "string",
+						"defaultValue": "Full"
+					}
+				},
+				"folder": {
+					"name": "SUMS"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_SUMS_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "PL_SUMS_SourceToBlob",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_SUMS_SourcetoBlob",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true
+						}
+					},
+					{
+						"name": "PL_SUMS_BlobToASQL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_SUMS_SourceToBlob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_SUMS_BlobToASQL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Load_Type": {
+									"value": "@pipeline().parameters.Load_Type",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "PL_SUMS_Daily_Consumption_And_Analysis",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_SUMS_BlobToASQL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_SUMS_Daily_Consumption_And_Analysis",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Source_Name": "SUMS",
+								"Load_Type": {
+									"value": "@pipeline().parameters.Load_Type",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"parameters": {
+					"Load_Type": {
+						"type": "string",
+						"defaultValue": "Full"
+					}
+				},
+				"folder": {
+					"name": "SUMS"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_SUMS_Daily_Consumption_And_Analysis')]"
+			]
+		}
+	]
+}
