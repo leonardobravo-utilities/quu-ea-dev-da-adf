@@ -60,7 +60,11 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"Load_Type": "Full"
+						"Source_Name": "SUMS",
+						"Load_Type": {
+							"value": "@pipeline().parameters.Load_Type",
+							"type": "Expression"
+						}
 					}
 				}
 			}
@@ -68,7 +72,7 @@
 		"parameters": {
 			"Load_Type": {
 				"type": "string",
-				"defaultValue": "Incremental"
+				"defaultValue": "Full"
 			}
 		},
 		"folder": {

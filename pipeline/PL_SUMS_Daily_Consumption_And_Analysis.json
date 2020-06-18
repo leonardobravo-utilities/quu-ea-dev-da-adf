@@ -15,7 +15,7 @@
 				],
 				"policy": {
 					"timeout": "7.00:00:00",
-					"retry": 0,
+					"retry": 1,
 					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
 					"secureInput": false
@@ -84,7 +84,7 @@
 				],
 				"policy": {
 					"timeout": "7.00:00:00",
-					"retry": 0,
+					"retry": 1,
 					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
 					"secureInput": false
@@ -98,6 +98,43 @@
 							"type": "Expression"
 						}
 					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_DBR_ADF_Job_Cluster",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"databricksclusterid": {
+							"value": "@activity('GetSourceID').output.Firstrow['databricksclusterid']",
+							"type": "Expression"
+						},
+						"databrickssecretname": {
+							"value": "@activity('GetSourceID').output.Firstrow['databrickssecretname']",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "SUMS_KCA_Consumption",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "SUMS_MovingAnalysis",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/edw_discovery/SUMS/SUMS_KCA_Consumption"
 				},
 				"linkedServiceName": {
 					"referenceName": "LS_DBR_ADF_Job_Cluster",
