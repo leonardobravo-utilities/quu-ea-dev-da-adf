@@ -2,8 +2,20 @@
 	"name": "FSE_Daily_Trigger",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
-		"pipelines": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_FSE_Source_To_ASQL",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "Field Service Edge",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
