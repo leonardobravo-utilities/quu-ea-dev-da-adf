@@ -63,6 +63,18 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Ellipse9"
+		},
+		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "Field Service Edge"
@@ -12420,8 +12432,20 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Ellipse9_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
 				"type": "ScheduleTrigger",
 				"typeProperties": {
 					"recurrence": {
@@ -12440,7 +12464,9 @@
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Ellipse9_Main')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/FSE_Daily_Trigger')]",

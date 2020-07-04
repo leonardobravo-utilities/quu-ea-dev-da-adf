@@ -27,6 +27,18 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Ellipse9"
+		},
+		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "Field Service Edge"
@@ -56,121 +68,6 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_TFSCS_TRFM_BlobToASQL')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "GetSourceID",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "Select SourceID FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
-									"type": "Expression"
-								}
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					},
-					{
-						"name": "Get Table Metadata Information",
-						"description": "Lookup activity to retrieve the list of partitions stored in the external control table.",
-						"type": "Lookup",
-						"dependsOn": [
-							{
-								"activity": "GetSourceID",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_tablelist_by_sourceid]",
-								"storedProcedureParameters": {
-									"sourceid": {
-										"type": "Int32",
-										"value": {
-											"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
-											"type": "Expression"
-										}
-									}
-								}
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Execute_PL_EDWDiscovery_TRFM_BlobToASQL",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Get Table Metadata Information",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"SourceID": {
-									"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
-									"type": "Expression"
-								}
-							}
-						}
-					}
-				],
-				"parameters": {
-					"source_name": {
-						"type": "string",
-						"defaultValue": "Tanker Filling Station Card Services"
-					}
-				},
-				"folder": {
-					"name": "Tanker Filling Station Card Services"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Temetra_BlobToASQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -1693,9 +1590,7 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_TFSCS_TRFM_BlobToASQL')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Main')]",
@@ -1997,6 +1892,48 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_BOM_SourceToAsql')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Ellipse9_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Ellipse9_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-06-15T07:28:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								18
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Ellipse9_Main')]"
 			]
 		},
 		{

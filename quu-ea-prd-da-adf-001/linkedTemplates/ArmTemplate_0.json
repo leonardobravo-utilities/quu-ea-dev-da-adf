@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ORAC_Framework'"
 		},
+		"LS_SQL_Framework_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'"
+		},
 		"ADF_LS_AKV_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://quu-ea-prd-da-key-vault.vault.azure.net/"
@@ -42,6 +46,10 @@
 		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_SQL_Framework_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "@{linkedService().UserName}"
 		}
 	},
 	"variables": {
@@ -380,34 +388,6 @@
 					"Host": {
 						"type": "string",
 						"defaultValue": "ftp://ftp.bom.gov.au/"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Ellipse9_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-06-15T07:28:00.000Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								30
-							],
-							"hours": [
-								18
-							]
-						}
 					}
 				}
 			},
@@ -979,6 +959,56 @@
 							"type": "LinkedServiceReference"
 						},
 						"secretName": "svc-ebi-prdc04-agt"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedRuntime')]",
+				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_SQL_Framework')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"Servername": {
+						"type": "string",
+						"defaultValue": "PRDC04-SQL"
+					},
+					"Databasename": {
+						"type": "string",
+						"defaultValue": "EDW_DISCOVERY"
+					},
+					"SecretPasswordName": {
+						"type": "string",
+						"defaultValue": "svc-ebi-prdc04-agt"
+					},
+					"UserName": {
+						"type": "string",
+						"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_SQL_Framework_connectionString')]",
+					"userName": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": {
+							"value": "@linkedService().SecretPasswordName",
+							"type": "Expression"
+						}
 					}
 				},
 				"connectVia": {

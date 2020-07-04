@@ -63,6 +63,18 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Ellipse9"
+		},
+		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "Field Service Edge"
@@ -192,6 +204,9 @@
 					"LS_ORAC_Framework_connectionString": {
 						"value": "[parameters('LS_ORAC_Framework_connectionString')]"
 					},
+					"LS_SQL_Framework_connectionString": {
+						"value": "[parameters('LS_SQL_Framework_connectionString')]"
+					},
 					"ADF_LS_AKV_properties_typeProperties_baseUrl": {
 						"value": "[parameters('ADF_LS_AKV_properties_typeProperties_baseUrl')]"
 					},
@@ -212,6 +227,9 @@
 					},
 					"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
 						"value": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName')]"
+					},
+					"LS_SQL_Framework_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -230,12 +248,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"LS_SQL_Framework_connectionString": {
-						"value": "[parameters('LS_SQL_Framework_connectionString')]"
-					},
-					"LS_SQL_Framework_properties_typeProperties_userName": {
-						"value": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -291,6 +303,15 @@
 					},
 					"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlyBlobtoASQL')]"
+					},
+					"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName": {
+						"value": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName')]"
+					},
+					"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlySourceToBlob": {
+						"value": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlySourceToBlob')]"
+					},
+					"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL')]"
 					},
 					"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
 						"value": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]"
