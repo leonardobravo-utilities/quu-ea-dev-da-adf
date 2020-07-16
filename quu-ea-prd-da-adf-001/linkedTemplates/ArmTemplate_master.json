@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery'"
 		},
+		"LS_MySQL_NetAppManagement_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_MySQL_NetAppManagement'"
+		},
 		"LS_ORAC_Framework_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ORAC_Framework'"
@@ -201,11 +205,11 @@
 					"LS_ASQL_EDWDiscovery_connectionString": {
 						"value": "[parameters('LS_ASQL_EDWDiscovery_connectionString')]"
 					},
+					"LS_MySQL_NetAppManagement_connectionString": {
+						"value": "[parameters('LS_MySQL_NetAppManagement_connectionString')]"
+					},
 					"LS_ORAC_Framework_connectionString": {
 						"value": "[parameters('LS_ORAC_Framework_connectionString')]"
-					},
-					"LS_SQL_Framework_connectionString": {
-						"value": "[parameters('LS_SQL_Framework_connectionString')]"
 					},
 					"ADF_LS_AKV_properties_typeProperties_baseUrl": {
 						"value": "[parameters('ADF_LS_AKV_properties_typeProperties_baseUrl')]"
@@ -227,9 +231,6 @@
 					},
 					"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
 						"value": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName')]"
-					},
-					"LS_SQL_Framework_properties_typeProperties_userName": {
-						"value": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -248,6 +249,12 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"LS_SQL_Framework_connectionString": {
+						"value": "[parameters('LS_SQL_Framework_connectionString')]"
+					},
+					"LS_SQL_Framework_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -283,6 +290,26 @@
 				"mode": "incremental",
 				"templateLink": {
 					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_2')]"
+			]
+		},
+		{
+			"name": "ArmTemplate_4",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters": {
@@ -330,26 +357,6 @@
 					},
 					"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_2')]"
-			]
-		},
-		{
-			"name": "ArmTemplate_4",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name": {
 						"value": "[parameters('LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name')]"
