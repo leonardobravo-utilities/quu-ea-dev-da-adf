@@ -1,0 +1,36 @@
+{
+	"name": "LS_MySQL_NetAppManagement",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"Databasename": {
+				"type": "string"
+			},
+			"SecretPasswordName": {
+				"type": "string"
+			},
+			"Servername": {
+				"type": "string"
+			},
+			"Username": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "MySql",
+		"typeProperties": {
+			"connectionString": "Server=@{linkedService().Servername};Port=3306;Database=@{linkedService().Databasename};User=@{linkedService().Username};SSLMode=1;UseSystemTrustStore=0",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ADF_LS_AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().SecretPasswordName",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,44 @@
+{
+	"name": "DS_MySQL",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_MySQL_NetAppManagement",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"Databasename": {
+					"value": "@dataset().Databasename",
+					"type": "Expression"
+				},
+				"SecretPasswordName": {
+					"value": "@dataset().SecretPasswordName",
+					"type": "Expression"
+				},
+				"Servername": {
+					"value": "@dataset().Servername",
+					"type": "Expression"
+				},
+				"Username": {
+					"value": "@dataset().UserName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"Databasename": {
+				"type": "string"
+			},
+			"SecretPasswordName": {
+				"type": "string"
+			},
+			"Servername": {
+				"type": "string"
+			},
+			"UserName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "MySqlTable",
+		"schema": []
+	}
+}
