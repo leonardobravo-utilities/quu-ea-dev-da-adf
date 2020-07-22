@@ -1,0 +1,23 @@
+{
+	"name": "LS_FS_NFUJPRD202",
+	"properties": {
+		"annotations": [],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "\\\\NFUJPRD202\\FDrive",
+			"userId": "urbanutilities\\SVC-EBI_PRDC04_AGT",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ADF_LS_AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "SVC-EBI-PRDC04-AGT"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHostedRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
