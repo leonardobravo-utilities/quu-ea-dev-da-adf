@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery'"
 		},
+		"LS_ASQL_EDWTactical_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWTactical'"
+		},
 		"LS_MySQL_NetAppManagement_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_MySQL_NetAppManagement'"
@@ -40,6 +44,14 @@
 			"defaultValue": "\\\\nfujprd200\\EBI_PROD_LANDING"
 		},
 		"LS_FS_Globalscape_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\NFUJPRD202\\FDrive"
+		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
 			"type": "string",
 			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
@@ -131,6 +143,18 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "NetworkAccess"
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "OpenWindows"
@@ -174,18 +198,6 @@
 		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
 			"type": "string",
 			"defaultValue": "databricks-token"
-		},
-		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "NetworkAccess"
-		},
-		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
 		}
 	},
 	"variables": {
@@ -1692,6 +1704,43 @@
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ABLB_DataLanding_FizeSize')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Cost_Summary_By_Region')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "usp_load_Cost_Summary_by_Region",
+						"description": "execute the stored procedure to reload the data into cost_summary_by_region table in tactical database",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_load_Cost_Summary_by_Region]"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWTactical",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"folder": {
+					"name": "Cost_Summary_By_Region"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWTactical')]"
 			]
 		},
 		{
@@ -9506,6 +9555,92 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_ICN_Payment_Extract')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Generate Extract File",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[Ellipse9].[usp_get_Icn_Payment_Extract]",
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "FileServerWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ICN_Payment_Extract_File",
+								"type": "DatasetReference",
+								"parameters": {
+									"FilePath": {
+										"value": "@pipeline().parameters.FilePath",
+										"type": "Expression"
+									},
+									"FileName": {
+										"value": "@concat('ICN','_Payment_',convertFromUtc(utcnow(),'E. Australia Standard Time','yyyyMMdd_HHmmss'),'.txt')\n\n\n",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"parameters": {
+					"FilePath": {
+						"type": "string",
+						"defaultValue": "DEVELOPER CLIENT MANAGEMENT TEAM FOLDER\\14.00 ICNDbRegister\\Payment Reports"
+					}
+				},
+				"folder": {
+					"name": "ICN Payment Extract"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ICN_Payment_Extract_File')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_LIMS_Source_To_ASQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -12917,6 +13052,51 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ICN_Payment_Extract_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_NFUJPRD202",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FilePath": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ICN Payment Extract"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FilePath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_NFUJPRD202')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_MySQL')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -13150,6 +13330,19 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_ASQL_EDWTactical')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_ASQL_EDWTactical_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_DBR_ADF_Job_Cluster')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -13220,6 +13413,35 @@
 				"typeProperties": {
 					"host": "[parameters('LS_FS_Globalscape_properties_typeProperties_host')]",
 					"userId": "[parameters('LS_FS_Globalscape_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SVC-EBI-PRDC04-AGT"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedRuntime')]",
+				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_NFUJPRD202')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_userId')]",
 					"password": {
 						"type": "AzureKeyVaultSecret",
 						"store": {
@@ -13812,6 +14034,45 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/NetworkAccess_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_NetworkAccess_Source_To_ASQL",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-07-20T16:00:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"hours": [
+								16
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_NetworkAccess_Source_To_ASQL')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/OpenWindows_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -14068,7 +14329,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/NetworkAccess_Daily_Trigger')]",
+			"name": "[concat(parameters('factoryName'), '/Cost_Summary_Monthly_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -14077,33 +14338,35 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "PL_NetworkAccess_Source_To_ASQL",
+							"referenceName": "PL_Cost_Summary_By_Region",
 							"type": "PipelineReference"
 						},
-						"parameters": {
-							"SourceName": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
-						}
+						"parameters": {}
 					}
 				],
 				"type": "ScheduleTrigger",
 				"typeProperties": {
 					"recurrence": {
-						"frequency": "Day",
+						"frequency": "Month",
 						"interval": 1,
-						"startTime": "2020-07-20T16:00:00.000Z",
+						"startTime": "2020-07-23T05:14:00.000Z",
 						"timeZone": "UTC",
 						"schedule": {
+							"minutes": [
+								0
+							],
 							"hours": [
-								16
+								23
+							],
+							"monthDays": [
+								5
 							]
 						}
 					}
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_NetworkAccess_Source_To_ASQL')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_Cost_Summary_By_Region')]"
 			]
 		}
 	]

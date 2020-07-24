@@ -7,9 +7,25 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
+		"LS_MySQL_NetAppManagement_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_MySQL_NetAppManagement'"
+		},
+		"LS_ORAC_Framework_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ORAC_Framework'"
+		},
 		"LS_SQL_Framework_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'"
+		},
+		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "ellipse-analytics-connection-string"
+		},
+		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT"
 		},
 		"LS_SQL_Framework_properties_typeProperties_userName": {
 			"type": "string",
@@ -20,6 +36,122 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_MySQL_NetAppManagement')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"Databasename": {
+						"type": "string"
+					},
+					"SecretPasswordName": {
+						"type": "string"
+					},
+					"Servername": {
+						"type": "string"
+					},
+					"Username": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "MySql",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_MySQL_NetAppManagement_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": {
+							"value": "@linkedService().SecretPasswordName",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ORAC_Framework')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"HostName": {
+						"type": "string"
+					},
+					"PortNo": {
+						"type": "string"
+					},
+					"SID": {
+						"type": "string"
+					},
+					"UserName": {
+						"type": "string"
+					},
+					"SecretName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Oracle",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_ORAC_Framework_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": {
+							"value": "@linkedService().SecretName",
+							"type": "Expression"
+						}
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_SQL_ELLIPSE_ANALYTICS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName')]"
+					},
+					"userName": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "svc-ebi-prdc04-agt"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_SQL_Framework')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -2888,6 +3020,49 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ICN_Payment_Extract_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_NFUJPRD202",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FilePath": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ICN Payment Extract"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FilePath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_MySQL')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -2933,7 +3108,9 @@
 				"schema": [],
 				"typeProperties": {}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_MySQL_NetAppManagement')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_Oracle_OnPrem')]",
@@ -2996,573 +3173,8 @@
 				"schema": [],
 				"typeProperties": {}
 			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_SQL_EDWDiscovery_OnPrem')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_SQL_Framework",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"Servername": {
-							"value": "@dataset().ServerName",
-							"type": "Expression"
-						},
-						"Databasename": {
-							"value": "@dataset().DatabaseName",
-							"type": "Expression"
-						},
-						"SecretPasswordName": {
-							"value": "@dataset().SecretPasswordName",
-							"type": "Expression"
-						},
-						"UserName": {
-							"value": "@dataset().UserName",
-							"type": "Expression"
-						}
-					}
-				},
-				"parameters": {
-					"ServerName": {
-						"type": "string",
-						"defaultValue": "PRDC04-SQL"
-					},
-					"DatabaseName": {
-						"type": "string",
-						"defaultValue": "EDW_Discovery"
-					},
-					"UserName": {
-						"type": "string",
-						"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
-					},
-					"SecretPasswordName": {
-						"type": "string",
-						"defaultValue": "SVC-EBI-PRDC04-AGT"
-					}
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {}
-			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_SQL_Framework')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_SQL_ELLIPSE_ANALYTICS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_SQL_ELLIPSE_ANALYTICS",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": "Z_RUN_HISTORY"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_ABN_BlobToASQL')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Process the ABN data in Databricks delta then move to Azure sql db",
-				"activities": [
-					{
-						"name": "usp_get_tablelist_by_sourceid",
-						"description": "Lookup activity to retrieve the list blob csv file need to be processed from the metadata table.",
-						"type": "Lookup",
-						"dependsOn": [
-							{
-								"activity": "GetSourceID",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_tablelist_by_sourceid]",
-								"storedProcedureParameters": {
-									"sourceid": {
-										"type": "Int32",
-										"value": {
-											"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
-											"type": "Expression"
-										}
-									}
-								}
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEachABNFiles",
-						"description": "looping through the list of blob file.",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "usp_get_tablelist_by_sourceid",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('usp_get_tablelist_by_sourceid').output.value",
-								"type": "Expression"
-							},
-							"isSequential": true,
-							"activities": [
-								{
-									"name": "Exec_PL_Framework_TRFM_BlobToASQL",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_Framework_TRFM_BlobToASQL",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": false,
-										"parameters": {
-											"blobcontainer": {
-												"value": "@item().TargetBlobContainer",
-												"type": "Expression"
-											},
-											"storageaccount": {
-												"value": "@item().StorageAccount",
-												"type": "Expression"
-											},
-											"blobfilename": {
-												"value": "@item().Data_Destination_Folder_Path",
-												"type": "Expression"
-											},
-											"columnlist": {
-												"value": "@if(equals(item().SourceName,'EDW_Discovery'), item().Source_Column_list,item().ColumnSchemaList)",
-												"type": "Expression"
-											},
-											"businesskeylist": {
-												"value": "@item().BusinessKeyColumnList",
-												"type": "Expression"
-											},
-											"deltastagingdbname": {
-												"value": "@item().DeltaStagingDbName",
-												"type": "Expression"
-											},
-											"deltatargetdbname": {
-												"value": "@item().DeltaTargetDbName",
-												"type": "Expression"
-											},
-											"deltastagetablename": {
-												"value": "@item().DeltaStagingTableName",
-												"type": "Expression"
-											},
-											"ColumnDelimiter": {
-												"value": "@item().ColumnDelimiter",
-												"type": "Expression"
-											},
-											"azuresqldbetllastmodifieddtm": {
-												"value": "@item().AzuresqldbMaxLastModifieddtm",
-												"type": "Expression"
-											},
-											"tableid": {
-												"value": "@item().TableID",
-												"type": "Expression"
-											},
-											"QuoteCharacter": {
-												"value": "@item().QuoteCharacter",
-												"type": "Expression"
-											},
-											"azuresqltemptablename": {
-												"value": "@item().azuresqltemptablename",
-												"type": "Expression"
-											},
-											"blobfolderpath": {
-												"value": "@item().TargetBlobFolderPath",
-												"type": "Expression"
-											},
-											"deltastagingtableparquetfilepath": {
-												"value": "@item().deltastagingtableparquetfilepath",
-												"type": "Expression"
-											},
-											"DbHostName": {
-												"value": "@item().DestinationHostName",
-												"type": "Expression"
-											},
-											"RowSource": {
-												"value": "@item().SourceName",
-												"type": "Expression"
-											},
-											"azuresqltargettablename": {
-												"value": "@item().AzuresqlTargetTableName",
-												"type": "Expression"
-											},
-											"skipcsvrows": "0",
-											"ETLMergeNotebookPath": {
-												"value": "@item().ETLMergeNotebookPath",
-												"type": "Expression"
-											},
-											"StoredProcNameMergeAzuresqltable": {
-												"value": "@item().StoredProcNameMergeAzuresqltable",
-												"type": "Expression"
-											},
-											"databricksclustername": {
-												"value": "@item().databricksclustername",
-												"type": "Expression"
-											},
-											"databricksclusterid": {
-												"value": "@item().databricksclusterid",
-												"type": "Expression"
-											},
-											"SourceTableName": {
-												"value": "@item().SourceTableName",
-												"type": "Expression"
-											},
-											"skipchangedset": "0",
-											"databrickssecretname": {
-												"value": "@item().databrickssecretname",
-												"type": "Expression"
-											}
-										}
-									}
-								},
-								{
-									"name": "ETL_usp_delete_from_azuresqltable",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "Exec_PL_Framework_TRFM_BlobToASQL",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[ETL].[usp_delete_from_azuresqltable]",
-										"storedProcedureParameters": {
-											"table_source": {
-												"value": {
-													"value": "@item().AzuresqlTempTableName",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"table_target": {
-												"value": {
-													"value": "@item().AzuresqlTargetTableName",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"tableid": {
-												"value": {
-													"value": "@item().TableID",
-													"type": "Expression"
-												},
-												"type": "Int32"
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "LS_ASQL_EDWDiscovery",
-										"type": "LinkedServiceReference"
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "GetSourceID",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "Select SourceID FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
-									"type": "Expression"
-								}
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					}
-				],
-				"parameters": {
-					"Source_Name": {
-						"type": "string",
-						"defaultValue": "ABN"
-					}
-				},
-				"folder": {
-					"name": "ABN"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_Framework_TRFM_BlobToASQL')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_BOM_CopyandTransformSourceFile')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy BOM file to Blob",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "FtpReadSettings",
-									"recursive": false,
-									"wildcardFileName": {
-										"value": "@{concat(pipeline().parameters.STATION_POINT_NAME,'-',pipeline().parameters.yesterdayyear,pipeline().parameters.yesterdaymonth,'.csv')}",
-										"type": "Expression"
-									},
-									"useBinaryTransfer": true
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings",
-									"skipLineCount": 0
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".csv"
-								}
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_FS_FTP",
-								"type": "DatasetReference",
-								"parameters": {
-									"FileFolderPath": {
-										"value": "@pipeline().parameters.FileFolderPath",
-										"type": "Expression"
-									},
-									"FileFolderName": {
-										"value": "@pipeline().parameters.STATION_POINT_NAME",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DS_ABLB_FS_Dataloading",
-								"type": "DatasetReference",
-								"parameters": {
-									"targetblobfoldername": {
-										"value": "@concat('bom-datalanding/',pipeline().parameters.STATION_POINT_NAME)",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					},
-					{
-						"name": "PL_BOM_TRFM_BlobFile",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "getlistofblobfile",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_BOM_TRFM_BlobFile",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"blobcontainer": {
-									"value": "@activity('getlistofblobfile').output.firstrow.TargetBlobContainer",
-									"type": "Expression"
-								},
-								"storageaccount": {
-									"value": "@activity('getlistofblobfile').output.firstrow.StorageAccount",
-									"type": "Expression"
-								},
-								"blobfilename": {
-									"value": "@concat(activity('getlistofblobfile').output.firstrow.TargetBlobContainer,'/',pipeline().parameters.STATION_POINT_NAME)",
-									"type": "Expression"
-								},
-								"columnlist": {
-									"value": "@activity('getlistofblobfile').output.firstrow.ColumnSchemaList",
-									"type": "Expression"
-								},
-								"ColumnDelimiter": {
-									"value": "@activity('getlistofblobfile').output.firstrow.ColumnDelimiter",
-									"type": "Expression"
-								},
-								"QuoteCharacter": {
-									"value": "@activity('getlistofblobfile').output.firstrow.QuoteCharacter",
-									"type": "Expression"
-								},
-								"STATION_POINT_NAME": {
-									"value": "@pipeline().parameters.STATION_POINT_NAME",
-									"type": "Expression"
-								},
-								"blobfolderpath": {
-									"value": "@pipeline().parameters.STATION_POINT_NAME",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "getlistofblobfile",
-						"description": "Lookup activity to retrieve the list blob csv file need to be processed from the metadata table.",
-						"type": "Lookup",
-						"dependsOn": [
-							{
-								"activity": "Copy BOM file to Blob",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderStoredProcedureName": "ETL.usp_get_tablelist_by_sourceid_and_tableid",
-								"storedProcedureParameters": {
-									"sourceid": {
-										"type": "Int32",
-										"value": {
-											"value": "@pipeline().parameters.SourceID",
-											"type": "Expression"
-										}
-									},
-									"TableID": {
-										"type": "Int32",
-										"value": {
-											"value": "@pipeline().parameters.TableID",
-											"type": "Expression"
-										}
-									}
-								}
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": true
-						}
-					}
-				],
-				"parameters": {
-					"Fileserverlocation": {
-						"type": "string"
-					},
-					"FileFolderPath": {
-						"type": "string"
-					},
-					"STATION_POINT_NAME": {
-						"type": "string"
-					},
-					"TableID": {
-						"type": "string"
-					},
-					"yesterdayyear": {
-						"type": "string"
-					},
-					"yesterdaymonth": {
-						"type": "string"
-					},
-					"SourceID": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "BOM"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_BOM_TRFM_BlobFile')]"
+				"[concat(variables('factoryId'), '/linkedServices/LS_ORAC_Framework')]"
 			]
 		}
 	]

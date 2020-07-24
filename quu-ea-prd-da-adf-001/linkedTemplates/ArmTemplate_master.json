@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery'"
 		},
+		"LS_ASQL_EDWTactical_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWTactical'"
+		},
 		"LS_MySQL_NetAppManagement_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_MySQL_NetAppManagement'"
@@ -40,6 +44,14 @@
 			"defaultValue": "\\\\nfujprd200\\EBI_PROD_LANDING"
 		},
 		"LS_FS_Globalscape_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\NFUJPRD202\\FDrive"
+		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
 			"type": "string",
 			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
@@ -131,6 +143,18 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "NetworkAccess"
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "OpenWindows"
@@ -175,18 +199,6 @@
 			"type": "string",
 			"defaultValue": "databricks-token"
 		},
-		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "NetworkAccess"
-		},
-		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -217,11 +229,8 @@
 					"LS_ASQL_EDWDiscovery_connectionString": {
 						"value": "[parameters('LS_ASQL_EDWDiscovery_connectionString')]"
 					},
-					"LS_MySQL_NetAppManagement_connectionString": {
-						"value": "[parameters('LS_MySQL_NetAppManagement_connectionString')]"
-					},
-					"LS_ORAC_Framework_connectionString": {
-						"value": "[parameters('LS_ORAC_Framework_connectionString')]"
+					"LS_ASQL_EDWTactical_connectionString": {
+						"value": "[parameters('LS_ASQL_EDWTactical_connectionString')]"
 					},
 					"ADF_LS_AKV_properties_typeProperties_baseUrl": {
 						"value": "[parameters('ADF_LS_AKV_properties_typeProperties_baseUrl')]"
@@ -238,11 +247,11 @@
 					"LS_FS_Globalscape_properties_typeProperties_userId": {
 						"value": "[parameters('LS_FS_Globalscape_properties_typeProperties_userId')]"
 					},
-					"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
-						"value": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName')]"
+					"LS_FS_NFUJPRD202_properties_typeProperties_host": {
+						"value": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_host')]"
 					},
-					"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
-						"value": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName')]"
+					"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
+						"value": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_userId')]"
 					}
 				}
 			},
@@ -262,8 +271,20 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"LS_MySQL_NetAppManagement_connectionString": {
+						"value": "[parameters('LS_MySQL_NetAppManagement_connectionString')]"
+					},
+					"LS_ORAC_Framework_connectionString": {
+						"value": "[parameters('LS_ORAC_Framework_connectionString')]"
+					},
 					"LS_SQL_Framework_connectionString": {
 						"value": "[parameters('LS_SQL_Framework_connectionString')]"
+					},
+					"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName')]"
+					},
+					"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName')]"
 					},
 					"LS_SQL_Framework_properties_typeProperties_userName": {
 						"value": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]"
@@ -391,6 +412,15 @@
 					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL')]"
 					},
+					"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName": {
+						"value": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName')]"
+					},
+					"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob": {
+						"value": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob')]"
+					},
+					"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
+					},
 					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
 						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName')]"
 					},
@@ -417,20 +447,31 @@
 					},
 					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
 						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name')]"
-					},
-					"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName": {
-						"value": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName')]"
-					},
-					"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob": {
-						"value": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob')]"
-					},
-					"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
 					}
 				}
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_3')]"
+			]
+		},
+		{
+			"name": "ArmTemplate_5",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_4')]"
 			]
 		}
 	]

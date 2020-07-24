@@ -11,13 +11,9 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery'"
 		},
-		"LS_MySQL_NetAppManagement_connectionString": {
+		"LS_ASQL_EDWTactical_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_MySQL_NetAppManagement'"
-		},
-		"LS_ORAC_Framework_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ORAC_Framework'"
+			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWTactical'"
 		},
 		"ADF_LS_AKV_properties_typeProperties_baseUrl": {
 			"type": "string",
@@ -39,13 +35,13 @@
 			"type": "string",
 			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
-		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
+		"LS_FS_NFUJPRD202_properties_typeProperties_host": {
 			"type": "string",
-			"defaultValue": "ellipse-analytics-connection-string"
+			"defaultValue": "\\\\NFUJPRD202\\FDrive"
 		},
-		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
+		"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
 			"type": "string",
-			"defaultValue": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT"
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		}
 	},
 	"variables": {
@@ -367,6 +363,19 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_ASQL_EDWTactical')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_ASQL_EDWTactical_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_FS_FTP')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -399,6 +408,43 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Cost_Summary_By_Region')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "usp_load_Cost_Summary_by_Region",
+						"description": "execute the stored procedure to reload the data into cost_summary_by_region table in tactical database",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_load_Cost_Summary_by_Region]"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWTactical",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"folder": {
+					"name": "Cost_Summary_By_Region"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWTactical')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Analysis_Service')]",
@@ -884,117 +930,22 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LS_MySQL_NetAppManagement')]",
+			"name": "[concat(parameters('factoryName'), '/LS_FS_NFUJPRD202')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"parameters": {
-					"Databasename": {
-						"type": "string"
-					},
-					"SecretPasswordName": {
-						"type": "string"
-					},
-					"Servername": {
-						"type": "string"
-					},
-					"Username": {
-						"type": "string"
-					}
-				},
 				"annotations": [],
-				"type": "MySql",
+				"type": "FileServer",
 				"typeProperties": {
-					"connectionString": "[parameters('LS_MySQL_NetAppManagement_connectionString')]",
+					"host": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_userId')]",
 					"password": {
 						"type": "AzureKeyVaultSecret",
 						"store": {
 							"referenceName": "ADF_LS_AKV",
 							"type": "LinkedServiceReference"
 						},
-						"secretName": {
-							"value": "@linkedService().SecretPasswordName",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ORAC_Framework')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"parameters": {
-					"HostName": {
-						"type": "string"
-					},
-					"PortNo": {
-						"type": "string"
-					},
-					"SID": {
-						"type": "string"
-					},
-					"UserName": {
-						"type": "string"
-					},
-					"SecretName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "Oracle",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_ORAC_Framework_connectionString')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": {
-							"value": "@linkedService().SecretName",
-							"type": "Expression"
-						}
-					}
-				},
-				"connectVia": {
-					"referenceName": "SelfHostedRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedRuntime')]",
-				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_SQL_ELLIPSE_ANALYTICS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"connectionString": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName')]"
-					},
-					"userName": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "svc-ebi-prdc04-agt"
+						"secretName": "SVC-EBI-PRDC04-AGT"
 					}
 				},
 				"connectVia": {
