@@ -1,0 +1,32 @@
+{
+	"name": "PL_Cost_Summary_By_Region",
+	"properties": {
+		"activities": [
+			{
+				"name": "usp_load_Cost_Summary_by_Region",
+				"description": "execute the stored procedure to reload the data into cost_summary_by_region table in tactical database",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[usp_load_Cost_Summary_by_Region]"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWTactical",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "Cost_Summary_By_Region"
+		},
+		"annotations": []
+	}
+}
