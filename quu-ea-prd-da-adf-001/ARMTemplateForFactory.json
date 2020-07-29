@@ -202,6 +202,10 @@
 		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
 			"type": "string",
 			"defaultValue": "databricks-token"
+		},
+		"WorkOrder_DataModel_Daily_Trigger_properties_PL_EDW_Mart_WorkOrder_Main_parameters_sourcename": {
+			"type": "string",
+			"defaultValue": "Ellipse9"
 		}
 	},
 	"variables": {
@@ -15439,6 +15443,47 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/WorkOrder_DataModel_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "updating dimensional work order tables in edw_mart",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDW_Mart_WorkOrder_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"sourcename": "[parameters('WorkOrder_DataModel_Daily_Trigger_properties_PL_EDW_Mart_WorkOrder_Main_parameters_sourcename')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-07-28T06:52:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								23
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDW_Mart_WorkOrder_Main')]"
+			]
 		}
 	]
 }

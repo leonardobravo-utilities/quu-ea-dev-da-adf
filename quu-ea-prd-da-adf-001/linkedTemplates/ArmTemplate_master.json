@@ -203,6 +203,10 @@
 			"type": "string",
 			"defaultValue": "databricks-token"
 		},
+		"WorkOrder_DataModel_Daily_Trigger_properties_PL_EDW_Mart_WorkOrder_Main_parameters_sourcename": {
+			"type": "string",
+			"defaultValue": "Ellipse9"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -315,6 +319,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"WorkOrder_DataModel_Daily_Trigger_properties_PL_EDW_Mart_WorkOrder_Main_parameters_sourcename": {
+						"value": "[parameters('WorkOrder_DataModel_Daily_Trigger_properties_PL_EDW_Mart_WorkOrder_Main_parameters_sourcename')]"
 					}
 				}
 			},
@@ -436,15 +443,6 @@
 					},
 					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL')]"
-					},
-					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName": {
-						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName')]"
-					},
-					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob": {
-						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob')]"
-					},
-					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL')]"
 					}
 				}
 			},
@@ -465,6 +463,15 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName": {
+						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName')]"
+					},
+					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob": {
+						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob')]"
+					},
+					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL')]"
 					},
 					"SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type": {
 						"value": "[parameters('SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type')]"
