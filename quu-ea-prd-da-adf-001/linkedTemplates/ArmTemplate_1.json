@@ -19,6 +19,22 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'"
 		},
+		"LS_FS_Globalscape_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\nfujprd200\\EBI_PROD_LANDING"
+		},
+		"LS_FS_Globalscape_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\NFUJPRD202\\FDrive"
+		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
 		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "ellipse-analytics-connection-string"
@@ -36,6 +52,58 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_Globalscape')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_Globalscape_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_Globalscape_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SVC-EBI-PRDC04-AGT"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_NFUJPRD202')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SVC-EBI-PRDC04-AGT"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_MySQL_NetAppManagement')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -2880,7 +2948,9 @@
 					}
 				]
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_SUMS')]",
@@ -2936,7 +3006,9 @@
 					}
 				]
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_TFS')]",
@@ -2972,7 +3044,9 @@
 				},
 				"schema": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_File_Source')]",
@@ -3017,7 +3091,9 @@
 				},
 				"schema": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_ICN_Payment_Extract_File')]",
@@ -3060,121 +3136,8 @@
 				},
 				"schema": []
 			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_MySQL')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_MySQL_NetAppManagement",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"Databasename": {
-							"value": "@dataset().Databasename",
-							"type": "Expression"
-						},
-						"SecretPasswordName": {
-							"value": "@dataset().SecretPasswordName",
-							"type": "Expression"
-						},
-						"Servername": {
-							"value": "@dataset().Servername",
-							"type": "Expression"
-						},
-						"Username": {
-							"value": "@dataset().UserName",
-							"type": "Expression"
-						}
-					}
-				},
-				"parameters": {
-					"Databasename": {
-						"type": "string"
-					},
-					"SecretPasswordName": {
-						"type": "string"
-					},
-					"Servername": {
-						"type": "string"
-					},
-					"UserName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "MySqlTable",
-				"schema": [],
-				"typeProperties": {}
-			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_MySQL_NetAppManagement')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_Oracle_OnPrem')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ORAC_Framework",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"HostName": {
-							"value": "@dataset().HostName",
-							"type": "Expression"
-						},
-						"PortNo": {
-							"value": "@dataset().PortNo",
-							"type": "Expression"
-						},
-						"SID": {
-							"value": "@dataset().SID",
-							"type": "Expression"
-						},
-						"UserName": {
-							"value": "@dataset().UserName",
-							"type": "Expression"
-						},
-						"SecretName": {
-							"value": "@dataset().SecretPasswordName",
-							"type": "Expression"
-						}
-					}
-				},
-				"parameters": {
-					"HostName": {
-						"type": "string",
-						"defaultValue": "QNDCPRD137.corporate.urbanutilities.internal"
-					},
-					"PortNo": {
-						"type": "string",
-						"defaultValue": "1521"
-					},
-					"SID": {
-						"type": "string",
-						"defaultValue": "SDCM"
-					},
-					"UserName": {
-						"type": "string",
-						"defaultValue": "EBI_TECHM_USERS"
-					},
-					"SecretPasswordName": {
-						"type": "string",
-						"defaultValue": "gis-ebi-techm-users"
-					}
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "OracleTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ORAC_Framework')]"
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_NFUJPRD202')]"
 			]
 		}
 	]
