@@ -1,0 +1,36 @@
+{
+	"name": "WorkOrder_DataModel_Daily_Trigger",
+	"properties": {
+		"description": "updating dimensional work order tables in edw_mart",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EDW_Mart_WorkOrder_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"sourcename": "Ellipse9"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2020-07-28T06:52:00.000Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						23
+					]
+				}
+			}
+		}
+	}
+}
