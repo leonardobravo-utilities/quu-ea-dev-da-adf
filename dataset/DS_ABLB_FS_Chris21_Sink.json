@@ -1,0 +1,40 @@
+{
+	"name": "DS_ABLB_FS_Chris21_Sink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueatstdadlslanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"targetblobfoldername": {
+				"type": "string"
+			},
+			"targetblobfilename": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Chris21"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().targetblobfilename",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().targetblobfoldername",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"rowDelimiter": "\n",
+			"escapeChar": "\\",
+			"quoteChar": "¬"
+		},
+		"schema": []
+	}
+}
