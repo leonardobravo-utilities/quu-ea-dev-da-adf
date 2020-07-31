@@ -7,6 +7,70 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Field Service Edge Hourly_Refresh"
+		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name": {
+			"type": "string",
+			"defaultValue": "LIMS"
+		},
+		"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "LIWIS"
+		},
+		"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "MDSProd"
+		},
+		"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "NetworkAccess"
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "OpenWindows"
+		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "REFERENCE"
@@ -36,6 +100,257 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/FSE_Hourly_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "FSE_Hourly_Trigger",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_FSE_Source_To_ASQL",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-06-23T06:31:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								50
+							],
+							"hours": [
+								19,
+								20,
+								21,
+								22,
+								23,
+								0,
+								1,
+								2,
+								3,
+								4,
+								5,
+								6,
+								7,
+								8,
+								9
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LIMS_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_LIMS_Source_To_ASQL",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"Source_Name": "[parameters('LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-05-15T00:49:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								17
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LIWIS_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_LIWIS_SourceToAsql",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-05-15T00:43:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								16
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MDS_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_MDSProd_SourceToASQL",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-05-26T22:52:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								15
+							],
+							"hours": [
+								19
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/NetworkAccess_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_NetworkAccess_Source_To_ASQL",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-07-20T16:00:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"hours": [
+								16
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OpenWindows_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "OpenWindows Daily Trigger",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Openwindows_SourceToASQL",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-04-30T05:47:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								21
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/REF_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",

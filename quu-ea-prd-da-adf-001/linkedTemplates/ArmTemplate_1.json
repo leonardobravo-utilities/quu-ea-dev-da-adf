@@ -53,6 +53,42 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_DBR_ADF_Job_Cluster')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Azure Databricks Access Token",
+				"parameters": {
+					"databricksclusterid": {
+						"type": "string",
+						"defaultValue": "0417-051914-axons909"
+					},
+					"databrickssecretname": {
+						"type": "string",
+						"defaultValue": "databricks-token"
+					}
+				},
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://australiaeast.azuredatabricks.net",
+					"accessToken": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": {
+							"value": "@linkedService().databrickssecretname",
+							"type": "Expression"
+						}
+					},
+					"existingClusterId": "@linkedService().databricksclusterid"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_FS_Globalscape')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -642,7 +678,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Framework_Migration_BlobToASQL')]",
@@ -1641,7 +1679,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Framework_TRFM_BlobToASQL')]",
@@ -2435,7 +2475,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_SUMS_Daily_Consumption_And_Analysis')]",
@@ -2609,7 +2651,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_StartFSECluster')]",
@@ -2685,7 +2729,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Temetra_24HR_STATS')]",
@@ -2737,7 +2783,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Temetra_API_Response')]",
@@ -2790,7 +2838,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Hourly_Consumption')]",
@@ -2843,7 +2893,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Potential_Leaks')]",
@@ -2897,7 +2949,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_Archive')]",
@@ -2947,6 +3001,51 @@
 						"type": "String"
 					}
 				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_Chris21_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Chris21"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
@@ -3046,98 +3145,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_File_Source')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"DirectoryName": {
-						"type": "string"
-					},
-					"FileName": {
-						"type": "string"
-					},
-					"ColumnDelimiter": {
-						"type": "string"
-					},
-					"QuoteCharacter": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"fileName": {
-							"value": "@dataset().FileName",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().DirectoryName",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ICN_Payment_Extract_File')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_NFUJPRD202",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"FilePath": {
-						"type": "string"
-					},
-					"FileName": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "ICN Payment Extract"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"fileName": {
-							"value": "@dataset().FileName",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().FilePath",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_FS_NFUJPRD202')]"
 			]
 		}
 	]

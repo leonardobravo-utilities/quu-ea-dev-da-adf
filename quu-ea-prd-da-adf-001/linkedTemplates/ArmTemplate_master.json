@@ -207,6 +207,18 @@
 			"type": "string",
 			"defaultValue": "Ellipse9"
 		},
+		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "CHRIS21"
+		},
+		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -369,6 +381,15 @@
 					"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
 						"value": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type')]"
 					},
+					"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName": {
+						"value": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName')]"
+					},
+					"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlySourceToBlob": {
+						"value": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlySourceToBlob')]"
+					},
+					"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL')]"
+					},
 					"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
 						"value": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName')]"
 					},
@@ -395,6 +416,26 @@
 					},
 					"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_3')]"
+			]
+		},
+		{
+			"name": "ArmTemplate_5",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
 						"value": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]"
@@ -443,26 +484,6 @@
 					},
 					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_3')]"
-			]
-		},
-		{
-			"name": "ArmTemplate_5",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName": {
 						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName')]"

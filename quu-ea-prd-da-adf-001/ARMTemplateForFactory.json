@@ -206,6 +206,18 @@
 		"WorkOrder_DataModel_Daily_Trigger_properties_PL_EDW_Mart_WorkOrder_Main_parameters_sourcename": {
 			"type": "string",
 			"defaultValue": "Ellipse9"
+		},
+		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "CHRIS21"
+		},
+		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
 		}
 	},
 	"variables": {
@@ -1712,6 +1724,485 @@
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ABLB_DataLanding_FizeSize')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Chris21_CopytoArchive')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Transfer file to Archive folder in global scape",
+				"activities": [
+					{
+						"name": "Lkp_getfilemetadata",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select  \n\n     FileFolderName \n\t ,SourceFileName\n    ,ArchiveFileFolderName =FileFolderName  + '\\Archive\\' + convert(varchar(20),dbo.udf_getLocalDTM(),112) \n\t\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d\nON s.sourceid = d.sourceid \nand d.isactive = 1\nwhere sourcename = '@{pipeline().parameters.sourcename}'",
+									"type": "Expression"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachTable",
+						"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lkp_getfilemetadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lkp_getfilemetadata').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "Chris21_Files_Copy_to_Blob",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "FileServerReadSettings",
+												"recursive": false,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings",
+												"skipLineCount": 0
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "FileServerWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".csv"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_FS_GlobalScape_Chris21_Source",
+											"type": "DatasetReference",
+											"parameters": {
+												"filefolder": {
+													"value": "@item().FileFolderName",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@item().SourceFileName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_FS_GlobalScape_Chris21_Source",
+											"type": "DatasetReference",
+											"parameters": {
+												"filefolder": {
+													"value": "@item().ArchiveFileFolderName",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@item().SourceFileName",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"sourcename": {
+						"type": "string",
+						"defaultValue": "CHRIS21"
+					}
+				},
+				"variables": {
+					"Testvar": {
+						"type": "String"
+					},
+					"targetblobfoldername": {
+						"type": "String",
+						"defaultValue": "tankerfillingstation-dataloading/CardService"
+					}
+				},
+				"folder": {
+					"name": "Chris21"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/datasets/DS_FS_GlobalScape_Chris21_Source')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Chris21_DM_SourcetoBlob')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Transfer file to Blob storage",
+				"activities": [
+					{
+						"name": "Lkp_getfilemetadata",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select  FileFolderName,SourceFileName,TargetBlobFilePath,TargetBlobFileName = lower(TargetBlobFileName + '_' + convert(varchar(20),dbo.udf_getLocalDTM(),112) + targetBlobFileNameExt )\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d\nON s.sourceid = d.sourceid \nand d.isactive = 1\nwhere sourcename = '@{pipeline().parameters.sourcename}'\n",
+									"type": "Expression"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachTable",
+						"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lkp_getfilemetadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lkp_getfilemetadata').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "Chris21_Files_Copy_to_Blob",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "FileServerReadSettings",
+												"recursive": false,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings",
+												"skipLineCount": 0
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".csv"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_FS_GlobalScape_Chris21_Source",
+											"type": "DatasetReference",
+											"parameters": {
+												"filefolder": {
+													"value": "@item().FileFolderName",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@item().SourceFileName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ABLB_FS_Chris21_Sink",
+											"type": "DatasetReference",
+											"parameters": {
+												"targetblobfoldername": {
+													"value": "@item().TargetBlobFilePath ",
+													"type": "Expression"
+												},
+												"targetblobfilename": {
+													"value": "@item().TargetBlobFileName",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"sourcename": {
+						"type": "string",
+						"defaultValue": "CHRIS21"
+					}
+				},
+				"variables": {
+					"Testvar": {
+						"type": "String"
+					},
+					"targetblobfoldername": {
+						"type": "String",
+						"defaultValue": "tankerfillingstation-dataloading/CardService"
+					}
+				},
+				"folder": {
+					"name": "Chris21"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/datasets/DS_FS_GlobalScape_Chris21_Source')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ABLB_FS_Chris21_Sink')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Chris21_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForSourceToBlob",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlySourceToBlob",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Chris21_DM_SourcetoBlob",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"sourcename": {
+												"value": "@pipeline().parameters.SourceName",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForBlobToASQL",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "CheckExecutionStatusForSourceToBlob",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyBlobtoASQL",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_TRFM_BLOBToASQL",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CopyfiletoArchiveGlobascape",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "CheckExecutionStatusForBlobToASQL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Chris21_CopytoArchive",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sourcename": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "CHRIS21"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					}
+				},
+				"folder": {
+					"name": "Chris21"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Chris21_CopytoArchive')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Chris21_DM_SourcetoBlob')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
 			]
 		},
 		{
@@ -13692,6 +14183,51 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_Chris21_Sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"targetblobfoldername": {
+						"type": "string"
+					},
+					"targetblobfilename": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Chris21"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().targetblobfilename",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().targetblobfoldername",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"quoteChar": "¬"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_Dataloading')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -13965,6 +14501,51 @@
 						"type": "String"
 					}
 				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_Chris21_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Chris21"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
@@ -15434,17 +16015,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/SelfHostedRuntime')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "Self hosted runtime gateway nfujprd298",
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/WorkOrder_DataModel_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -15483,6 +16053,63 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_EDW_Mart_WorkOrder_Main')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SelfHostedRuntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "Self hosted runtime gateway nfujprd298",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Chris21_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Every Thursday loading Chris21 Payroll files.",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Chris21_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Week",
+						"interval": 1,
+						"startTime": "2020-07-31T01:09:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								22
+							],
+							"weekDays": [
+								"Wednesday"
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Chris21_Main')]"
 			]
 		}
 	]
