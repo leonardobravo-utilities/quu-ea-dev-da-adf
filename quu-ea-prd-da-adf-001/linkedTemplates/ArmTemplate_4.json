@@ -7,14 +7,6 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
-		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
-			"type": "string",
-			"defaultValue": "SILO"
-		},
-		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
-			"type": "string",
-			"defaultValue": "Incremental_Load"
-		},
 		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "CHRIS21"
@@ -26,6 +18,14 @@
 		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
+		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
+			"type": "string",
+			"defaultValue": "SILO"
+		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
+			"type": "string",
+			"defaultValue": "Incremental_Load"
 		},
 		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
 			"type": "string",
@@ -92,7 +92,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -228,7 +229,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -262,7 +264,8 @@
 								"sqlReaderQuery": {
 									"value": "select HostName from etl.SourceSystem\nwhere SourceID=@{activity('GetSourceID').output.Firstrow['SourceID']}",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -370,7 +373,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -512,7 +516,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -628,7 +633,8 @@
 										"source": {
 											"type": "SqlServerSource",
 											"sqlReaderQuery": "Select top(1 ) SUCCESS  as JobOutCome from dbo.z_run_history \nwhere cast(START_TIME as date) = cast(GETDATE() as date)  \n\norder by RUN_ID desc",
-											"queryTimeout": "02:00:00"
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
 										},
 										"dataset": {
 											"referenceName": "DS_SQL_ELLIPSE_ANALYTICS",
@@ -718,7 +724,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -879,7 +886,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -952,7 +960,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1087,7 +1096,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1222,7 +1232,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1357,7 +1368,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1492,7 +1504,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1920,45 +1933,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/SILO_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_Silo_Weather_Observations",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"Source_Name": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name')]",
-							"Silo_load_type": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-05-15T00:47:00.000Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								30
-							],
-							"hours": [
-								16
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/Chris21_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -1995,6 +1969,45 @@
 							],
 							"weekDays": [
 								"Wednesday"
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SILO_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Silo_Weather_Observations",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"Source_Name": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name')]",
+							"Silo_load_type": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-05-15T00:47:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								16
 							]
 						}
 					}

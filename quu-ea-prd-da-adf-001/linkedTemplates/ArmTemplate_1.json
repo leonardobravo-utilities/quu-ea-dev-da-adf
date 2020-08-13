@@ -622,7 +622,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1370,7 +1371,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -2344,7 +2346,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -2546,7 +2549,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID,databricksclusterid,databrickssecretname FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -2714,7 +2718,8 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderQuery": "select distinct databricksclusterid,databrickssecretname  from ETL.SourceSystem\nwhere databricksclustername = 'ADF_Job_Cluster_FSE'",
-								"queryTimeout": "02:00:00"
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",

@@ -61,7 +61,8 @@
 											"sqlReaderQuery": {
 												"value": "select @{pipeline().parameters.Source_Column_List}\nfrom @{pipeline().parameters.Data_Source_Table_Name} \n@{pipeline().parameters.Join_Condition}\n@{pipeline().parameters.source_where_filter}\n",
 												"type": "Expression"
-											}
+											},
+											"partitionOption": "None"
 										},
 										"sink": {
 											"type": "DelimitedTextSink",
@@ -176,7 +177,8 @@
 									"typeProperties": {
 										"source": {
 											"type": "SqlMISource",
-											"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2"
+											"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2",
+											"partitionOption": "None"
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
@@ -204,7 +206,8 @@
 											"sqlReaderQuery": {
 												"value": "select isnull(@{pipeline().parameters.Control_Table_Column_Name},'1753-01-01') as WatermarkValue from @{pipeline().parameters.Control_Table_Table_Name}\nwhere TableID = @{pipeline().parameters.TableID}",
 												"type": "Expression"
-											}
+											},
+											"partitionOption": "None"
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
@@ -230,7 +233,8 @@
 											"sqlReaderQuery": {
 												"value": "select max(@{pipeline().parameters.Data_Source_WaterMarkColumn}) AS NewWatermarkValue from @{pipeline().parameters.Data_Source_Table_Name}\n@{pipeline().parameters.Join_Condition}\n",
 												"type": "Expression"
-											}
+											},
+											"partitionOption": "None"
 										},
 										"dataset": {
 											"referenceName": "DS_SQL_EDWDiscovery_OnPrem",
@@ -286,7 +290,8 @@
 											"sqlReaderQuery": {
 												"value": "select @{pipeline().parameters.Source_Column_List}\n from @{pipeline().parameters.Data_Source_Table_Name} \n@{pipeline().parameters.Join_Condition}\nwhere\n@{pipeline().parameters.Data_Source_WaterMarkColumn} > '@{activity('lkp_getpreviousdatevalue').output.firstRow.WatermarkValue}' \nand @{pipeline().parameters.Data_Source_WaterMarkColumn} <= '@{activity('lkp_getcurrentmaxvalue').output.firstRow.NewWatermarkValue}'\n@{pipeline().parameters.source_where_filter}",
 												"type": "Expression"
-											}
+											},
+											"partitionOption": "None"
 										},
 										"sink": {
 											"type": "DelimitedTextSink",
@@ -408,7 +413,8 @@
 									"typeProperties": {
 										"source": {
 											"type": "SqlMISource",
-											"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime"
+											"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime",
+											"partitionOption": "None"
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
@@ -450,7 +456,8 @@
 												"value": "SELECT  \n\t Case WHEN [__$operation] = 1 THEN 'DELETE'\n\t        WHEN [__$operation] = 2 THEN 'INSERT'\n\t\t\tWHEN [__$operation] = 4 THEN ' UPDATE' END as ROW_OPERATION\n    ,@{pipeline().parameters.Source_Column_List}\n  FROM @{concat('cdc.',pipeline().parameters.DeltaTargetTableName,'_CT',' ',  pipeline().parameters.Data_Destination_File_Name)}\n  WHERE [__$operation] !=3\n",
 												"type": "Expression"
 											},
-											"queryTimeout": "02:00:00"
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
 										},
 										"sink": {
 											"type": "DelimitedTextSink",
@@ -635,7 +642,8 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderStoredProcedureName": "[[Ellipse9].[usp_get_Icn_Payment_Extract]",
-								"queryTimeout": "02:00:00"
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"sink": {
 								"type": "DelimitedTextSink",
@@ -899,7 +907,8 @@
 								"sqlReaderQuery": {
 									"value": "select  FileFolderName\nfrom etl.sourcesystem\nwhere sourcename = '@{pipeline().parameters.sourcename}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1131,7 +1140,8 @@
 								"sqlReaderQuery": {
 									"value": "select  FileFolderName\nfrom etl.sourcesystem\nwhere sourcename = '@{pipeline().parameters.sourcename}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1252,7 +1262,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1453,7 +1464,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID,databricksclusterid,databrickssecretname FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1501,7 +1513,8 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzureSqlSource",
-								"sqlReaderQuery": "select substring(dbo.udf_covert_utc_to_local_Datetime(getdate()), 1,4)  as  currentyear\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(getdate()),6,2)  as  currentmonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(getdate()),9,2)  as  currentdayofmonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())), 1,4)  as  yesterdayyear\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())),6,2)  as  yesterdaymonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())),9,2)  as  yesterdaydayofmonth"
+								"sqlReaderQuery": "select substring(dbo.udf_covert_utc_to_local_Datetime(getdate()), 1,4)  as  currentyear\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(getdate()),6,2)  as  currentmonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(getdate()),9,2)  as  currentdayofmonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())), 1,4)  as  yesterdayyear\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())),6,2)  as  yesterdaymonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())),9,2)  as  yesterdaydayofmonth",
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1535,7 +1548,8 @@
 								"sqlReaderQuery": {
 									"value": "select \n\t\tss.*, STD.TableID\n From \n (\n\n\t SELECT \n\t\tsourceid, Fileserverlocation, FileFolderPath,value as STATION_POINT_NAME\n\tFROM  ETL.SourceSystem \n\t\tcross apply STRING_SPLIT(filefoldername, ',')\n\twhere sourceid = @{pipeline().parameters.SourceID}\n\n) SS join  [ETL].[SourceTableDetails] STD on STD.sourceid = ss.sourceid\nand TargetBlobFileName = ss.STATION_POINT_NAME",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1662,7 +1676,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -1830,7 +1845,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -2000,7 +2016,8 @@
 													}
 												}
 											},
-											"queryTimeout": "02:00:00"
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
 										},
 										"dataset": {
 											"referenceName": "DS_ASQL_EDWDiscovery",
@@ -2057,7 +2074,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -2298,7 +2316,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -2531,7 +2550,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -2710,7 +2730,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -2893,7 +2914,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -3072,7 +3094,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -3298,7 +3321,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID,databricksclusterid,databrickssecretname FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -3419,7 +3443,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID,databricksclusterid,databrickssecretname FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -3496,7 +3521,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -3537,7 +3563,8 @@
 											"type": "Expression"
 										}
 									}
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
@@ -3638,7 +3665,8 @@
 								"sqlReaderQuery": {
 									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 									"type": "Expression"
-								}
+								},
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "DS_ASQL_EDWDiscovery",
