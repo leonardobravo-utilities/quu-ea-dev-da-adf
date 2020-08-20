@@ -219,6 +219,10 @@
 			"type": "string",
 			"defaultValue": "Ellipse9"
 		},
+		"ICN_Payment_Extract_Daily_Trigger_properties_PL_ICN_Payment_Extract_parameters_FilePath": {
+			"type": "string",
+			"defaultValue": "DEVELOPER CLIENT MANAGEMENT TEAM FOLDER\\14.00 ICNDbRegister\\Payment Reports"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -354,6 +358,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"ICN_Payment_Extract_Daily_Trigger_properties_PL_ICN_Payment_Extract_parameters_FilePath": {
+						"value": "[parameters('ICN_Payment_Extract_Daily_Trigger_properties_PL_ICN_Payment_Extract_parameters_FilePath')]"
 					}
 				}
 			},
@@ -407,15 +414,6 @@
 					},
 					"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL')]"
-					},
-					"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
-						"value": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]"
-					},
-					"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
-						"value": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob')]"
-					},
-					"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
 					}
 				}
 			},
@@ -436,6 +434,15 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
+						"value": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]"
+					},
+					"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
+						"value": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob')]"
+					},
+					"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
 					},
 					"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
 						"value": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]"

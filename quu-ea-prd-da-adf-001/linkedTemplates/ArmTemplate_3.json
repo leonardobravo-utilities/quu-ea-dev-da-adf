@@ -6,6 +6,10 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
+		},
+		"ICN_Payment_Extract_Daily_Trigger_properties_PL_ICN_Payment_Extract_parameters_FilePath": {
+			"type": "string",
+			"defaultValue": "DEVELOPER CLIENT MANAGEMENT TEAM FOLDER\\14.00 ICNDbRegister\\Payment Reports"
 		}
 	},
 	"variables": {
@@ -3690,54 +3694,43 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_ABN_Main')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
+			"name": "[concat(parameters('factoryName'), '/ICN_Payment_Extract_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"activities": [
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
 					{
-						"name": "Exec_PL_ABN",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_ABN_SourceToBlob",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "Exec_PL_ABN_BlobToASQL",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Exec_PL_ABN",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_ABN_BlobToASQL",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
+						"pipelineReference": {
+							"referenceName": "PL_ICN_Payment_Extract",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"FilePath": "[parameters('ICN_Payment_Extract_Daily_Trigger_properties_PL_ICN_Payment_Extract_parameters_FilePath')]"
 						}
 					}
 				],
-				"folder": {
-					"name": "ABN"
-				},
-				"annotations": []
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-08-19T23:00:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								23
+							]
+						}
+					}
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_ABN_SourceToBlob')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_ICN_Payment_Extract')]"
 			]
 		}
 	]
