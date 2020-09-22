@@ -1,0 +1,64 @@
+{
+	"name": "DS_File_NFUJPRD200",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_FS_Globalscape",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TargetFilePath": {
+				"type": "string"
+			},
+			"TargetFileName": {
+				"type": "string"
+			},
+			"ColumnDelimiter": {
+				"type": "string"
+			},
+			"QuoteCharacter": {
+				"type": "string"
+			},
+			"EscapeCharacter": {
+				"type": "string"
+			},
+			"FirstRowHeader": {
+				"type": "int"
+			}
+		},
+		"folder": {
+			"name": "File Extract"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"fileName": {
+					"value": "@dataset().TargetFileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().TargetFilePath",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": {
+				"value": "@dataset().ColumnDelimiter",
+				"type": "Expression"
+			},
+			"escapeChar": {
+				"value": "@dataset().EscapeCharacter",
+				"type": "Expression"
+			},
+			"firstRowAsHeader": {
+				"value": "@equals(dataset().FirstRowHeader,1)",
+				"type": "Expression"
+			},
+			"quoteChar": {
+				"value": "@dataset().QuoteCharacter",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	}
+}
