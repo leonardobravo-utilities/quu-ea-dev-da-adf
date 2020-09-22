@@ -131,6 +131,10 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName": {
+			"type": "string",
+			"defaultValue": "ICN"
+		},
 		"LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name": {
 			"type": "string",
 			"defaultValue": "LIMS"
@@ -219,9 +223,9 @@
 			"type": "string",
 			"defaultValue": "Ellipse9"
 		},
-		"ICN_Payment_Extract_Daily_Trigger_properties_PL_ICN_Payment_Extract_parameters_FilePath": {
+		"QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_NFUJPRD200_parameters_FileExportName": {
 			"type": "string",
-			"defaultValue": "DEVELOPER CLIENT MANAGEMENT TEAM FOLDER\\14.00 ICNDbRegister\\Payment Reports"
+			"defaultValue": "QAO"
 		},
 		"containerUri": {
 			"type": "string",
@@ -358,9 +362,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"ICN_Payment_Extract_Daily_Trigger_properties_PL_ICN_Payment_Extract_parameters_FilePath": {
-						"value": "[parameters('ICN_Payment_Extract_Daily_Trigger_properties_PL_ICN_Payment_Extract_parameters_FilePath')]"
 					}
 				}
 			},
@@ -376,6 +377,32 @@
 				"mode": "incremental",
 				"templateLink": {
 					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName": {
+						"value": "[parameters('ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName')]"
+					},
+					"QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_NFUJPRD200_parameters_FileExportName": {
+						"value": "[parameters('QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_NFUJPRD200_parameters_FileExportName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_3')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_5",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters": {
@@ -414,26 +441,6 @@
 					},
 					"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_3')]"
-			]
-		},
-		{
-			"name": "quu-ea-prd-da-adf-001_ArmTemplate_5",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
 						"value": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]"
