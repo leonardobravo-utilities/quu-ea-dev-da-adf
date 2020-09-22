@@ -1,0 +1,42 @@
+{
+	"name": "QAO_File_Export_Monthly_Trigger",
+	"properties": {
+		"description": "Every 2nd Monday of each Month at 9 : 00 AM",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_File_Export_To_NFUJPRD200",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"FileExportName": "QAO"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2020-09-22T02:04:00.000Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						23
+					],
+					"monthlyOccurrences": [
+						{
+							"day": "Monday",
+							"occurrence": 2
+						}
+					]
+				}
+			}
+		}
+	}
+}
