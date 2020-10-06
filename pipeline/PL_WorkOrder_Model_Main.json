@@ -1,0 +1,50 @@
+{
+	"name": "PL_WorkOrder_Model_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_EDW_Mart_WorkOrder",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EDW_Mart_WorkOrder",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"sourcename": "Ellipse9"
+					}
+				}
+			},
+			{
+				"name": "PL_WorkOrder_FinanceTransaction",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_EDW_Mart_WorkOrder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EDW_Mart_FinanceTransaction",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"sourcename": "Ellipse9"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "WorkOrder-Model"
+		},
+		"annotations": []
+	}
+}
