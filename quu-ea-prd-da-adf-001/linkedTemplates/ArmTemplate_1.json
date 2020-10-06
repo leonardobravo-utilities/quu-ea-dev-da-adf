@@ -53,6 +53,46 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_FTP')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_FTP",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"Host": "ftp://ftp.bom.gov.au/"
+					}
+				},
+				"parameters": {
+					"FileFolderPath": {
+						"type": "string",
+						"defaultValue": "anon/gen/clim_data/IDCKWCDEA0/tables/qld/ brisbane"
+					},
+					"FileFolderName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FtpServerLocation",
+						"folderPath": {
+							"value": "@concat(dataset().FileFolderPath,dataset().FileFolderName)",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_DBR_ADF_Job_Cluster')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -2959,6 +2999,59 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_WorkOrder_Model_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "PL_EDW_Mart_WorkOrder",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDW_Mart_WorkOrder",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sourcename": "Ellipse9"
+							}
+						}
+					},
+					{
+						"name": "PL_WorkOrder_FinanceTransaction",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_EDW_Mart_WorkOrder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDW_Mart_FinanceTransaction",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sourcename": "Ellipse9"
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "WorkOrder-Model"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_Archive')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -3040,102 +3133,6 @@
 							"value": "@dataset().filename",
 							"type": "Expression"
 						},
-						"folderPath": {
-							"value": "@dataset().filefolder",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": false,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_SUMS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"filefolder": {
-						"type": "string",
-						"defaultValue": "\\\\Nfujprd200\\EBI_PROD_LANDING\\SUMS"
-					}
-				},
-				"folder": {
-					"name": "SUMS"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"folderPath": {
-							"value": "@dataset().filefolder",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"rowDelimiter": "\n",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_TFS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"filefolder": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Tanker Filling Station Card Services"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
 						"folderPath": {
 							"value": "@dataset().filefolder",
 							"type": "Expression"

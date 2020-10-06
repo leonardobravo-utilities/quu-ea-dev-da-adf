@@ -6,447 +6,12 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
-		},
-		"LS_ASQL_EDWDiscovery_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery'"
-		},
-		"LS_ASQL_EDWMart_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWMart'"
-		},
-		"LS_ASQL_EDWTactical_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWTactical'"
-		},
-		"ADF_LS_AKV_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://quu-ea-prd-da-key-vault.vault.azure.net/"
-		},
-		"LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint": {
-			"type": "string",
-			"defaultValue": "https://quueaprddadlslanding001.blob.core.windows.net"
-		},
-		"LS_FS_FTP_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "@{linkedService().Host}"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_ProcessModel')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "This is a general pipeline for ssas tabular model cube refresh. it would refresh the cube according to the parameter parsed in the pipeline.",
-				"activities": [
-					{
-						"name": "Login",
-						"type": "WebActivity",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"url": {
-								"value": "@concat('https://login.microsoftonline.com/',pipeline().parameters.TenantID,'/oauth2/token')",
-								"type": "Expression"
-							},
-							"method": "POST",
-							"headers": {
-								"Content-Type": "application/x-www-form-urlencoded"
-							},
-							"body": {
-								"value": "@concat('grant_type=client_credentials&resource=https://*.asazure.windows.net&client_id=',pipeline().parameters.ClientID,'&client_secret=',encodeUriComponent(pipeline().parameters.ClientSecret))",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "UntilRefreshComplete",
-						"type": "Until",
-						"dependsOn": [
-							{
-								"activity": "FilterToCurrentRefresh",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@not(equals(activity('GetAzureASRefreshStatus').output.status,'inProgress'))",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "GetAzureASRefreshStatus",
-									"type": "WebActivity",
-									"dependsOn": [
-										{
-											"activity": "Wait30Seconds",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"url": {
-											"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes/',activity('FilterToCurrentRefresh').output.Value[0].refreshId)",
-											"type": "Expression"
-										},
-										"method": "GET",
-										"headers": {
-											"Authorization": {
-												"value": "@concat(string(activity('Login').output.token_type),' ',string(activity('Login').output.access_token))",
-												"type": "Expression"
-											}
-										}
-									}
-								},
-								{
-									"name": "Wait30Seconds",
-									"type": "Wait",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"waitTimeInSeconds": 30
-									}
-								}
-							],
-							"timeout": "7.00:00:00"
-						}
-					},
-					{
-						"name": "FilterToCurrentRefresh",
-						"type": "Filter",
-						"dependsOn": [
-							{
-								"activity": "GetAzureASRefreshes",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@json(activity('GetAzureASRefreshes').output.Response)",
-								"type": "Expression"
-							},
-							"condition": {
-								"value": "@greaterOrEquals(item().startTime,addseconds(activity('StartProcessingAzureAS').output.startTime,-30))",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "StartProcessingAzureAS",
-						"type": "WebActivity",
-						"dependsOn": [
-							{
-								"activity": "Login",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"url": {
-								"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes')",
-								"type": "Expression"
-							},
-							"method": "POST",
-							"headers": {
-								"Authorization": {
-									"value": "@concat(string(activity('Login').output.token_type),' ',string(activity('Login').output.access_token))",
-									"type": "Expression"
-								}
-							},
-							"body": {
-								"Type": "Full",
-								"CommitMode": "transactional",
-								"MaxParallelism": 10,
-								"RetryCount": 2
-							}
-						}
-					},
-					{
-						"name": "IfFailed",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "UntilRefreshComplete",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@equals(activity('GetAzureASRefreshStatus').output.status,'failed')",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "ThrowErrorOnFailure",
-									"type": "WebActivity",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"url": {
-											"value": "@string(activity('GetAzureASRefreshStatus').output)",
-											"type": "Expression"
-										},
-										"method": "GET",
-										"headers": {}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "GetAzureASRefreshes",
-						"type": "WebActivity",
-						"dependsOn": [
-							{
-								"activity": "StartProcessingAzureAS",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"url": {
-								"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes')",
-								"type": "Expression"
-							},
-							"method": "GET",
-							"headers": {
-								"Authorization": {
-									"value": "@concat(string(activity('Login').output.token_type),' ',string(activity('Login').output.access_token))",
-									"type": "Expression"
-								}
-							},
-							"body": {
-								"Type": "Full",
-								"CommitMode": "transactional",
-								"MaxParallelism": 10,
-								"RetryCount": 2
-							}
-						}
-					}
-				],
-				"parameters": {
-					"TenantID": {
-						"type": "String",
-						"defaultValue": "855f3711-2ce2-4c7e-af5b-a513f6f2ae6d"
-					},
-					"ClientID": {
-						"type": "String",
-						"defaultValue": "89ad5ef1-4924-43a2-9dca-37e65f827ef8"
-					},
-					"ClientSecret": {
-						"type": "String",
-						"defaultValue": "[QG2xdpLS5T1l9-/MoK-?ALgjk/Enf.-"
-					},
-					"SubscriptionID": {
-						"type": "String",
-						"defaultValue": "3ae58716-8913-4137-b029-844b270cb4a0"
-					},
-					"Region": {
-						"type": "String",
-						"defaultValue": "australiaeast"
-					},
-					"Server": {
-						"type": "String",
-						"defaultValue": "quueaprddaaas001"
-					},
-					"DatabaseName": {
-						"type": "String",
-						"defaultValue": "Temetra"
-					}
-				},
-				"folder": {
-					"name": "Azure AS"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ADF_LS_AKV')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "https://quu-ea-prd-da-key-vault.vault.azure.net/",
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('ADF_LS_AKV_properties_typeProperties_baseUrl')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ABLB_quueadadlslanding001')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"serviceEndpoint": "[parameters('LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ASQL_EDWDiscovery')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_ASQL_EDWDiscovery_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ASQL_EDWMart')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_ASQL_EDWMart_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ASQL_EDWTactical')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_ASQL_EDWTactical_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_FS_FTP')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "FtpServer",
-				"annotations": [],
-				"typeProperties": {
-					"host": "[parameters('LS_FS_FTP_properties_typeProperties_host')]",
-					"port": 21,
-					"enableSsl": false,
-					"enableServerCertificateValidation": false,
-					"authenticationType": "Anonymous"
-				},
-				"parameters": {
-					"Host": {
-						"type": "string",
-						"defaultValue": "ftp://ftp.bom.gov.au/"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SelfHostedRuntime')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "Self hosted runtime gateway nfujprd298",
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Cost_Summary_By_Region')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "usp_load_Cost_Summary_by_Region",
-						"description": "execute the stored procedure to reload the data into cost_summary_by_region table in tactical database",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[[dbo].[usp_load_Cost_Summary_by_Region]"
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_ASQL_EDWTactical",
-							"type": "LinkedServiceReference"
-						}
-					}
-				],
-				"folder": {
-					"name": "Cost_Summary_By_Region"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWTactical')]"
-			]
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_EDW_Mart_FinanceTransaction')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -1332,9 +897,7 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_EDW_Mart_WorkOrder')]",
@@ -2386,427 +1949,100 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]"
-			]
+			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Analysis_Service')]",
+			"name": "[concat(parameters('factoryName'), '/PL_WorkOrder_Model_Main')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "PL_Process_ssas_Model_Temetra",
-						"description": "Process Temetra Model analysis service",
+						"name": "PL_EDW_Mart_WorkOrder",
 						"type": "ExecutePipeline",
 						"dependsOn": [],
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
-								"referenceName": "PL_ProcessModel",
+								"referenceName": "PL_EDW_Mart_WorkOrder",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
 							"parameters": {
-								"TenantID": "855f3711-2ce2-4c7e-af5b-a513f6f2ae6d",
-								"ClientID": "89ad5ef1-4924-43a2-9dca-37e65f827ef8",
-								"ClientSecret": "[QG2xdpLS5T1l9-/MoK-?ALgjk/Enf.-",
-								"SubscriptionID": "3ae58716-8913-4137-b029-844b270cb4a0",
-								"Region": "australiaeast",
-								"Server": "quueaprddaaas001",
-								"DatabaseName": "Temetra"
+								"sourcename": "Ellipse9"
+							}
+						}
+					},
+					{
+						"name": "PL_WorkOrder_FinanceTransaction",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_EDW_Mart_WorkOrder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDW_Mart_FinanceTransaction",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sourcename": "Ellipse9"
 							}
 						}
 					}
 				],
 				"folder": {
-					"name": "Temetra"
+					"name": "WorkOrder-Model"
 				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_ProcessModel')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_EDW_Mart_WorkOrder')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_EDW_Mart_FinanceTransaction')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_FileExists')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
+			"name": "[concat(parameters('factoryName'), '/WorkOrder_DataModel_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"blobcontainer": {
-						"type": "string"
-					},
-					"blobfolderpath": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Framework"
-				},
+				"description": "updating dimensional work order tables in edw_mart",
 				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": {
-							"value": "@dataset().blobfolderpath",
-							"type": "Expression"
-						},
-						"container": {
-							"value": "@dataset().blobcontainer",
-							"type": "Expression"
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_WorkOrder_Model_Main",
+							"type": "PipelineReference"
 						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_FizeSize')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"container": {
-						"type": "string"
-					},
-					"directory": {
-						"type": "string"
-					},
-					"file": {
-						"type": "string"
 					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
+				],
+				"type": "ScheduleTrigger",
 				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@dataset().file",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().directory",
-							"type": "Expression"
-						},
-						"container": {
-							"value": "@dataset().container",
-							"type": "Expression"
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-07-28T06:52:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								23
+							]
 						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
+					}
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_Datalanding')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"FolderPath": {
-						"type": "string"
-					},
-					"TargetFileName": {
-						"type": "string"
-					},
-					"ColumnDelimiter": {
-						"type": "string",
-						"defaultValue": ","
-					},
-					"QuoteCharacter": {
-						"type": "string",
-						"defaultValue": "\""
-					}
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@dataset().TargetFileName",
-							"type": "Expression"
-						},
-						"container": {
-							"value": "@dataset().FolderPath",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": {
-						"value": "@dataset().ColumnDelimiter",
-						"type": "Expression"
-					},
-					"rowDelimiter": "\n",
-					"escapeChar": "º",
-					"quoteChar": {
-						"value": "@dataset().QuoteCharacter",
-						"type": "Expression"
-					}
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_Chris21_Sink')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"targetblobfoldername": {
-						"type": "string"
-					},
-					"targetblobfilename": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Chris21"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@dataset().targetblobfilename",
-							"type": "Expression"
-						},
-						"container": {
-							"value": "@dataset().targetblobfoldername",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"rowDelimiter": "\n",
-					"escapeChar": "\\",
-					"quoteChar": "¬"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_Dataloading')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"targetblobfoldername": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"container": {
-							"value": "@dataset().targetblobfoldername",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"rowDelimiter": "\n",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_SUMS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"targetblobfoldername": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "SUMS"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"container": {
-							"value": "@dataset().targetblobfoldername",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"rowDelimiter": "\n",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_TFS_Sink')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"targetblobfoldername": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Tanker Filling Station Card Services"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"container": {
-							"value": "@dataset().targetblobfoldername",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"rowDelimiter": "\n",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ASQL_EDWDiscovery')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ASQL_EDWDiscovery",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_WorkOrder_Model_Main')]"
 			]
 		}
 	]
