@@ -1,0 +1,81 @@
+{
+	"name": "PL_BOM_Forecast_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "BOM_Brisbane_Forecast",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/edw_discovery/BOM_Forecasts/BOM_Brisbane_Forecast"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_DBR_ADF_Job_Cluster",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"databricksclusterid": {
+							"value": "@pipeline().parameters.databricksclusterid",
+							"type": "Expression"
+						},
+						"databrickssecretname": {
+							"value": "@pipeline().parameters.databrickssecretname",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_BOM_Forecast_BlobToASQL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "BOM_Brisbane_Forecast",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_BOM_Forecast_BlobToASQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceName": {
+							"value": "@pipeline().parameters.SourceName",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "BOM-FORECAST"
+			},
+			"databricksclusterid": {
+				"type": "string",
+				"defaultValue": "0728-035305-bob49"
+			},
+			"databrickssecretname": {
+				"type": "string",
+				"defaultValue": "databricks2-token"
+			}
+		},
+		"folder": {
+			"name": "BOM"
+		},
+		"annotations": []
+	}
+}
