@@ -1,0 +1,37 @@
+{
+	"name": "Bom_Forecast_Daily_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_BOM_Forecast_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "BOM-FORECAST",
+					"databricksclusterid": "1015-043022-have239",
+					"databrickssecretname": "databricks-token"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 15,
+				"startTime": "2020-10-15T05:29:00.000Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						21
+					]
+				}
+			}
+		}
+	}
+}
