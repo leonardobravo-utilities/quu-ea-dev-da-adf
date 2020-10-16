@@ -83,6 +83,18 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "BOM-FORECAST"
+		},
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid": {
+			"type": "string",
+			"defaultValue": "1015-043022-have239"
+		},
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname": {
+			"type": "string",
+			"defaultValue": "databricks-token"
+		},
 		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "CHRIS21"
@@ -426,6 +438,15 @@
 					"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlyBlobtoASQL')]"
 					},
+					"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName": {
+						"value": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName')]"
+					},
+					"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid": {
+						"value": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid')]"
+					},
+					"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname": {
+						"value": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname')]"
+					},
 					"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName": {
 						"value": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName')]"
 					},
@@ -514,6 +535,26 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_4')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_6",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_6.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_5')]"
 			]
 		}
 	]
