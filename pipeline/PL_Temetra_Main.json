@@ -78,6 +78,29 @@
 						"param_load_type": "Incremental"
 					}
 				}
+			},
+			{
+				"name": "PL_Temetra_BlobToASQL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_Temetra_API_Call",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Temetra_BlobToASQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceName": "TEMETRA"
+					}
+				}
 			}
 		],
 		"parameters": {
