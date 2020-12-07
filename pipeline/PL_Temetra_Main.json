@@ -47,6 +47,37 @@
 						"SourceName": "TEMETRA-DEVICES"
 					}
 				}
+			},
+			{
+				"name": "PL_Temetra_API_Call",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_Temetra_devices",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Temetra_API_Call",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"databricks_cluster_id": {
+							"value": "@pipeline().parameters.databricks_cluster_id",
+							"type": "Expression"
+						},
+						"databricks_secret_name": {
+							"value": "@pipeline().parameters.databricks_secret_name",
+							"type": "Expression"
+						},
+						"param_load_type": "Incremental"
+					}
+				}
 			}
 		],
 		"parameters": {
