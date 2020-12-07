@@ -16,7 +16,13 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/edw_discovery/Temetra/Temetra_Hourly_Consumption"
+					"notebookPath": "/edw_discovery/Temetra/4_Temetra_Hourly_Consumption",
+					"baseParameters": {
+						"Load_Type": {
+							"value": "@pipeline().parameters.Load_Type",
+							"type": "Expression"
+						}
+					}
 				},
 				"linkedServiceName": {
 					"referenceName": "LS_DBR_ADF_Job_Cluster",
