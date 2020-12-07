@@ -101,6 +101,37 @@
 						"SourceName": "TEMETRA"
 					}
 				}
+			},
+			{
+				"name": "PL_Temetra_Hourly_Consumption",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_Temetra_BlobToASQL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Temetra_Hourly_Consumption",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"databricks_cluster_id": {
+							"value": "@pipeline().parameters.databricks_cluster_id",
+							"type": "Expression"
+						},
+						"databricks_secret_name": {
+							"value": "@pipeline().parameters.databricks_secret_name",
+							"type": "Expression"
+						},
+						"Load_Type": "Incremental"
+					}
+				}
 			}
 		],
 		"parameters": {
