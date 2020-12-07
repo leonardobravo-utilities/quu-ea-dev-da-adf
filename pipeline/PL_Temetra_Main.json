@@ -1,6 +1,21 @@
 {
 	"name": "PL_Temetra_Main",
 	"properties": {
+		"activities": [
+			{
+				"name": "PL_Temetra_DeviceList_Generate",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Temetra_DeviceList_Generate",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
 		"parameters": {
 			"databricks_cluster_id": {
 				"type": "string",
