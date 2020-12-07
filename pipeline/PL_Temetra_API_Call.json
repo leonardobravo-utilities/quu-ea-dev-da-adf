@@ -13,7 +13,32 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/edw_discovery/Temetra/3_Temetra_API_Response_Management",
+					"baseParameters": {
+						"Load_Type": {
+							"value": "@pipeline().parameters.param_load_type",
+							"type": "Expression"
+						},
+						"InitialStartDate": {
+							"value": "@pipeline().parameters.param_startdate",
+							"type": "Expression"
+						},
+						"InitialEndDate": {
+							"value": "@pipeline().parameters.param_enddate",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_DBR_ADF_Job_Cluster",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"databricksclusterid": "0417-051914-axons909",
+						"databrickssecretname": "databricks-token"
+					}
+				}
 			}
 		],
 		"parameters": {
