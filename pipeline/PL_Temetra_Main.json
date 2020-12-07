@@ -24,6 +24,29 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "PL_Temetra_devices",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_Temetra_DeviceList_Generate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Temetra_devices",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceName": "TEMETRA-DEVICES"
+					}
+				}
 			}
 		],
 		"parameters": {
