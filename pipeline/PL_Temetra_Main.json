@@ -12,7 +12,17 @@
 						"referenceName": "PL_Temetra_DeviceList_Generate",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"databricks_cluster_id": {
+							"value": "@pipeline().parameters.databricks_cluster_id",
+							"type": "Expression"
+						},
+						"databricks_secret_name": {
+							"value": "@pipeline().parameters.databricks_secret_name",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],
