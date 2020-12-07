@@ -1,6 +1,21 @@
 {
 	"name": "PL_Temetra_API_Call",
 	"properties": {
+		"activities": [
+			{
+				"name": "3_Temetra_API_Response_Management",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": []
+			}
+		],
 		"parameters": {
 			"databricks_cluster_id": {
 				"type": "string",
