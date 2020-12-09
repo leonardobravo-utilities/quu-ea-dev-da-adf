@@ -90,7 +90,25 @@
 				"outputs": [
 					{
 						"referenceName": "DS_ABLB_Temetra_Geospatial_Sink",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"FolderPath": {
+								"value": "@activity('lkp_getfilemetadata').output.Firstrow['TargetBlobFilePath']",
+								"type": "Expression"
+							},
+							"TargetFileName": {
+								"value": "@activity('lkp_getfilemetadata').output.Firstrow['TargetBlobFileName']",
+								"type": "Expression"
+							},
+							"ColumnDelimiter": {
+								"value": "@activity('lkp_getfilemetadata').output.Firstrow['ColumnDelimiter']",
+								"type": "Expression"
+							},
+							"QuoteCharacter": {
+								"value": "@activity('lkp_getfilemetadata').output.Firstrow['QuoteCharacter']",
+								"type": "Expression"
+							}
+						}
 					}
 				]
 			}
