@@ -137,6 +137,40 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "01_Temetra_GIS_Spatial_Linkage",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "PL_Temetra_BlobToASQL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "LS_DBR_ADF_Job_Cluster",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"databricksclusterid": {
+							"value": "@pipeline().parameters.databricks_cluster_id",
+							"type": "Expression"
+						},
+						"databrickssecretname": {
+							"value": "@pipeline().parameters.databricks_secret_name",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
