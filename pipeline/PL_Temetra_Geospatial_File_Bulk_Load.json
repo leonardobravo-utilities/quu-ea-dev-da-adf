@@ -111,6 +111,32 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "PL_Temetra_BlobToASQL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Copy_Geospatial_File_From_API_EndPoint",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Temetra_BlobToASQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceName": {
+							"value": "@pipeline().parameters.sourcename",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
