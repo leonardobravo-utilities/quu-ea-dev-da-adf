@@ -1,0 +1,27 @@
+{
+	"name": "LS_HTTPS_Temetra_Geospatial_API_EndPoint",
+	"properties": {
+		"description": "This is the temetra geospatial API Endpoint for the bulk load. This endpoint will download a csv file.",
+		"parameters": {
+			"temetra_api_endpoint": {
+				"type": "string",
+				"defaultValue": "https://au.temetra.com/api//file"
+			},
+			"networkmeterload": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"auth_token": {
+				"type": "string",
+				"defaultValue": "1c4be2ef9009863ac5c9af1b55051a"
+			}
+		},
+		"annotations": [],
+		"type": "HttpServer",
+		"typeProperties": {
+			"url": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		}
+	}
+}
