@@ -235,6 +235,10 @@
 			"type": "string",
 			"defaultValue": "databricks-token"
 		},
+		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -279,6 +283,9 @@
 					},
 					"LS_FS_FTP_properties_typeProperties_host": {
 						"value": "[parameters('LS_FS_FTP_properties_typeProperties_host')]"
+					},
+					"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
+						"value": "[parameters('LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url')]"
 					}
 				}
 			},
@@ -473,6 +480,26 @@
 					},
 					"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_4')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_6",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_6.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name": {
 						"value": "[parameters('LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name')]"
@@ -503,26 +530,6 @@
 					},
 					"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_4')]"
-			]
-		},
-		{
-			"name": "quu-ea-prd-da-adf-001_ArmTemplate_6",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_6.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
 						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName')]"

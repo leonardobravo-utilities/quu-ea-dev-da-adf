@@ -234,6 +234,10 @@
 		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
 			"type": "string",
 			"defaultValue": "databricks-token"
+		},
+		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
 		}
 	},
 	"variables": {
@@ -15248,6 +15252,82 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_API_Call')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "3_Temetra_API_Response_Management",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/Temetra/3_Temetra_API_Response_Management",
+							"baseParameters": {
+								"Load_Type": {
+									"value": "@pipeline().parameters.param_load_type",
+									"type": "Expression"
+								},
+								"InitialStartDate": {
+									"value": "@pipeline().parameters.param_startdate",
+									"type": "Expression"
+								},
+								"InitialEndDate": {
+									"value": "@pipeline().parameters.param_enddate",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": "0417-051914-axons909",
+								"databrickssecretname": "databricks-token"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"databricks_cluster_id": {
+						"type": "string",
+						"defaultValue": "0417-051914-axons909"
+					},
+					"databricks_secret_name": {
+						"type": "string",
+						"defaultValue": "databricks-token"
+					},
+					"param_load_type": {
+						"type": "string",
+						"defaultValue": "Incremental"
+					},
+					"param_startdate": {
+						"type": "string",
+						"defaultValue": "20200101"
+					},
+					"param_enddate": {
+						"type": "string",
+						"defaultValue": "20201231"
+					}
+				},
+				"folder": {
+					"name": "Temetra"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_Temetra_API_Response')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -15532,6 +15612,169 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "PL_Temetra_DeviceList_Generate",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_DeviceList_Generate",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"databricks_cluster_id": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databricks_secret_name": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "PL_Temetra_devices",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_Temetra_DeviceList_Generate",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_devices",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": "TEMETRA-DEVICES"
+							}
+						}
+					},
+					{
+						"name": "PL_Temetra_API_Call",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_Temetra_devices",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_API_Call",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"databricks_cluster_id": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databricks_secret_name": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								},
+								"param_load_type": "Incremental",
+								"param_startdate": "20200101",
+								"param_enddate": "20201231"
+							}
+						}
+					},
+					{
+						"name": "PL_Temetra_BlobToASQL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_Temetra_API_Call",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_BlobToASQL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": "TEMETRA"
+							}
+						}
+					},
+					{
+						"name": "PL_Temetra_Hourly_Consumption",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_Temetra_BlobToASQL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_Hourly_Consumption",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"databricks_cluster_id": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databricks_secret_name": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								},
+								"Load_Type": "Incremental"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"databricks_cluster_id": {
+						"type": "string",
+						"defaultValue": "0417-051914-axons909"
+					},
+					"databricks_secret_name": {
+						"type": "string",
+						"defaultValue": "databricks-token"
+					}
+				},
+				"folder": {
+					"name": "Temetra"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_DeviceList_Generate')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_devices')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_API_Call')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_BlobToASQL')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_Hourly_Consumption')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Main_old')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -15772,6 +16015,84 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_devices')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExecutePL_TRFM_BLOBToASQL",
+						"description": "Loading Temetra API Data into databricks delta and Azure sql db",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceID": {
+									"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "TEMETRA-DEVICES"
+					}
+				},
+				"folder": {
+					"name": "Temetra"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]"
 			]
 		},
 		{
@@ -18177,203 +18498,13 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Main')]",
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Geospatial_File_Bulk_Load')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "PL_Temetra_DeviceList_Generate",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_DeviceList_Generate",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"databricks_cluster_id": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databricks_secret_name": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "PL_Temetra_devices",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_DeviceList_Generate",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_devices",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"SourceName": "TEMETRA-DEVICES"
-							}
-						}
-					},
-					{
-						"name": "PL_Temetra_API_Call",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_devices",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_API_Call",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"databricks_cluster_id": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databricks_secret_name": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								},
-								"param_load_type": "Incremental",
-								"param_startdate": "20200101",
-								"param_enddate": "20201231"
-							}
-						}
-					},
-					{
-						"name": "PL_Temetra_BlobToASQL",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_API_Call",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_BlobToASQL",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"SourceName": "TEMETRA"
-							}
-						}
-					},
-					{
-						"name": "PL_Temetra_Hourly_Consumption",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_BlobToASQL",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_Hourly_Consumption",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"databricks_cluster_id": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databricks_secret_name": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								},
-								"Load_Type": "Incremental"
-							}
-						}
-					}
-				],
-				"parameters": {
-					"databricks_cluster_id": {
-						"type": "string",
-						"defaultValue": "0417-051914-axons909"
-					},
-					"databricks_secret_name": {
-						"type": "string",
-						"defaultValue": "databricks-token"
-					}
-				},
-				"folder": {
-					"name": "Temetra"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_DeviceList_Generate')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_devices')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_API_Call')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_BlobToASQL')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_Hourly_Consumption')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Temetra_devices')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "ExecutePL_TRFM_BLOBToASQL",
-						"description": "Loading Temetra API Data into databricks delta and Azure sql db",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "GetSourceID",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"SourceID": {
-									"value": "@activity('GetSourceID').output.firstRow['SourceID']",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "GetSourceID",
+						"name": "lkp_getfilemetadata",
 						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
@@ -18388,9 +18519,10 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderQuery": {
-									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"value": "SELECT t.TargetBlobFilePath\n            ,t.TargetBlobFileName + '-' + cast(convert(date,[dbo].[udf_getLocalDTM](),121) as  \n varchar(10)) +  t.targetBlobFileNameExt AS targetBlobFileName\n            ,t.TargetBlobContainer\n            ,t.ColumnDelimiter\n            ,t.QuoteCharacter\nFROM ETL.SourceSystem S  \nInner join ETL.SourceTableDetails T\n ON S.SourceID = T.SourceID\nWHERE S.SourceName =  '@{pipeline().parameters.sourcename}'\nand lower(SourceTableName)='geospatial_devices'",
 									"type": "Expression"
 								},
+								"queryTimeout": "02:00:00",
 								"partitionOption": "None"
 							},
 							"dataset": {
@@ -18399,89 +18531,166 @@
 								"parameters": {}
 							}
 						}
-					}
-				],
-				"parameters": {
-					"SourceName": {
-						"type": "string",
-						"defaultValue": "TEMETRA-DEVICES"
-					}
-				},
-				"folder": {
-					"name": "Temetra"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Temetra_API_Call')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
+					},
 					{
-						"name": "3_Temetra_API_Response_Management",
-						"type": "DatabricksNotebook",
-						"dependsOn": [],
+						"name": "Copy_Geospatial_File_From_API_EndPoint",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "lkp_getfilemetadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "7.00:00:00",
-							"retry": 1,
+							"retry": 0,
 							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"notebookPath": "/edw_discovery/Temetra/3_Temetra_API_Response_Management",
-							"baseParameters": {
-								"Load_Type": {
-									"value": "@pipeline().parameters.param_load_type",
-									"type": "Expression"
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "HttpReadSettings",
+									"requestMethod": "GET"
 								},
-								"InitialStartDate": {
-									"value": "@pipeline().parameters.param_startdate",
-									"type": "Expression"
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
 								},
-								"InitialEndDate": {
-									"value": "@pipeline().parameters.param_enddate",
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_Temetra_Geospatial_Meters_Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ABLB_Temetra_Geospatial_Sink",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderPath": {
+										"value": "@activity('lkp_getfilemetadata').output.Firstrow['TargetBlobFilePath']",
+										"type": "Expression"
+									},
+									"TargetFileName": {
+										"value": "@activity('lkp_getfilemetadata').output.Firstrow['TargetBlobFileName']",
+										"type": "Expression"
+									},
+									"ColumnDelimiter": {
+										"value": "@activity('lkp_getfilemetadata').output.Firstrow['ColumnDelimiter']",
+										"type": "Expression"
+									},
+									"QuoteCharacter": {
+										"value": "@activity('lkp_getfilemetadata').output.Firstrow['QuoteCharacter']",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "PL_Temetra_BlobToASQL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Copy_Geospatial_File_From_API_EndPoint",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_BlobToASQL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": {
+									"value": "@pipeline().parameters.sourcename",
 									"type": "Expression"
 								}
 							}
+						}
+					},
+					{
+						"name": "01_Temetra_GIS_Spatial_Linkage",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "PL_Temetra_BlobToASQL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/Temetra/01_Temetra_GIS_Spatial_Linkage"
 						},
 						"linkedServiceName": {
 							"referenceName": "LS_DBR_ADF_Job_Cluster",
 							"type": "LinkedServiceReference",
 							"parameters": {
-								"databricksclusterid": "0417-051914-axons909",
-								"databrickssecretname": "databricks-token"
+								"databricksclusterid": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								}
 							}
 						}
 					}
 				],
 				"parameters": {
+					"sourcename": {
+						"type": "string",
+						"defaultValue": "TEMETRA-GEOSPATIAL-DEVICES"
+					},
 					"databricks_cluster_id": {
 						"type": "string",
-						"defaultValue": "0417-051914-axons909"
+						"defaultValue": "1209-000519-adds90"
 					},
 					"databricks_secret_name": {
 						"type": "string",
 						"defaultValue": "databricks-token"
-					},
-					"param_load_type": {
-						"type": "string",
-						"defaultValue": "Incremental"
-					},
-					"param_startdate": {
-						"type": "string",
-						"defaultValue": "20200101"
-					},
-					"param_enddate": {
-						"type": "string",
-						"defaultValue": "20201231"
 					}
 				},
 				"folder": {
@@ -18490,7 +18699,130 @@
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Temetra_Geospatial_Meters_Source')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ABLB_Temetra_Geospatial_Sink')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_BlobToASQL')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_HTTPS_Temetra_Geospatial_API_EndPoint')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This is the temetra geospatial API Endpoint for the bulk load. This endpoint will download a csv file.",
+				"parameters": {
+					"temetra_api_endpoint": {
+						"type": "string",
+						"defaultValue": "https://au.temetra.com/api//file"
+					},
+					"networkmeterload": {
+						"type": "string",
+						"defaultValue": "1"
+					},
+					"auth_token": {
+						"type": "string",
+						"defaultValue": "1c4be2ef9009863ac5c9af1b55051a"
+					}
+				},
+				"annotations": [],
+				"type": "HttpServer",
+				"typeProperties": {
+					"url": "[parameters('LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Temetra_Geospatial_Meters_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_HTTPS_Temetra_Geospatial_API_EndPoint",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"temetra_api_endpoint": "https://au.temetra.com/api//file",
+						"networkmeterload": "1",
+						"auth_token": "1c4be2ef9009863ac5c9af1b55051a"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation"
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\"",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_HTTPS_Temetra_Geospatial_API_EndPoint')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_Temetra_Geospatial_Sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"TargetFileName": {
+						"type": "string"
+					},
+					"ColumnDelimiter": {
+						"type": "string",
+						"defaultValue": ","
+					},
+					"QuoteCharacter": {
+						"type": "string",
+						"defaultValue": "\""
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().TargetFileName",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().FolderPath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().ColumnDelimiter",
+						"type": "Expression"
+					},
+					"rowDelimiter": "\n",
+					"escapeChar": "º",
+					"firstRowAsHeader": true,
+					"quoteChar": {
+						"value": "@dataset().QuoteCharacter",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
 			]
 		}
 	]

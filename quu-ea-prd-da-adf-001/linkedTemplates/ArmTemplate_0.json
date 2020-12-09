@@ -30,6 +30,10 @@
 		"LS_FS_FTP_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "@{linkedService().Host}"
+		},
+		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
 		}
 	},
 	"variables": {
@@ -407,6 +411,36 @@
 				"type": "SelfHosted",
 				"description": "Self hosted runtime gateway nfujprd298",
 				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_HTTPS_Temetra_Geospatial_API_EndPoint')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This is the temetra geospatial API Endpoint for the bulk load. This endpoint will download a csv file.",
+				"parameters": {
+					"temetra_api_endpoint": {
+						"type": "string",
+						"defaultValue": "https://au.temetra.com/api//file"
+					},
+					"networkmeterload": {
+						"type": "string",
+						"defaultValue": "1"
+					},
+					"auth_token": {
+						"type": "string",
+						"defaultValue": "1c4be2ef9009863ac5c9af1b55051a"
+					}
+				},
+				"annotations": [],
+				"type": "HttpServer",
+				"typeProperties": {
+					"url": "[parameters('LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
 			},
 			"dependsOn": []
 		},
@@ -2786,27 +2820,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ASQL_EDWDiscovery')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ASQL_EDWDiscovery",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
 			]
 		}
 	]
