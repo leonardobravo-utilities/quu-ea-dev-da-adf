@@ -44,6 +44,9 @@
 		"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
 			"value": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
+		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
+			"value": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
+		},
 		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
 			"value": "ellipse-analytics-connection-string"
 		},
@@ -175,9 +178,6 @@
 		},
 		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
 			"value": "databricks-token"
-		},
-		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
-			"value": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
 		}
 	}
 }

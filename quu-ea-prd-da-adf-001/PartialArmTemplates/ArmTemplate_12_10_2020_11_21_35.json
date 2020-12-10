@@ -1,0 +1,217 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "quu-ea-prd-da-adf-001"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Geospatial_File_Bulk_Load')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "lkp_getfilemetadata",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT t.TargetBlobFilePath\n            ,t.TargetBlobFileName + '-' + cast(convert(date,[dbo].[udf_getLocalDTM](),121) as  \n varchar(10)) +  t.targetBlobFileNameExt AS targetBlobFileName\n            ,t.TargetBlobContainer\n            ,t.ColumnDelimiter\n            ,t.QuoteCharacter\nFROM ETL.SourceSystem S  \nInner join ETL.SourceTableDetails T\n ON S.SourceID = T.SourceID\nWHERE S.SourceName =  '@{pipeline().parameters.sourcename}'\nand lower(SourceTableName)='geospatial_devices'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference"
+							}
+						}
+					},
+					{
+						"name": "Copy_Geospatial_File_From_API_EndPoint",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "lkp_getfilemetadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "HttpReadSettings",
+									"requestMethod": "GET"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_Temetra_Geospatial_Meters_Source",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ABLB_Temetra_Geospatial_Sink",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderPath": {
+										"value": "@activity('lkp_getfilemetadata').output.Firstrow['TargetBlobFilePath']",
+										"type": "Expression"
+									},
+									"TargetFileName": {
+										"value": "@activity('lkp_getfilemetadata').output.Firstrow['TargetBlobFileName']",
+										"type": "Expression"
+									},
+									"ColumnDelimiter": {
+										"value": "@activity('lkp_getfilemetadata').output.Firstrow['ColumnDelimiter']",
+										"type": "Expression"
+									},
+									"QuoteCharacter": {
+										"value": "@activity('lkp_getfilemetadata').output.Firstrow['QuoteCharacter']",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "PL_Temetra_BlobToASQL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Copy_Geospatial_File_From_API_EndPoint",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_BlobToASQL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": {
+									"value": "@pipeline().parameters.sourcename",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "01_Temetra_GIS_Spatial_Linkage",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "PL_Temetra_BlobToASQL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/Temetra/01_Temetra_GIS_Spatial_Linkage"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"parameters": {
+					"sourcename": {
+						"type": "string",
+						"defaultValue": "TEMETRA-GEOSPATIAL-DEVICES"
+					},
+					"databricks_cluster_id": {
+						"type": "string",
+						"defaultValue": "1210-010752-knack200"
+					},
+					"databricks_secret_name": {
+						"type": "string",
+						"defaultValue": "databricks-token"
+					}
+				},
+				"folder": {
+					"name": "Temetra"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		}
+	]
+}
