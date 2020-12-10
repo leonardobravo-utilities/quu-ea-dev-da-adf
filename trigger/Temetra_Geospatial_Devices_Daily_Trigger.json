@@ -1,0 +1,37 @@
+{
+	"name": "Temetra_Geospatial_Devices_Daily_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Temetra_Geospatial_File_Bulk_Load",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"sourcename": "TEMETRA-GEOSPATIAL-DEVICES",
+					"databricks_cluster_id": "1210-010752-knack200",
+					"databricks_secret_name": "databricks-token"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2020-12-09T01:42:00Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						15
+					],
+					"hours": [
+						16
+					]
+				}
+			}
+		}
+	}
+}
