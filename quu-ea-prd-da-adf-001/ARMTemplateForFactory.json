@@ -15967,7 +15967,7 @@
 									"value": "@pipeline().parameters.databricks_secret_name",
 									"type": "Expression"
 								},
-								"Load_Type": "Incremental"
+								"Load_Type": "Full"
 							}
 						}
 					}
@@ -18788,6 +18788,48 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Temetra_Geospatial_Devices_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Temetra_Geospatial_File_Bulk_Load",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"sourcename": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_sourcename')]",
+							"databricks_cluster_id": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_cluster_id')]",
+							"databricks_secret_name": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_secret_name')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-12-09T01:42:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								15
+							],
+							"hours": [
+								16
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_Geospatial_File_Bulk_Load')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/WorkOrder_DataModel_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -18836,48 +18878,6 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Temetra_Geospatial_Devices_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_Temetra_Geospatial_File_Bulk_Load",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"sourcename": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_sourcename')]",
-							"databricks_cluster_id": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_cluster_id')]",
-							"databricks_secret_name": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_secret_name')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-12-09T01:42:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								15
-							],
-							"hours": [
-								16
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_Temetra_Geospatial_File_Bulk_Load')]"
-			]
 		}
 	]
 }
