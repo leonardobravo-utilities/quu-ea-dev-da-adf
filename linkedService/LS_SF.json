@@ -1,0 +1,27 @@
+{
+	"name": "LS_SF",
+	"properties": {
+		"annotations": [],
+		"type": "Salesforce",
+		"typeProperties": {
+			"environmentUrl": "https://login.salesforce.com",
+			"username": "analytics-support@urbanutilities.com.au",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ADF_LS_AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "salesforce-prod-analytics-support-password"
+			},
+			"securityToken": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ADF_LS_AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "salesforce-prod-analytics-support-securitytoken"
+			}
+		}
+	}
+}
