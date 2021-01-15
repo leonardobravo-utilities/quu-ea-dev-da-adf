@@ -1,0 +1,179 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "quu-ea-prd-da-adf-001"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "PL_Temetra_DeviceList_Generate",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_DeviceList_Generate",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"databricks_cluster_id": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databricks_secret_name": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "PL_Temetra_devices",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_Temetra_DeviceList_Generate",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_devices",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": "TEMETRA-DEVICES"
+							}
+						}
+					},
+					{
+						"name": "PL_Temetra_API_Call",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_Temetra_devices",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_API_Call",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"databricks_cluster_id": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databricks_secret_name": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								},
+								"param_load_type": "Incremental",
+								"param_startdate": {
+									"value": "@formatDateTime(subtractFromTime(convertTimeZone(utcnow(),'UTC','E. Australia Standard Time'),1,'Day'),'yyyyMMdd')",
+									"type": "Expression"
+								},
+								"param_enddate": {
+									"value": "@formatDateTime(convertTimeZone(utcnow(),'UTC','E. Australia Standard Time'),'yyyyMMdd')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "PL_Temetra_BlobToASQL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_Temetra_API_Call",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_BlobToASQL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": "TEMETRA"
+							}
+						}
+					},
+					{
+						"name": "PL_Temetra_Hourly_Consumption",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_Temetra_BlobToASQL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Temetra_Hourly_Consumption",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"databricks_cluster_id": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databricks_secret_name": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								},
+								"Load_Type": "Full"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"databricks_cluster_id": {
+						"type": "string",
+						"defaultValue": "0417-051914-axons909"
+					},
+					"databricks_secret_name": {
+						"type": "string",
+						"defaultValue": "databricks-token"
+					}
+				},
+				"folder": {
+					"name": "Temetra"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		}
+	]
+}

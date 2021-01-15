@@ -1427,8 +1427,14 @@
 									"type": "Expression"
 								},
 								"param_load_type": "Incremental",
-								"param_startdate": "20200101",
-								"param_enddate": "20201231"
+								"param_startdate": {
+									"value": "@formatDateTime(subtractFromTime(convertTimeZone(utcnow(),'UTC','E. Australia Standard Time'),1,'Day'),'yyyyMMdd')",
+									"type": "Expression"
+								},
+								"param_enddate": {
+									"value": "@formatDateTime(convertTimeZone(utcnow(),'UTC','E. Australia Standard Time'),'yyyyMMdd')",
+									"type": "Expression"
+								}
 							}
 						}
 					},
