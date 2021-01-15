@@ -63,6 +63,14 @@
 			"type": "string",
 			"defaultValue": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
 		},
+		"LS_SF_properties_typeProperties_environmentUrl": {
+			"type": "string",
+			"defaultValue": "https://login.salesforce.com"
+		},
+		"LS_SF_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "analytics-support@urbanutilities.com.au"
+		},
 		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "ellipse-analytics-connection-string"
@@ -338,6 +346,12 @@
 					"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
 						"value": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_userId')]"
 					},
+					"LS_SF_properties_typeProperties_environmentUrl": {
+						"value": "[parameters('LS_SF_properties_typeProperties_environmentUrl')]"
+					},
+					"LS_SF_properties_typeProperties_username": {
+						"value": "[parameters('LS_SF_properties_typeProperties_username')]"
+					},
 					"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName')]"
 					},
@@ -447,6 +461,26 @@
 					},
 					"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
 						"value": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_4')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_6",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_6.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
 						"value": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName')]"
@@ -492,26 +526,6 @@
 					},
 					"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_4')]"
-			]
-		},
-		{
-			"name": "quu-ea-prd-da-adf-001_ArmTemplate_6",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_6.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name": {
 						"value": "[parameters('LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name')]"
