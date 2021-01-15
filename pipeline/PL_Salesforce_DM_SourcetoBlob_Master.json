@@ -1,0 +1,132 @@
+{
+	"name": "PL_Salesforce_DM_SourcetoBlob_Master",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetSourceID",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select SourceID FROM etl.SourceSystem where \nSourceName='@{pipeline().parameters.Source_Name}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "CheckSourceToBlobInd",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "GetSourceID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.SourceToBlob,true)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute_Salesforce_DM_SourceToBlob",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_SalesForce",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "CheckBlobtoAsqlInd",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "CheckSourceToBlobInd",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.BlobtoAsql,true)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute_Salesforce_TRFM_BlobToASQL",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Source_Name": {
+				"type": "string",
+				"defaultValue": "SalesForce"
+			},
+			"SourceToBlob": {
+				"type": "bool",
+				"defaultValue": true
+			},
+			"BlobtoAsql": {
+				"type": "bool",
+				"defaultValue": true
+			}
+		},
+		"folder": {
+			"name": "Salesforce"
+		},
+		"annotations": []
+	}
+}
