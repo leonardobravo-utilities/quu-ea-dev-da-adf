@@ -1,0 +1,40 @@
+{
+	"name": "GIS_SD_REFERENCE_Daily_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_GIS_Source_To_ASQL_Oracle",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "GIS_Oracle_SD_REFERENCE",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2021-01-20T20:00:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						20
+					],
+					"weekDays": [
+						"Sunday"
+					]
+				}
+			}
+		}
+	}
+}

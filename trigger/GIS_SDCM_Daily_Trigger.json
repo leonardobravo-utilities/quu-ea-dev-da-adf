@@ -1,0 +1,37 @@
+{
+	"name": "GIS_SDCM_Daily_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_GIS_Source_To_ASQL_SQLServer",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "GIS_SQLServer_SDCM_SQL",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2021-01-20T19:00:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						19
+					]
+				}
+			}
+		}
+	}
+}
