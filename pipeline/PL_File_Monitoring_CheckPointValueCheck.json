@@ -1,0 +1,66 @@
+{
+	"name": "PL_File_Monitoring_CheckPointValueCheck",
+	"properties": {
+		"activities": [
+			{
+				"name": "Check the checkpoint value",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@lessOrEquals(pipeline().parameters.CheckpointTableValue,pipeline().parameters.CheckpointFileLoadValue)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Send email",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "https://prod-24.australiaeast.logic.azure.com:443/workflows/dc9e1df8aa2e45808aacf97f550a7599/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=xQCVGhMPOjEYrG7FImPoWprQJPEtC5I_9OV0LOzMWyI",
+								"method": "POST",
+								"headers": {
+									"Content-Type": "application/json"
+								},
+								"body": {
+									"value": "{\"DataFactoryName\":\"@{pipeline().DataFactory}\",\"PipelineName\":\"@{pipeline().Pipeline}\",\"Subject\":\"@{pipeline().parameters.Subject}\",\"ErrorMessage\":\"@{pipeline().parameters.ErrorMessage}\",\"EmailTo\":\"@{pipeline().parameters.EmailTo}\"}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"CheckpointTableValue": {
+				"type": "string"
+			},
+			"CheckpointFileLoadValue": {
+				"type": "string"
+			},
+			"ErrorMessage": {
+				"type": "string"
+			},
+			"EmailTo": {
+				"type": "string"
+			},
+			"Subject": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Source File Monitoring"
+		},
+		"annotations": []
+	}
+}

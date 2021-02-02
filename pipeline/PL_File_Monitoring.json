@@ -1,0 +1,357 @@
+{
+	"name": "PL_File_Monitoring",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup source files",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup source files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup source files').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Get Metadata",
+							"description": "check if any files need to process in the blob container",
+							"type": "GetMetadata",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"fieldList": [
+									"exists",
+									"lastModified"
+								],
+								"storeSettings": {
+									"type": "FileServerReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "Check if file exists",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Get Metadata",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@activity('Get Metadata').output.exists",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "Send email file not received",
+										"type": "WebActivity",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"url": "https://prod-24.australiaeast.logic.azure.com:443/workflows/dc9e1df8aa2e45808aacf97f550a7599/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=xQCVGhMPOjEYrG7FImPoWprQJPEtC5I_9OV0LOzMWyI",
+											"method": "POST",
+											"body": {
+												"value": "{\n   \"DataFactoryName\": \"@{pipeline().DataFactory}\",\n   \"PipelineName\": \"@{pipeline().Pipeline}\",\n   \"Subject\": \"@{pipeline().parameters.Subject}\",\n   \"ErrorMessage\": \" File @{item().TargetFileName}  is not received\",\n   \"EmailTo\": \"@{pipeline().parameters.EmailTo}\"\n}\t",
+												"type": "Expression"
+											}
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "Set File Name",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "FileName",
+											"value": {
+												"value": "@string(item().TargetFileName)",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Retrieve File Size",
+										"type": "GetMetadata",
+										"dependsOn": [
+											{
+												"activity": "Set File Name",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"fieldList": [
+												"size"
+											],
+											"storeSettings": {
+												"type": "FileServerReadSettings",
+												"recursive": true
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										}
+									},
+									{
+										"name": "Set File Size",
+										"description": "Assign the file size value to the variable",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Retrieve File Size",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "FileSize",
+											"value": {
+												"value": "@string(activity('Retrieve File Size').output.Size)",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Retrieve File Modification Date",
+										"type": "GetMetadata",
+										"dependsOn": [
+											{
+												"activity": "Set File Name",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"fieldList": [
+												"lastModified"
+											],
+											"storeSettings": {
+												"type": "FileServerReadSettings",
+												"recursive": true
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										}
+									},
+									{
+										"name": "Set LastModified Date",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Retrieve File Modification Date",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "LastModifiedDate",
+											"value": {
+												"value": "@string(convertfromUtc(activity('Retrieve File Modification Date').output.LastModified,'E. Australia Standard Time'))",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Execute Pipeline for File size check",
+										"type": "ExecutePipeline",
+										"dependsOn": [
+											{
+												"activity": "Set File Size",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"waitOnCompletion": true,
+											"parameters": {
+												"FileSize": {
+													"value": "@variables('FileSize')",
+													"type": "Expression"
+												},
+												"Subject": {
+													"value": "@pipeline().parameters.Subject",
+													"type": "Expression"
+												},
+												"FileName": {
+													"value": "@variables('FileName')",
+													"type": "Expression"
+												},
+												"EmailTo": {
+													"value": "@pipeline().parameters.EmailTo",
+													"type": "Expression"
+												}
+											}
+										}
+									},
+									{
+										"name": "Execute Pipeline for Lastmodified check",
+										"type": "ExecutePipeline",
+										"dependsOn": [
+											{
+												"activity": "Set LastModified Date",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"waitOnCompletion": true,
+											"parameters": {
+												"LastModifiedDate": {
+													"value": "@variables('LastModifiedDate')",
+													"type": "Expression"
+												},
+												"Subject": {
+													"value": "@pipeline().parameters.Subject",
+													"type": "Expression"
+												},
+												"LastLoadedDate": {
+													"value": "@ITEM().LastLoadedDate",
+													"type": "Expression"
+												},
+												"FileName": {
+													"value": "@variables('FileName')",
+													"type": "Expression"
+												},
+												"EmailTo": {
+													"value": "@pipeline().parameters.EmailTo",
+													"type": "Expression"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Sourcename": {
+				"type": "string",
+				"defaultValue": "CHRIS21"
+			},
+			"Subject": {
+				"type": "string",
+				"defaultValue": "Chris21"
+			},
+			"ErrorMessageFileNotReceived": {
+				"type": "string",
+				"defaultValue": "File not received"
+			},
+			"EmailTo": {
+				"type": "string",
+				"defaultValue": "Vinayak.Khoje@urbanutilities.com.au"
+			}
+		},
+		"variables": {
+			"OldFile": {
+				"type": "Array"
+			},
+			"FileSize": {
+				"type": "String"
+			},
+			"LastModifiedDate": {
+				"type": "String"
+			},
+			"EmptyFile": {
+				"type": "Array"
+			},
+			"FileName": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Source File Monitoring"
+		},
+		"annotations": []
+	}
+}

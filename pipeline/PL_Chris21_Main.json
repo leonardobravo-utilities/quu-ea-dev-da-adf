@@ -20,7 +20,8 @@
 						"sqlReaderQuery": {
 							"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 							"type": "Expression"
-						}
+						},
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",
@@ -122,7 +123,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "PL_Chris21_CopytoArchive",
+						"referenceName": "PL_Chris21_Archive_updateFileLoadDate",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
