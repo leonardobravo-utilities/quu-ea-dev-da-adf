@@ -1,0 +1,338 @@
+{
+	"name": "PL_Chris21_Archive_updateFileLoadDate",
+	"properties": {
+		"description": "Transfer file to Archive folder in global scape",
+		"activities": [
+			{
+				"name": "Lkp_getfilemetadata",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select  \n\n     FileFolderName \n\t ,SourceFileName\n    ,ArchiveFileFolderName =FileFolderName  + '\\Archive\\' + convert(varchar(20),dbo.udf_getLocalDTM(),112)\n\t,CheckpointColumn\n\t,CheckpointColumnDatatype\n\t,CheckpointColumnValue\n\t,SFL.FileName\n\t,AzuresqlTargetTableName\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d ON s.sourceid = d.sourceid \nLEFT OUTER JOIN ETL.SourceFileLoad SFL on replace(SFL.FileName,'.csv','') = d.SourceTableName\nwhere sourcename = '@{pipeline().parameters.SourceName}'  and d.isactive = 1",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEachTable",
+				"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lkp_getfilemetadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lkp_getfilemetadata').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "Chris21_Files_Copy_to_Blob",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "FileServerReadSettings",
+										"recursive": false,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 0
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "FileServerWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_FS_GlobalScape_Chris21_Source",
+									"type": "DatasetReference",
+									"parameters": {
+										"filefolder": {
+											"value": "@item().FileFolderName",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@item().SourceFileName",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_FS_GlobalScape_Chris21_Source",
+									"type": "DatasetReference",
+									"parameters": {
+										"filefolder": {
+											"value": "@item().ArchiveFileFolderName",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@item().SourceFileName",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "StoredProcedureUpdateFileLoadDate",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Chris21_Files_Copy_to_Blob",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[ETL].[usp_update_SourceFileLoad]",
+								"storedProcedureParameters": {
+									"FileName": {
+										"value": {
+											"value": "@item().SourceFileName",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_ASQL_EDWDiscovery",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Set AzuresqlTargetTableName",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "StoredProcedureUpdateFileLoadDate",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "AzuresqlTargetTableName",
+								"value": {
+									"value": "@item().AzuresqlTargetTableName",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set CheckpointColumn",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "StoredProcedureUpdateFileLoadDate",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "CheckpointColumn",
+								"value": {
+									"value": "@coalesce(item().CheckpointColumn,'NA')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Checkpoint Column check",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Set AzuresqlTargetTableName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set CheckpointColumn",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(variables('CheckpointColumn'),'NA')",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "Get Max CheckPointValue",
+										"type": "Lookup",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "Select max(@{variables('CheckpointColumn')}) CheckpointColumnMaxValue from @{variables('AzuresqlTargetTableName')}",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"dataset": {
+												"referenceName": "DS_ASQL_EDWDiscovery",
+												"type": "DatasetReference"
+											}
+										}
+									},
+									{
+										"name": "PL_File_Monitoring_CheckPointValueCheck",
+										"type": "ExecutePipeline",
+										"dependsOn": [
+											{
+												"activity": "Get Max CheckPointValue",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "PL_File_Monitoring_CheckPointValueCheck",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"CheckpointTableValue": {
+													"value": "@activity('Get Max CheckPointValue').output.firstRow['CheckpointColumnMaxValue']",
+													"type": "Expression"
+												},
+												"CheckpointFileLoadValue": {
+													"value": "@item().CheckpointColumnValue",
+													"type": "Expression"
+												},
+												"ErrorMessage": {
+													"value": "@concat(item().SourceFileName,' was not received with latest ',item().CheckpointColumn, '. The current ', item().CheckpointColumn, ' is ',item().CheckpointColumnValue)",
+													"type": "Expression"
+												},
+												"EmailTo": {
+													"value": "@pipeline().parameters.EmailTo",
+													"type": "Expression"
+												},
+												"Subject": {
+													"value": "@pipeline().parameters.Subject",
+													"type": "Expression"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"sourcename": {
+				"type": "string",
+				"defaultValue": "CHRIS21"
+			},
+			"Subject": {
+				"type": "string"
+			},
+			"EmailTo": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"Testvar": {
+				"type": "String"
+			},
+			"targetblobfoldername": {
+				"type": "String"
+			},
+			"ErrorMessage": {
+				"type": "String"
+			},
+			"AzuresqlTargetTableName": {
+				"type": "String"
+			},
+			"CheckpointColumn": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Chris21"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

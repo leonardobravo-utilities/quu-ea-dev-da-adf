@@ -5,7 +5,14 @@
 			{
 				"name": "GetSourceID",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "FileMonitoring",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -20,7 +27,8 @@
 						"sqlReaderQuery": {
 							"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 							"type": "Expression"
-						}
+						},
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",
@@ -109,7 +117,7 @@
 				}
 			},
 			{
-				"name": "CopyfiletoArchiveGlobascape",
+				"name": "Archive_UpdateLoadDateforFile",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -122,13 +130,42 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "PL_Chris21_CopytoArchive",
+						"referenceName": "PL_Chris21_Archive_updateFileLoadDate",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
 					"parameters": {
 						"sourcename": {
 							"value": "@pipeline().parameters.SourceName",
+							"type": "Expression"
+						},
+						"Subject": {
+							"value": "@pipeline().parameters.SourceName",
+							"type": "Expression"
+						},
+						"EmailTo": {
+							"value": "@pipeline().parameters.EmailTo",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "FileMonitoring",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_File_Monitoring",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Sourcename": "CHRIS21",
+						"ErrorMessageFileNotReceived": "File not received",
+						"EmailTo": {
+							"value": "@pipeline().parameters.EmailTo",
 							"type": "Expression"
 						}
 					}
@@ -147,6 +184,10 @@
 			"OnlyBlobtoASQL": {
 				"type": "bool",
 				"defaultValue": true
+			},
+			"EmailTo": {
+				"type": "string",
+				"defaultValue": "Analytics-Support@urbanutilities.com.au;Vinayak.Khoje@urbanutilities.com.au"
 			}
 		},
 		"folder": {
