@@ -2001,7 +2001,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_Chris21_CopytoArchive')]",
+			"name": "[concat(parameters('factoryName'), '/PL_Chris21_Archive_updateFileLoadDate')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -2023,7 +2023,7 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderQuery": {
-									"value": "Select  \n\n     FileFolderName \n\t ,SourceFileName\n    ,ArchiveFileFolderName =FileFolderName  + '\\Archive\\' + convert(varchar(20),dbo.udf_getLocalDTM(),112) \n\t\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d\nON s.sourceid = d.sourceid \nand d.isactive = 1\nwhere sourcename = '@{pipeline().parameters.sourcename}'",
+									"value": "Select  \n\n     FileFolderName \n\t ,SourceFileName\n    ,ArchiveFileFolderName =FileFolderName  + '\\Archive\\' + convert(varchar(20),dbo.udf_getLocalDTM(),112)\n\t,CheckpointColumn\n\t,CheckpointColumnDatatype\n\t,CheckpointColumnValue\n\t,SFL.FileName\n\t,AzuresqlTargetTableName\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d ON s.sourceid = d.sourceid \nLEFT OUTER JOIN ETL.SourceFileLoad SFL on replace(SFL.FileName,'.csv','') = d.SourceTableName\nwhere sourcename = '@{pipeline().parameters.SourceName}'  and d.isactive = 1",
 									"type": "Expression"
 								},
 								"partitionOption": "None"
@@ -2127,6 +2127,180 @@
 											}
 										}
 									]
+								},
+								{
+									"name": "StoredProcedureUpdateFileLoadDate",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "Chris21_Files_Copy_to_Blob",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[ETL].[usp_update_SourceFileLoad]",
+										"storedProcedureParameters": {
+											"FileName": {
+												"value": {
+													"value": "@item().SourceFileName",
+													"type": "Expression"
+												},
+												"type": "String"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_EDWDiscovery",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Set AzuresqlTargetTableName",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "StoredProcedureUpdateFileLoadDate",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "AzuresqlTargetTableName",
+										"value": {
+											"value": "@item().AzuresqlTargetTableName",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set CheckpointColumn",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "StoredProcedureUpdateFileLoadDate",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "CheckpointColumn",
+										"value": {
+											"value": "@coalesce(item().CheckpointColumn,'NA')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Checkpoint Column check",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Set AzuresqlTargetTableName",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "Set CheckpointColumn",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(variables('CheckpointColumn'),'NA')",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Get Max CheckPointValue",
+												"type": "Lookup",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "Select max(@{variables('CheckpointColumn')}) CheckpointColumnMaxValue from @{variables('AzuresqlTargetTableName')}",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"dataset": {
+														"referenceName": "DS_ASQL_EDWDiscovery",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												}
+											},
+											{
+												"name": "PL_File_Monitoring_CheckPointValueCheck",
+												"type": "ExecutePipeline",
+												"dependsOn": [
+													{
+														"activity": "Get Max CheckPointValue",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "PL_File_Monitoring_CheckPointValueCheck",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"CheckpointTableValue": {
+															"value": "@activity('Get Max CheckPointValue').output.firstRow['CheckpointColumnMaxValue']",
+															"type": "Expression"
+														},
+														"CheckpointFileLoadValue": {
+															"value": "@item().CheckpointColumnValue",
+															"type": "Expression"
+														},
+														"ErrorMessage": {
+															"value": "@concat(item().SourceFileName,' was not received with latest ',item().CheckpointColumn, '. The current ', item().CheckpointColumn, ' is ',item().CheckpointColumnValue)",
+															"type": "Expression"
+														},
+														"EmailTo": {
+															"value": "@pipeline().parameters.EmailTo",
+															"type": "Expression"
+														},
+														"Subject": {
+															"value": "@pipeline().parameters.Subject",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
 								}
 							]
 						}
@@ -2136,6 +2310,12 @@
 					"sourcename": {
 						"type": "string",
 						"defaultValue": "CHRIS21"
+					},
+					"Subject": {
+						"type": "string"
+					},
+					"EmailTo": {
+						"type": "string"
 					}
 				},
 				"variables": {
@@ -2143,8 +2323,16 @@
 						"type": "String"
 					},
 					"targetblobfoldername": {
-						"type": "String",
-						"defaultValue": "tankerfillingstation-dataloading/CardService"
+						"type": "String"
+					},
+					"ErrorMessage": {
+						"type": "String"
+					},
+					"AzuresqlTargetTableName": {
+						"type": "String"
+					},
+					"CheckpointColumn": {
+						"type": "String"
 					}
 				},
 				"folder": {
@@ -2154,7 +2342,9 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/datasets/DS_FS_GlobalScape_Chris21_Source')]"
+				"[concat(variables('factoryId'), '/datasets/DS_FS_GlobalScape_Chris21_Source')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_File_Monitoring_CheckPointValueCheck')]"
 			]
 		},
 		{
@@ -2324,7 +2514,14 @@
 					{
 						"name": "GetSourceID",
 						"type": "Lookup",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "FileMonitoring",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "7.00:00:00",
 							"retry": 0,
@@ -2430,7 +2627,7 @@
 						}
 					},
 					{
-						"name": "CopyfiletoArchiveGlobascape",
+						"name": "Archive_UpdateLoadDateforFile",
 						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
@@ -2443,13 +2640,42 @@
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
-								"referenceName": "PL_Chris21_CopytoArchive",
+								"referenceName": "PL_Chris21_Archive_updateFileLoadDate",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
 							"parameters": {
 								"sourcename": {
 									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								},
+								"Subject": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								},
+								"EmailTo": {
+									"value": "@pipeline().parameters.EmailTo",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "FileMonitoring",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_File_Monitoring",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Sourcename": "CHRIS21",
+								"ErrorMessageFileNotReceived": "File not received",
+								"EmailTo": {
+									"value": "@pipeline().parameters.EmailTo",
 									"type": "Expression"
 								}
 							}
@@ -2468,6 +2694,10 @@
 					"OnlyBlobtoASQL": {
 						"type": "bool",
 						"defaultValue": true
+					},
+					"EmailTo": {
+						"type": "string",
+						"defaultValue": "Analytics-Support@urbanutilities.com.au;Vinayak.Khoje@urbanutilities.com.au"
 					}
 				},
 				"folder": {
@@ -2477,7 +2707,8 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_Chris21_CopytoArchive')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Chris21_Archive_updateFileLoadDate')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_File_Monitoring')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Chris21_DM_SourcetoBlob')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
 			]
@@ -7719,6 +7950,685 @@
 				"[concat(variables('factoryId'), '/datasets/DS_File_NFUJPRD202')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_File_Monitoring')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup source files",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup source files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup source files').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Get Metadata",
+									"description": "check if any files need to process in the blob container",
+									"type": "GetMetadata",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "DS_FS_GlobalScape_FileSize",
+											"type": "DatasetReference",
+											"parameters": {
+												"filefolder": {
+													"value": "@item().FileFolderName",
+													"type": "Expression"
+												},
+												"file": {
+													"value": "@item().TargetFileName",
+													"type": "Expression"
+												}
+											}
+										},
+										"fieldList": [
+											"exists",
+											"lastModified"
+										],
+										"storeSettings": {
+											"type": "FileServerReadSettings",
+											"recursive": true
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "Check if file exists",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Get Metadata",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@activity('Get Metadata').output.exists",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Send email file not received",
+												"type": "WebActivity",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"url": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU",
+													"method": "POST",
+													"headers": {},
+													"body": {
+														"value": "{\n   \"DataFactoryName\": \"@{pipeline().DataFactory}\",\n   \"PipelineName\": \"@{pipeline().Pipeline}\",\n   \"Subject\": \"@{pipeline().parameters.Subject}\",\n   \"ErrorMessage\": \" File @{item().TargetFileName}  is not received\",\n   \"EmailTo\": \"@{pipeline().parameters.EmailTo}\"\n}\t",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"ifTrueActivities": [
+											{
+												"name": "Set File Name",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "FileName",
+													"value": {
+														"value": "@string(item().TargetFileName)",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Retrieve File Size",
+												"type": "GetMetadata",
+												"dependsOn": [
+													{
+														"activity": "Set File Name",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataset": {
+														"referenceName": "DS_FS_GlobalScape_FileSize",
+														"type": "DatasetReference",
+														"parameters": {
+															"filefolder": {
+																"value": "@item().FileFolderName",
+																"type": "Expression"
+															},
+															"file": {
+																"value": "@variables('FileName')",
+																"type": "Expression"
+															}
+														}
+													},
+													"fieldList": [
+														"size"
+													],
+													"storeSettings": {
+														"type": "FileServerReadSettings",
+														"recursive": true
+													},
+													"formatSettings": {
+														"type": "DelimitedTextReadSettings"
+													}
+												}
+											},
+											{
+												"name": "Set File Size",
+												"description": "Assign the file size value to the variable",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "Retrieve File Size",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "FileSize",
+													"value": {
+														"value": "@string(activity('Retrieve File Size').output.Size)",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Retrieve File Modification Date",
+												"type": "GetMetadata",
+												"dependsOn": [
+													{
+														"activity": "Set File Name",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataset": {
+														"referenceName": "DS_FS_GlobalScape_FileSize",
+														"type": "DatasetReference",
+														"parameters": {
+															"filefolder": {
+																"value": "@item().FileFolderName",
+																"type": "Expression"
+															},
+															"file": {
+																"value": "@variables('FileName')",
+																"type": "Expression"
+															}
+														}
+													},
+													"fieldList": [
+														"lastModified"
+													],
+													"storeSettings": {
+														"type": "FileServerReadSettings",
+														"recursive": true
+													},
+													"formatSettings": {
+														"type": "DelimitedTextReadSettings"
+													}
+												}
+											},
+											{
+												"name": "Set LastModified Date",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "Retrieve File Modification Date",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "LastModifiedDate",
+													"value": {
+														"value": "@string(convertfromUtc(activity('Retrieve File Modification Date').output.LastModified,'E. Australia Standard Time'))",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Execute Pipeline for File size check",
+												"type": "ExecutePipeline",
+												"dependsOn": [
+													{
+														"activity": "Set File Size",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "PL_File_Monitoring_File_Size_Check",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"FileSize": {
+															"value": "@variables('FileSize')",
+															"type": "Expression"
+														},
+														"Subject": {
+															"value": "@pipeline().parameters.Subject",
+															"type": "Expression"
+														},
+														"FileName": {
+															"value": "@variables('FileName')",
+															"type": "Expression"
+														},
+														"EmailTo": {
+															"value": "@pipeline().parameters.EmailTo",
+															"type": "Expression"
+														}
+													}
+												}
+											},
+											{
+												"name": "Execute Pipeline for Lastmodified check",
+												"type": "ExecutePipeline",
+												"dependsOn": [
+													{
+														"activity": "Set LastModified Date",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "PL_File_Monitoring_File_LastModifiedDate_Check",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"LastModifiedDate": {
+															"value": "@variables('LastModifiedDate')",
+															"type": "Expression"
+														},
+														"Subject": {
+															"value": "@pipeline().parameters.Subject",
+															"type": "Expression"
+														},
+														"LastLoadedDate": {
+															"value": "@ITEM().LastLoadedDate",
+															"type": "Expression"
+														},
+														"FileName": {
+															"value": "@variables('FileName')",
+															"type": "Expression"
+														},
+														"EmailTo": {
+															"value": "@pipeline().parameters.EmailTo",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"Sourcename": {
+						"type": "string",
+						"defaultValue": "CHRIS21"
+					},
+					"Subject": {
+						"type": "string",
+						"defaultValue": "Chris21"
+					},
+					"ErrorMessageFileNotReceived": {
+						"type": "string",
+						"defaultValue": "File not received"
+					},
+					"EmailTo": {
+						"type": "string",
+						"defaultValue": "Vinayak.Khoje@urbanutilities.com.au"
+					}
+				},
+				"variables": {
+					"OldFile": {
+						"type": "Array"
+					},
+					"FileSize": {
+						"type": "String"
+					},
+					"LastModifiedDate": {
+						"type": "String"
+					},
+					"EmptyFile": {
+						"type": "Array"
+					},
+					"FileName": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Source File Monitoring"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/datasets/DS_FS_GlobalScape_FileSize')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_File_Monitoring_File_Size_Check')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_File_Monitoring_File_LastModifiedDate_Check')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_File_Monitoring_CheckPointValueCheck')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Check the checkpoint value",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@lessOrEquals(pipeline().parameters.CheckpointTableValue,pipeline().parameters.CheckpointFileLoadValue)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Send email",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU",
+										"method": "POST",
+										"headers": {
+											"Content-Type": "application/json"
+										},
+										"body": {
+											"value": "{\"DataFactoryName\":\"@{pipeline().DataFactory}\",\"PipelineName\":\"@{pipeline().Pipeline}\",\"Subject\":\"@{pipeline().parameters.Subject}\",\"ErrorMessage\":\"@{pipeline().parameters.ErrorMessage}\",\"EmailTo\":\"@{pipeline().parameters.EmailTo}\"}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"CheckpointTableValue": {
+						"type": "string"
+					},
+					"CheckpointFileLoadValue": {
+						"type": "string"
+					},
+					"ErrorMessage": {
+						"type": "string"
+					},
+					"EmailTo": {
+						"type": "string"
+					},
+					"Subject": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Source File Monitoring"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_File_Monitoring_File_LastModifiedDate_Check')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "If Condition3",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(ticks(pipeline().parameters.LastModifiedDate),ticks(pipeline().parameters.LastLoadedDate))",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Send email",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "Set variable1",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU",
+										"method": "POST",
+										"headers": {
+											"Content-Type": "application/json"
+										},
+										"body": {
+											"value": "{\"DataFactoryName\":\"@{pipeline().DataFactory}\",\"PipelineName\":\"@{pipeline().Pipeline}\",\"Subject\":\"@{pipeline().parameters.Subject}\",\"ErrorMessage\":\"@{variables('ErrorMessage')}\",\"EmailTo\":\"@{pipeline().parameters.EmailTo}\"}",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set variable1",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorMessage",
+										"value": {
+											"value": "@concat('Lastest file for ',pipeline().parameters.FileName,' is not recevied')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"LastModifiedDate": {
+						"type": "string"
+					},
+					"Subject": {
+						"type": "string"
+					},
+					"LastLoadedDate": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					},
+					"EmailTo": {
+						"type": "string",
+						"defaultValue": "Vinayak.Khoje@urbanutilities.com.au"
+					}
+				},
+				"variables": {
+					"ErrorMessage": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Source File Monitoring"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_File_Monitoring_File_Size_Check')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Check if file is empty",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(int(pipeline().parameters.FileSize),5)",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Send email",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "Set error message",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU",
+										"method": "POST",
+										"headers": {
+											"Content-Type": "application/json"
+										},
+										"body": {
+											"value": "{\"DataFactoryName\":\"@{pipeline().DataFactory}\",\"PipelineName\":\"@{pipeline().Pipeline}\",\"Subject\":\"@{pipeline().parameters.Subject}\",\"ErrorMessage\":\"@{variables('ErrorMessage')}\",\"EmailTo\":\"@{pipeline().parameters.EmailTo}\"}",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set error message",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorMessage",
+										"value": {
+											"value": "@concat('Lastest file for ',pipeline().parameters.FileName,' is empty')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"FileSize": {
+						"type": "string",
+						"defaultValue": "10"
+					},
+					"Subject": {
+						"type": "string",
+						"defaultValue": "C21"
+					},
+					"FileName": {
+						"type": "string",
+						"defaultValue": "F1"
+					},
+					"EmailTo": {
+						"type": "string",
+						"defaultValue": "Vinayak.Khoje@urbanutilities.com.au"
+					}
+				},
+				"variables": {
+					"ErrorMessage": {
+						"type": "String"
+					},
+					"Filesize": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Source File Monitoring"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Framework_DM_SourceToBlob_Oracle')]",
@@ -18096,6 +19006,48 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_FileSize')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					},
+					"file": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().file",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_SUMS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -19476,7 +20428,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -19518,7 +20470,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -19560,7 +20512,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -19602,7 +20554,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
