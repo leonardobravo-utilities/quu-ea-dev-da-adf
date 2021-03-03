@@ -855,6 +855,10 @@
 														"Subject": {
 															"value": "@pipeline().parameters.Subject",
 															"type": "Expression"
+														},
+														"LogicAppURL": {
+															"value": "@pipeline().parameters.LogicAppURL",
+															"type": "Expression"
 														}
 													}
 												}
@@ -875,6 +879,9 @@
 						"type": "string"
 					},
 					"EmailTo": {
+						"type": "string"
+					},
+					"LogicAppURL": {
 						"type": "string"
 					}
 				},
@@ -2064,6 +2071,7 @@
 								"value": "@activity('Lookup source files').output.value",
 								"type": "Expression"
 							},
+							"isSequential": true,
 							"activities": [
 								{
 									"name": "Get Metadata",
@@ -2137,7 +2145,10 @@
 												},
 												"userProperties": [],
 												"typeProperties": {
-													"url": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU",
+													"url": {
+														"value": "@pipeline().parameters.LogicAppURL",
+														"type": "Expression"
+													},
 													"method": "POST",
 													"headers": {},
 													"body": {
@@ -2233,7 +2244,7 @@
 												"type": "GetMetadata",
 												"dependsOn": [
 													{
-														"activity": "Set File Name",
+														"activity": "Execute Pipeline for File size check",
 														"dependencyConditions": [
 															"Succeeded"
 														]
@@ -2328,6 +2339,10 @@
 														"EmailTo": {
 															"value": "@pipeline().parameters.EmailTo",
 															"type": "Expression"
+														},
+														"LogicAppURL": {
+															"value": "@pipeline().parameters.LogicAppURL",
+															"type": "Expression"
 														}
 													}
 												}
@@ -2370,6 +2385,10 @@
 														"EmailTo": {
 															"value": "@pipeline().parameters.EmailTo",
 															"type": "Expression"
+														},
+														"LogicAppURL": {
+															"value": "@pipeline().parameters.LogicAppURL",
+															"type": "Expression"
 														}
 													}
 												}
@@ -2395,8 +2414,10 @@
 						"defaultValue": "File not received"
 					},
 					"EmailTo": {
-						"type": "string",
-						"defaultValue": "Vinayak.Khoje@urbanutilities.com.au"
+						"type": "string"
+					},
+					"LogicAppURL": {
+						"type": "string"
 					}
 				},
 				"variables": {
