@@ -1,0 +1,337 @@
+{
+	"name": "PL_EDW_Mart_LIWIS",
+	"properties": {
+		"activities": [
+			{
+				"name": "Dim_TradeWaste_Category",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Mart].[usp_load_Dim_TradeWaste_Category]",
+					"storedProcedureParameters": {
+						"from_dtm": {
+							"value": null,
+							"type": "DateTime"
+						},
+						"isdeltaload": {
+							"value": "0",
+							"type": "Byte"
+						},
+						"row_execution_id": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"sourcename": {
+							"value": {
+								"value": "@pipeline().parameters.sourcename",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"to_dtm": {
+							"value": null,
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWMart",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Dim_TradeWaste_Status",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Mart].[usp_load_Dim_TradeWaste_Status]",
+					"storedProcedureParameters": {
+						"from_dtm": {
+							"value": null,
+							"type": "DateTime"
+						},
+						"isdeltaload": {
+							"value": "0",
+							"type": "Byte"
+						},
+						"row_execution_id": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"sourcename": {
+							"value": {
+								"value": "@pipeline().parameters.sourcename",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"to_dtm": {
+							"value": null,
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWMart",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Dim_Risk_Rating",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Mart].[usp_load_Dim_Risk_Rating]",
+					"storedProcedureParameters": {
+						"from_dtm": {
+							"value": null,
+							"type": "DateTime"
+						},
+						"isdeltaload": {
+							"value": "0",
+							"type": "Byte"
+						},
+						"row_execution_id": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"sourcename": {
+							"value": {
+								"value": "@pipeline().parameters.sourcename",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"to_dtm": {
+							"value": null,
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWMart",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Fact_Applications",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Dim_TradeWaste_Category",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Dim_TradeWaste_Status",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Dim_Risk_Rating",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Dim_Officer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Mart].[usp_load_Fact_Applications]",
+					"storedProcedureParameters": {
+						"from_dtm": {
+							"value": null,
+							"type": "DateTime"
+						},
+						"isdeltaload": {
+							"value": "0",
+							"type": "Byte"
+						},
+						"row_execution_id": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"sourcename": {
+							"value": {
+								"value": "@pipeline().parameters.sourcename",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"to_dtm": {
+							"value": null,
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWMart",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Fact_Approvals",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Fact_Applications",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Mart].[usp_load_Fact_Approvals]",
+					"storedProcedureParameters": {
+						"from_dtm": {
+							"value": null,
+							"type": "DateTime"
+						},
+						"isdeltaload": {
+							"value": "0",
+							"type": "Byte"
+						},
+						"row_execution_id": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"sourcename": {
+							"value": {
+								"value": "@pipeline().parameters.sourcename",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"to_dtm": {
+							"value": null,
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWMart",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Dim_Officer",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Mart].[usp_load_Dim_Officer]",
+					"storedProcedureParameters": {
+						"from_dtm": {
+							"value": null,
+							"type": "DateTime"
+						},
+						"isdeltaload": {
+							"value": "0",
+							"type": "Byte"
+						},
+						"row_execution_id": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"sourcename": {
+							"value": {
+								"value": "@pipeline().parameters.sourcename",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"to_dtm": {
+							"value": null,
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWMart",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"sourcename": {
+				"type": "string",
+				"defaultValue": "LIWIS"
+			}
+		},
+		"folder": {
+			"name": "LIWIS-Model"
+		},
+		"annotations": []
+	}
+}
