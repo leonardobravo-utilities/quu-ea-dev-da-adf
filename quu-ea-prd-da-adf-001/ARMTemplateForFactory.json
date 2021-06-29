@@ -239,6 +239,10 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"Liwis_DataModel_Daily_Trigger_properties_PL_EDW_Mart_LIWIS_parameters_sourcename": {
+			"type": "string",
+			"defaultValue": "LIWIS"
+		},
 		"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "MDSProd"
@@ -21420,6 +21424,46 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_LIWIS_SourceToAsql')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Liwis_DataModel_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDW_Mart_LIWIS",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"sourcename": "[parameters('Liwis_DataModel_Daily_Trigger_properties_PL_EDW_Mart_LIWIS_parameters_sourcename')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-06-28T08:20:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								6
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDW_Mart_LIWIS')]"
 			]
 		},
 		{
