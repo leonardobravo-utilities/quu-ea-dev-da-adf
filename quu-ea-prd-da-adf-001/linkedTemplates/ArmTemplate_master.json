@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
+		"LS_ABLB_quueaprdicndlslanding001_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ABLB_quueaprdicndlslanding001'"
+		},
 		"LS_ASQL_EDWDiscovery_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery'"
@@ -60,6 +64,14 @@
 			"defaultValue": "\\\\NFUJPRD202\\FDrive"
 		},
 		"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_FS_NFUJPRD301_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\NFUJPRD301\\EBI_PROD_LANDING"
+		},
+		"LS_FS_NFUJPRD301_properties_typeProperties_userId": {
 			"type": "string",
 			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
@@ -378,6 +390,9 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"LS_ABLB_quueaprdicndlslanding001_connectionString": {
+						"value": "[parameters('LS_ABLB_quueaprdicndlslanding001_connectionString')]"
+					},
 					"LS_ASQL_EDWDiscovery_connectionString": {
 						"value": "[parameters('LS_ASQL_EDWDiscovery_connectionString')]"
 					},
@@ -440,6 +455,12 @@
 					},
 					"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
 						"value": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_userId')]"
+					},
+					"LS_FS_NFUJPRD301_properties_typeProperties_host": {
+						"value": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_host')]"
+					},
+					"LS_FS_NFUJPRD301_properties_typeProperties_userId": {
+						"value": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_userId')]"
 					},
 					"LS_SF_properties_typeProperties_environmentUrl": {
 						"value": "[parameters('LS_SF_properties_typeProperties_environmentUrl')]"
@@ -597,6 +618,26 @@
 					},
 					"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname": {
 						"value": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_5')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_7",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_7.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_SourceName": {
 						"value": "[parameters('EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_SourceName')]"
@@ -651,26 +692,6 @@
 					},
 					"GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_5')]"
-			]
-		},
-		{
-			"name": "quu-ea-prd-da-adf-001_ArmTemplate_7",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_7.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName": {
 						"value": "[parameters('GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName')]"
