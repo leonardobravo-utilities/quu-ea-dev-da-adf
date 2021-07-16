@@ -1,0 +1,23 @@
+{
+	"name": "LS_FS_NFUJPRD301",
+	"properties": {
+		"annotations": [],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "\\\\NFUJPRD301\\EBI_PROD_LANDING",
+			"userId": "urbanutilities\\SVC-EBI_PRDC04_AGT",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ADF_LS_AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "SVC-EBI-PRDC04-AGT"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHostedRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
