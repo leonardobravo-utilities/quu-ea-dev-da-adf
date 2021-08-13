@@ -111,18 +111,6 @@
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "BOM-FORECAST"
-		},
-		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid": {
-			"type": "string",
-			"defaultValue": "1015-043022-have239"
-		},
-		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname": {
-			"type": "string",
-			"defaultValue": "databricks-token"
-		},
 		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "CHRIS21"
@@ -362,6 +350,18 @@
 		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
+		},
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "BOM-FORECAST"
+		},
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid": {
+			"type": "string",
+			"defaultValue": "0417-051914-axons909"
+		},
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname": {
+			"type": "string",
+			"defaultValue": "databricks-token"
 		}
 	},
 	"variables": {
@@ -4081,16 +4081,16 @@
 												"value": "@item().TableID",
 												"type": "Expression"
 											},
+											"Data_Destination_File_Name": {
+												"value": "@item().Data_Destination_File_Name",
+												"type": "Expression"
+											},
 											"SourceServerName": {
 												"value": "@item().SourceServerName",
 												"type": "Expression"
 											},
 											"SourceDatabaseName": {
 												"value": "@item().SourceDatabaseName",
-												"type": "Expression"
-											},
-											"Data_Destination_File_Name": {
-												"value": "@item().Data_Destination_File_Name",
 												"type": "Expression"
 											},
 											"IncrementalLoadInd": {
@@ -4131,14 +4131,6 @@
 											},
 											"SecretPasswordName": {
 												"value": "@item().SecretPasswordName",
-												"type": "Expression"
-											},
-											"SourceName": {
-												"value": "@item().SourceName",
-												"type": "Expression"
-											},
-											"DeltaTargetTableName": {
-												"value": "@item().DeltaTargetTableName",
 												"type": "Expression"
 											}
 										}
@@ -20949,48 +20941,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Bom_Forecast_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_BOM_Forecast_Main",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName')]",
-							"databricksclusterid": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid')]",
-							"databrickssecretname": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-10-15T05:29:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								30
-							],
-							"hours": [
-								21
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_BOM_Forecast_Main')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/Chris21_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -22228,6 +22178,48 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Bom_Forecast_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_BOM_Forecast_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName')]",
+							"databricksclusterid": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid')]",
+							"databrickssecretname": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-10-15T05:29:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								21
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_BOM_Forecast_Main')]"
+			]
 		}
 	]
 }
