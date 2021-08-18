@@ -39,17 +39,17 @@
 			"type": "bool",
 			"defaultValue": true
 		},
-		"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_SourceName": {
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName": {
 			"type": "string",
-			"defaultValue": "EAMS Integration"
+			"defaultValue": "BOM-FORECAST"
 		},
-		"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid": {
+			"type": "string",
+			"defaultValue": "0417-051914-axons909"
 		},
-		"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname": {
+			"type": "string",
+			"defaultValue": "databricks-token"
 		}
 	},
 	"variables": {
@@ -2223,22 +2223,22 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/EAMS_Integration_Daily_Trigger')]",
+			"name": "[concat(parameters('factoryName'), '/Bom_Forecast_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "PL_EAMS_Integration",
+							"referenceName": "PL_BOM_Forecast_Main",
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"SourceName": "[parameters('EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlyBlobtoASQL')]"
+							"SourceName": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName')]",
+							"databricksclusterid": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid')]",
+							"databrickssecretname": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname')]"
 						}
 					}
 				],
@@ -2247,11 +2247,14 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2021-02-10T01:00:00",
-						"timeZone": "E. Australia Standard Time",
+						"startTime": "2020-10-15T05:29:00Z",
+						"timeZone": "UTC",
 						"schedule": {
+							"minutes": [
+								30
+							],
 							"hours": [
-								1
+								21
 							]
 						}
 					}
