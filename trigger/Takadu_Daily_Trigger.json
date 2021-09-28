@@ -1,0 +1,30 @@
+{
+	"name": "Takadu_Daily_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "Takadu-Reporting-API",
+					"OnlyBlobtoASQL": true,
+					"OnlySourceToBlob": true,
+					"AllowPartialUpdateOfDiscovery": false
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 5,
+				"startTime": "2021-09-28T06:04:00",
+				"timeZone": "E. Australia Standard Time"
+			}
+		}
+	}
+}
