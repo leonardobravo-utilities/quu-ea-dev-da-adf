@@ -434,6 +434,232 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_DM_SourceToBlob_Databricks')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Source Tables",
+						"description": "",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_tablelist_by_sourceid]",
+								"storedProcedureParameters": {
+									"sourceid": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.SourceID",
+											"type": "Expression"
+										}
+									}
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachTable",
+						"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Source Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Source Tables').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "Is Data Up to Date",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Get Refresh Values",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(activity('Get Refresh Values').output.firstRow.Uptodate_Ind, 1)",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Execute_SourceToBlob_Notebook",
+												"type": "DatabricksNotebook",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"notebookPath": {
+														"value": "@item().Command",
+														"type": "Expression"
+													},
+													"baseParameters": {
+														"Watermark_Value": {
+															"value": "@activity('Get Refresh Values').output.firstRow.Watermark_Value",
+															"type": "Expression"
+														},
+														"Expected_Fields": {
+															"value": "@item().ColumnSchemaList",
+															"type": "Expression"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "LS_DBR_ADF_Job_Cluster",
+													"type": "LinkedServiceReference",
+													"parameters": {
+														"databricksclusterid": {
+															"value": "@item().databricksclusterid",
+															"type": "Expression"
+														},
+														"databrickssecretname": {
+															"value": "@item().databrickssecretname",
+															"type": "Expression"
+														}
+													}
+												}
+											},
+											{
+												"name": "PostProcessingAfterDelta",
+												"description": "Stored procedure activity to store the new high-watermark value into external control table for delta data loading. ",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "Execute_SourceToBlob_Notebook",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 3,
+													"retryIntervalInSeconds": 30
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[[ETL].[usp_update_incrementaldatevalue]",
+													"storedProcedureParameters": {
+														"LastModifiedDTM": {
+															"value": {
+																"value": "@activity('Get Refresh Values').output.firstRow.Current_Max_Value",
+																"type": "Expression"
+															},
+															"type": "DateTime"
+														},
+														"TableID": {
+															"value": {
+																"value": "@item().TableID",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "LS_ASQL_EDWDiscovery",
+													"type": "LinkedServiceReference"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "Get Refresh Values",
+									"description": "",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[ETL].[usp_get_tablerefreshvalues]",
+											"storedProcedureParameters": {
+												"tableID": {
+													"type": "Int32",
+													"value": {
+														"value": "@item().TableID",
+														"type": "Expression"
+													}
+												}
+											},
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_ASQL_EDWDiscovery",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"firstRowOnly": true
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceID": {
+						"type": "int",
+						"defaultValue": 3
+					}
+				},
+				"folder": {
+					"name": "EDW_Discovery"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_ABN_BlobToASQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -3305,566 +3531,6 @@
 						"type": "string"
 					},
 					"Secret_Password_Name": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "FrameWork"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_Oracle_OnPrem')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Framework_DM_SourcetoBlob_Delete_Oracle')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Copy new or updated rows only from database using external control table",
-				"activities": [
-					{
-						"name": "lkp_getlocalstarttime2",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SqlMISource",
-								"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					},
-					{
-						"name": "FullCopyToBlob",
-						"description": "Full Copy from source table into blob storage",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "lkp_getlocalstarttime2",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "OracleSource",
-								"oracleReaderQuery": {
-									"value": "select @{replace(replace(pipeline().parameters.BusinessKeyList,'[',''),']','')}\nfrom @{pipeline().parameters.Data_Source_Table_Name} \n@{pipeline().parameters.Join_Condition}\n@{pipeline().parameters.source_where_filter}",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".csv"
-								}
-							},
-							"enableStaging": false,
-							"dataIntegrationUnits": 0
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_Oracle_OnPrem",
-								"type": "DatasetReference",
-								"parameters": {
-									"HostName": {
-										"value": "@pipeline().parameters.Host_Name",
-										"type": "Expression"
-									},
-									"PortNo": {
-										"value": "@pipeline().parameters.Port_No",
-										"type": "Expression"
-									},
-									"SID": {
-										"value": "@pipeline().parameters.SID",
-										"type": "Expression"
-									},
-									"UserName": {
-										"value": "@pipeline().parameters.UserName",
-										"type": "Expression"
-									},
-									"SecretPasswordName": {
-										"value": "@pipeline().parameters.SecretPasswordName",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DS_ABLB_Datalanding",
-								"type": "DatasetReference",
-								"parameters": {
-									"FolderPath": {
-										"value": "@pipeline().parameters.Data_Destination_Folder_Path",
-										"type": "Expression"
-									},
-									"TargetFileName": {
-										"value": "@concat(\npipeline().parameters.Data_Destination_File_Name\n,pipeline().parameters.File_Name_Ext)",
-										"type": "Expression"
-									},
-									"ColumnDelimiter": {
-										"value": "@pipeline().parameters.ColumnDelimiter",
-										"type": "Expression"
-									},
-									"QuoteCharacter": {
-										"value": "@pipeline().parameters.QuoteCharacter",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					},
-					{
-						"name": "GenerateDeleteFile",
-						"type": "DatabricksNotebook",
-						"dependsOn": [
-							{
-								"activity": "FullCopyToBlob",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/edw_discovery/ETL_Create_Delete_File",
-							"baseParameters": {
-								"blobcontainer": {
-									"value": "@pipeline().parameters.BlobContainer",
-									"type": "Expression"
-								},
-								"blobfilename": {
-									"value": "@concat(pipeline().parameters.Data_Destination_Folder_Path,',',pipeline().parameters.Data_Destination_File_Name,pipeline().parameters.File_Name_Ext)",
-									"type": "Expression"
-								},
-								"columnlist": {
-									"value": "@pipeline().parameters.Source_Column_List",
-									"type": "Expression"
-								},
-								"businesskeylist": {
-									"value": "@pipeline().parameters.BusinessKeyList",
-									"type": "Expression"
-								},
-								"deltatargetdbname": {
-									"value": "@pipeline().parameters.DeltaTargetDbName",
-									"type": "Expression"
-								},
-								"storageaccount": {
-									"value": "@pipeline().parameters.StorageAccount",
-									"type": "Expression"
-								},
-								"columndelimiter": {
-									"value": "@pipeline().parameters.ColumnDelimiter",
-									"type": "Expression"
-								},
-								"quotecharacter": {
-									"value": "@base64(pipeline().parameters.QuoteCharacter)",
-									"type": "Expression"
-								},
-								"rowsource": {
-									"value": "@pipeline().parameters.RowSource",
-									"type": "Expression"
-								},
-								"dbhostname": {
-									"value": "@pipeline().parameters.DbHostName",
-									"type": "Expression"
-								},
-								"skipcsvrows": "0",
-								"azuretargettablename": {
-									"value": "@pipeline().parameters.AzureTargetTableName",
-									"type": "Expression"
-								}
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_DBR_ADF_Job_Cluster",
-							"type": "LinkedServiceReference",
-							"parameters": {
-								"databricksclusterid": {
-									"value": "@pipeline().parameters.databricksclusterid",
-									"type": "Expression"
-								},
-								"databrickssecretname": {
-									"value": "@pipeline().parameters.databrickssecretname",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "GetFileDetails",
-						"type": "GetMetadata",
-						"dependsOn": [
-							{
-								"activity": "GenerateDeleteFile",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "DS_ABLB_Datalanding",
-								"type": "DatasetReference",
-								"parameters": {
-									"FolderPath": {
-										"value": "@pipeline().parameters.Data_Destination_Folder_Path",
-										"type": "Expression"
-									},
-									"TargetFileName": {
-										"value": "@concat(pipeline().parameters.Data_Destination_File_Name,pipeline().parameters.File_Name_Ext)",
-										"type": "Expression"
-									},
-									"ColumnDelimiter": {
-										"value": "@pipeline().parameters.ColumnDelimiter",
-										"type": "Expression"
-									},
-									"QuoteCharacter": {
-										"value": "@pipeline().parameters.QuoteCharacter",
-										"type": "Expression"
-									}
-								}
-							},
-							"fieldList": [
-								"exists"
-							],
-							"storeSettings": {
-								"type": "AzureBlobStorageReadSettings",
-								"recursive": true
-							},
-							"formatSettings": {
-								"type": "DelimitedTextReadSettings"
-							}
-						}
-					},
-					{
-						"name": "CheckFileExists",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "GetFileDetails",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@activity('GetFileDetails').output.Exists",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "DeleteRecords",
-									"type": "DatabricksNotebook",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"notebookPath": "/edw_discovery/ETL_Merge_Delete",
-										"baseParameters": {
-											"blobcontainer": {
-												"value": "@pipeline().parameters.BlobContainer",
-												"type": "Expression"
-											},
-											"blobfilename": {
-												"value": "@concat(pipeline().parameters.Data_Destination_Folder_Path,',',pipeline().parameters.Data_Destination_File_Name,pipeline().parameters.File_Name_Ext)",
-												"type": "Expression"
-											},
-											"columnlist": {
-												"value": "@pipeline().parameters.Source_Column_List",
-												"type": "Expression"
-											},
-											"businesskeylist": {
-												"value": "@pipeline().parameters.BusinessKeyList",
-												"type": "Expression"
-											},
-											"deltastagingdbname": {
-												"value": "@pipeline().parameters.DeltaStagingDbName",
-												"type": "Expression"
-											},
-											"deltatargetdbname": {
-												"value": "@pipeline().parameters.DeltaTargetDbName",
-												"type": "Expression"
-											},
-											"deltastagetablename": {
-												"value": "@pipeline().parameters.DeltaStageTableName",
-												"type": "Expression"
-											},
-											"azuresqltemptablename": {
-												"value": "@pipeline().parameters.AzureSqlTempTableName",
-												"type": "Expression"
-											},
-											"storageaccount": {
-												"value": "@pipeline().parameters.StorageAccount",
-												"type": "Expression"
-											},
-											"ColumnDelimiter": {
-												"value": "@pipeline().parameters.ColumnDelimiter",
-												"type": "Expression"
-											},
-											"QuoteCharacter": {
-												"value": "@base64(pipeline().parameters.QuoteCharacter)",
-												"type": "Expression"
-											},
-											"azuresqldbetllastmodifieddtm": {
-												"value": "@pipeline().parameters.DeleteProcessCompletionDTM",
-												"type": "Expression"
-											},
-											"deltastagingtableparquetfilepath": {
-												"value": "@pipeline().parameters.DeltaStagingTableParquetFilePath",
-												"type": "Expression"
-											},
-											"DbHostName": {
-												"value": "@pipeline().parameters.DbHostName",
-												"type": "Expression"
-											},
-											"RowSource": {
-												"value": "@pipeline().parameters.RowSource",
-												"type": "Expression"
-											},
-											"skipcsvrows": "0",
-											"azuresqltargettablename": {
-												"value": "@pipeline().parameters.AzureTargetTableName",
-												"type": "Expression"
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "LS_DBR_ADF_Job_Cluster",
-										"type": "LinkedServiceReference",
-										"parameters": {
-											"databricksclusterid": {
-												"value": "@pipeline().parameters.databricksclusterid",
-												"type": "Expression"
-											},
-											"databrickssecretname": {
-												"value": "@pipeline().parameters.databrickssecretname",
-												"type": "Expression"
-											}
-										}
-									}
-								},
-								{
-									"name": "DeleteRecordsInDatabase",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "DeleteRecords",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[ETL].[usp_delete_from_azuresqltable]",
-										"storedProcedureParameters": {
-											"table_source": {
-												"value": {
-													"value": "@pipeline().parameters.AzureSqlTempTableName",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"table_target": {
-												"value": {
-													"value": "@pipeline().parameters.AzureTargetTableName",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"tableid": {
-												"value": {
-													"value": "@pipeline().parameters.TableID",
-													"type": "Expression"
-												},
-												"type": "Int32"
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "LS_ASQL_EDWDiscovery",
-										"type": "LinkedServiceReference"
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"Data_Source_Table_Name": {
-						"type": "String",
-						"defaultValue": "dbo.MSF660"
-					},
-					"Data_Source_WaterMarkColumn": {
-						"type": "String",
-						"defaultValue": "CASE WHEN LAST_MOD_DATE <> '' AND LAST_MOD_TIME<>'' THEN (CAST(LAST_MOD_DATE AS DATETIME) + CAST(stuff(stuff(LAST_MOD_TIME ,3,0,':'),6,0,':') AS DATETIME)) END"
-					},
-					"Data_Destination_Folder_Path": {
-						"type": "String",
-						"defaultValue": "ellipse9-datalanding/MSF660"
-					},
-					"TableID": {
-						"type": "string",
-						"defaultValue": "1"
-					},
-					"Data_Destination_File_Name": {
-						"type": "string",
-						"defaultValue": "MSF660"
-					},
-					"SourceServerName": {
-						"type": "string",
-						"defaultValue": "NFUJDEV073"
-					},
-					"SourceDatabaseName": {
-						"type": "string",
-						"defaultValue": "Datamart"
-					},
-					"File_Name_Ext": {
-						"type": "string",
-						"defaultValue": ".csv"
-					},
-					"Join_Condition": {
-						"type": "string",
-						"defaultValue": " "
-					},
-					"Source_Column_List": {
-						"type": "string",
-						"defaultValue": "*"
-					},
-					"ColumnDelimiter": {
-						"type": "string",
-						"defaultValue": ","
-					},
-					"QuoteCharacter": {
-						"type": "string",
-						"defaultValue": "¬"
-					},
-					"source_where_filter": {
-						"type": "string",
-						"defaultValue": " "
-					},
-					"UserName": {
-						"type": "string"
-					},
-					"SecretPasswordName": {
-						"type": "string"
-					},
-					"BlobContainer": {
-						"type": "string"
-					},
-					"BusinessKeyList": {
-						"type": "string"
-					},
-					"DeltaTargetDbName": {
-						"type": "string"
-					},
-					"StorageAccount": {
-						"type": "string"
-					},
-					"RowSource": {
-						"type": "string"
-					},
-					"DbHostName": {
-						"type": "string"
-					},
-					"AzureTargetTableName": {
-						"type": "string"
-					},
-					"DeltaStagingTableParquetFilePath": {
-						"type": "string"
-					},
-					"DeleteProcessCompletionDTM": {
-						"type": "string"
-					},
-					"DeltaStagingDbName": {
-						"type": "string"
-					},
-					"DeltaStageTableName": {
-						"type": "string"
-					},
-					"AzureSqlTempTableName": {
-						"type": "string"
-					},
-					"Host_Name": {
-						"type": "string"
-					},
-					"Port_No": {
-						"type": "string"
-					},
-					"SID": {
-						"type": "string"
-					},
-					"databricksclustername": {
-						"type": "string"
-					},
-					"databricksclusterid": {
-						"type": "string"
-					},
-					"databrickssecretname": {
 						"type": "string"
 					}
 				},
