@@ -1,0 +1,81 @@
+{
+	"name": "PL_EDWDiscovery_SourceToBlob",
+	"properties": {
+		"activities": [
+			{
+				"name": "SourceToBlob_CommandType",
+				"type": "Switch",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@pipeline().parameters.LoadTypeName",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "Databricks Notebook",
+							"activities": [
+								{
+									"name": "Execute DM_SourcetoBlob_Databricks",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Databricks",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@pipeline().parameters.SourceID",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						},
+						{
+							"value": "SQL Database",
+							"activities": [
+								{
+									"name": "Execute DM_SourcetoBlob_SQLDatabase",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_SqlServer",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@pipeline().parameters.SourceID",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"SourceID": {
+				"type": "int"
+			},
+			"LoadTypeName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "EDW_Discovery"
+		},
+		"annotations": []
+	}
+}
