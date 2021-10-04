@@ -395,6 +395,232 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_DM_SourceToBlob_Databricks')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Source Tables",
+						"description": "",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_tablelist_by_sourceid]",
+								"storedProcedureParameters": {
+									"sourceid": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.SourceID",
+											"type": "Expression"
+										}
+									}
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachTable",
+						"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Source Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Source Tables').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "Is Data Up to Date",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Get Refresh Values",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(activity('Get Refresh Values').output.firstRow.Uptodate_Ind, 1)",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Execute_SourceToBlob_Notebook",
+												"type": "DatabricksNotebook",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"notebookPath": {
+														"value": "@item().Command",
+														"type": "Expression"
+													},
+													"baseParameters": {
+														"Watermark_Value": {
+															"value": "@activity('Get Refresh Values').output.firstRow.Watermark_Value",
+															"type": "Expression"
+														},
+														"Expected_Fields": {
+															"value": "@item().ColumnSchemaList",
+															"type": "Expression"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "LS_DBR_ADF_Job_Cluster",
+													"type": "LinkedServiceReference",
+													"parameters": {
+														"databricksclusterid": {
+															"value": "@item().databricksclusterid",
+															"type": "Expression"
+														},
+														"databrickssecretname": {
+															"value": "@item().databrickssecretname",
+															"type": "Expression"
+														}
+													}
+												}
+											},
+											{
+												"name": "PostProcessingAfterDelta",
+												"description": "Stored procedure activity to store the new high-watermark value into external control table for delta data loading. ",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "Execute_SourceToBlob_Notebook",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 3,
+													"retryIntervalInSeconds": 30
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[[ETL].[usp_update_incrementaldatevalue]",
+													"storedProcedureParameters": {
+														"LastModifiedDTM": {
+															"value": {
+																"value": "@activity('Get Refresh Values').output.firstRow.Current_Max_Value",
+																"type": "Expression"
+															},
+															"type": "DateTime"
+														},
+														"TableID": {
+															"value": {
+																"value": "@item().TableID",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "LS_ASQL_EDWDiscovery",
+													"type": "LinkedServiceReference"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "Get Refresh Values",
+									"description": "",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[ETL].[usp_get_tablerefreshvalues]",
+											"storedProcedureParameters": {
+												"tableID": {
+													"type": "Int32",
+													"value": {
+														"value": "@item().TableID",
+														"type": "Expression"
+													}
+												}
+											},
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_ASQL_EDWDiscovery",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"firstRowOnly": true
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceID": {
+						"type": "int",
+						"defaultValue": 3
+					}
+				},
+				"folder": {
+					"name": "EDW_Discovery"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_Framework_Migration_BlobToASQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -3140,73 +3366,6 @@
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
 					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_File_NFUJPRD200')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"TargetFilePath": {
-						"type": "string"
-					},
-					"TargetFileName": {
-						"type": "string"
-					},
-					"ColumnDelimiter": {
-						"type": "string"
-					},
-					"QuoteCharacter": {
-						"type": "string"
-					},
-					"EscapeCharacter": {
-						"type": "string"
-					},
-					"FirstRowHeader": {
-						"type": "int"
-					}
-				},
-				"folder": {
-					"name": "File Extract"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"fileName": {
-							"value": "@dataset().TargetFileName",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().TargetFilePath",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": {
-						"value": "@dataset().ColumnDelimiter",
-						"type": "Expression"
-					},
-					"escapeChar": {
-						"value": "@dataset().EscapeCharacter",
-						"type": "Expression"
-					},
-					"firstRowAsHeader": {
-						"value": "@equals(dataset().FirstRowHeader,1)",
-						"type": "Expression"
-					},
-					"quoteChar": {
-						"value": "@dataset().QuoteCharacter",
-						"type": "Expression"
-					}
 				},
 				"schema": []
 			},
