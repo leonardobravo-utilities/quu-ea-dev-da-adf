@@ -19,10 +19,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ORAC_Framework'"
 		},
-		"LS_SQL_Framework_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'"
-		},
 		"LS_FS_Globalscape_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "\\\\nfujprd200\\EBI_PROD_LANDING"
@@ -62,16 +58,58 @@
 		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT"
-		},
-		"LS_SQL_Framework_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "@{linkedService().UserName}"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_FizeSize')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					},
+					"directory": {
+						"type": "string"
+					},
+					"file": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().file",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directory",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_ICN')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
@@ -769,53 +807,6 @@
 							"type": "LinkedServiceReference"
 						},
 						"secretName": "svc-ebi-prdc04-agt"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SelfHostedRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_SQL_Framework')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"parameters": {
-					"Servername": {
-						"type": "string",
-						"defaultValue": "PRDC04-SQL"
-					},
-					"Databasename": {
-						"type": "string",
-						"defaultValue": "EDW_DISCOVERY"
-					},
-					"SecretPasswordName": {
-						"type": "string",
-						"defaultValue": "svc-ebi-prdc04-agt"
-					},
-					"UserName": {
-						"type": "string",
-						"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
-					}
-				},
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_SQL_Framework_connectionString')]",
-					"userName": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": {
-							"value": "@linkedService().SecretPasswordName",
-							"type": "Expression"
-						}
 					}
 				},
 				"connectVia": {
