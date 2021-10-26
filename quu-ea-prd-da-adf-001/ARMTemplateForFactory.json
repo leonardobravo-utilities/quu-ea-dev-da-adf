@@ -307,14 +307,6 @@
 			"type": "bool",
 			"defaultValue": true
 		},
-		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
-			"type": "string",
-			"defaultValue": "SILO"
-		},
-		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
-			"type": "string",
-			"defaultValue": "Incremental_Load"
-		},
 		"SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type": {
 			"type": "string",
 			"defaultValue": "Incremental"
@@ -422,6 +414,14 @@
 		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_p_MidServerLocation": {
 			"type": "string",
 			"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
+			"type": "string",
+			"defaultValue": "SILO"
+		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
+			"type": "string",
+			"defaultValue": "Incremental"
 		}
 	},
 	"variables": {
@@ -22596,47 +22596,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/SILO_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_Silo_Weather_Observations",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"Source_Name": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name')]",
-							"Silo_load_type": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-05-15T00:47:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								30
-							],
-							"hours": [
-								16
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_Silo_Weather_Observations')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/SUMS_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -24534,6 +24493,47 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_ServiceNow_Main')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SILO_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Silo_Weather_Observations",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"Source_Name": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name')]",
+							"Silo_load_type": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-05-15T00:47:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								16
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Silo_Weather_Observations')]"
 			]
 		}
 	]
