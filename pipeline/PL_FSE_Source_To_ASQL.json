@@ -20,7 +20,8 @@
 						"sqlReaderQuery": {
 							"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
 							"type": "Expression"
-						}
+						},
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",
@@ -106,6 +107,29 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Execute EDW_Discovery to EDW_Mart Data Copy",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "CheckExecutionStatusForBlobToASQL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Framework_DM_DiscoveryToMart_DataCopy",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"ModelName": "Crew-Roster-Mart-Model"
+					}
 				}
 			}
 		],
