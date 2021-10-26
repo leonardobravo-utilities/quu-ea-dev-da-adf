@@ -394,6 +394,14 @@
 		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
+		},
+		"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "@{linkedService().p_MidServerLocation}"
+		},
+		"LS_FS_ServiceNow_MidServer_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_UATC02_AGT"
 		}
 	},
 	"variables": {
@@ -23588,6 +23596,144 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_ServiceNow')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"p_FileFolder": {
+						"type": "string",
+						"defaultValue": "ServiceNow\\Pre-Prod"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().p_FileFolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_ServiceNow_MidServer')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Service Now mid-server -    \\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates",
+				"parameters": {
+					"p_MidServerLocation": {
+						"type": "string",
+						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+					}
+				},
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SVC-EBI-UATC02-AGT"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_MidServer_ServiceNow_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_ServiceNow_MidServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_MidServerLocation": {
+							"value": "@dataset().p_MidServerLocation",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"p_MidServerLocation": {
+						"type": "string",
+						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_ServiceNow_MidServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_MidServer_ServiceNow_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
 			]
 		}
 	]

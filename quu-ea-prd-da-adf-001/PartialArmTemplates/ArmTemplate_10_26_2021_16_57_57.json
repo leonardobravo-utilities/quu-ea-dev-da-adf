@@ -1,0 +1,148 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "quu-ea-prd-da-adf-001"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_ServiceNow')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"p_FileFolder": {
+						"type": "string",
+						"defaultValue": "ServiceNow\\Pre-Prod"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().p_FileFolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_ServiceNow_MidServer')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Service Now mid-server -    \\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates",
+				"parameters": {
+					"p_MidServerLocation": {
+						"type": "string",
+						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+					}
+				},
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "@{linkedService().p_MidServerLocation}",
+					"userId": "urbanutilities\\SVC-EBI_UATC02_AGT",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SVC-EBI-UATC02-AGT"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_MidServer_ServiceNow_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_ServiceNow_MidServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_MidServerLocation": {
+							"value": "@dataset().p_MidServerLocation",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"p_MidServerLocation": {
+						"type": "string",
+						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_ServiceNow_MidServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_MidServer_ServiceNow_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

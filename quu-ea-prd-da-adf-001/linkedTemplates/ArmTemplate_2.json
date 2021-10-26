@@ -22,6 +22,14 @@
 		"LS_SQL_Framework_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "@{linkedService().UserName}"
+		},
+		"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "@{linkedService().p_MidServerLocation}"
+		},
+		"LS_FS_ServiceNow_MidServer_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_UATC02_AGT"
 		}
 	},
 	"variables": {
@@ -139,6 +147,35 @@
 					"table": {
 						"value": "@dataset().TableName",
 						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_ServiceNow_MidServer')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Service Now mid-server -    \\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates",
+				"parameters": {
+					"p_MidServerLocation": {
+						"type": "string",
+						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+					}
+				},
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SVC-EBI-UATC02-AGT"
 					}
 				}
 			},
@@ -3318,62 +3355,6 @@
 					"quoteChar": "\""
 				},
 				"schema": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_SUMS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"filefolder": {
-						"type": "string",
-						"defaultValue": "\\\\Nfujprd200\\EBI_PROD_LANDING\\SUMS"
-					}
-				},
-				"folder": {
-					"name": "SUMS"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"folderPath": {
-							"value": "@dataset().filefolder",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"rowDelimiter": "\n",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					}
-				]
 			},
 			"dependsOn": []
 		}

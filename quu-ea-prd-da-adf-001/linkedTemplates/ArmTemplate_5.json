@@ -10,16 +10,565 @@
 		"ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName": {
 			"type": "string",
 			"defaultValue": "ICN"
-		},
-		"QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_NFUJPRD200_parameters_FileExportName": {
-			"type": "string",
-			"defaultValue": "QAO"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/WorkOrder_DataModel_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "updating dimensional work order tables in edw_mart",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_WorkOrder_Model_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-07-28T06:52:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								23
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ABN_SourceToBlob')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This pipeline is to validate the Supplier ABN Number.,",
+				"activities": [
+					{
+						"name": "usp_get_tablelist_by_sourceid",
+						"description": "Lookup activity to retrieve the list of partitions stored in the external control table.",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_tablelist_by_sourceid]",
+								"storedProcedureParameters": {
+									"sourceid": {
+										"type": "Int32",
+										"value": {
+											"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
+											"type": "Expression"
+										}
+									}
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachTable",
+						"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "usp_get_tablelist_by_sourceid",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('usp_get_tablelist_by_sourceid').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 5,
+							"activities": [
+								{
+									"name": "Framework_CopyDBtoBlob_Pipeline",
+									"description": "Execute copy db to blob storage pipeline",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_DM_SourcetoBlob_SqlServer",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"Data_Source_Table_Name": {
+												"value": "@item().Data_Source_Table_Name",
+												"type": "Expression"
+											},
+											"Data_Source_WaterMarkColumn": {
+												"value": "@item().Data_Source_WaterMarkColumn",
+												"type": "Expression"
+											},
+											"Data_Destination_Folder_Path": {
+												"value": "@item().Data_Destination_Folder_Path",
+												"type": "Expression"
+											},
+											"Control_Table_Table_Name": {
+												"value": "@item().Control_Table_Table_Name",
+												"type": "Expression"
+											},
+											"Control_Table_Column_Name": {
+												"value": "@item().Control_Table_Column_Name",
+												"type": "Expression"
+											},
+											"TableID": {
+												"value": "@item().TableID",
+												"type": "Expression"
+											},
+											"SourceServerName": {
+												"value": "@item().SourceServerName",
+												"type": "Expression"
+											},
+											"SourceDatabaseName": {
+												"value": "@item().SourceDatabaseName",
+												"type": "Expression"
+											},
+											"Data_Destination_File_Name": {
+												"value": "@item().Data_Destination_File_Name",
+												"type": "Expression"
+											},
+											"IncrementalLoadInd": {
+												"value": "@item().IncrementalLoadInd",
+												"type": "Expression"
+											},
+											"File_Name_Ext": {
+												"value": "@item().File_Name_Ext",
+												"type": "Expression"
+											},
+											"File_Name_DateTime_Ind": {
+												"value": "@item().File_Name_DateTime_Ind",
+												"type": "Expression"
+											},
+											"Join_Condition": {
+												"value": "@item().Join_Condition",
+												"type": "Expression"
+											},
+											"Source_Column_List": {
+												"value": "@item().Source_Column_List",
+												"type": "Expression"
+											},
+											"ColumnDelimiter": {
+												"value": "@item().ColumnDelimiter",
+												"type": "Expression"
+											},
+											"QuoteCharacter": {
+												"value": "@item().QuoteCharacter",
+												"type": "Expression"
+											},
+											"source_where_filter": {
+												"value": "@item().Source_Where_Filter",
+												"type": "Expression"
+											},
+											"UserName": {
+												"value": "@item().UserName\n",
+												"type": "Expression"
+											},
+											"SecretPasswordName": {
+												"value": "@item().SecretPasswordName\n",
+												"type": "Expression"
+											},
+											"CDCMigrationCompleted": {
+												"value": "@item().CDCMigrationCompleted",
+												"type": "Expression"
+											},
+											"CDCMigrationInd": {
+												"value": "@item().CDCMigrationInd",
+												"type": "Expression"
+											},
+											"SourceName": {
+												"value": "@item().SourceName",
+												"type": "Expression"
+											},
+											"DeltaTargetTableName": {
+												"value": "@item().DeltaTargetTableName",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Databricks_ABN_SEARCH_Notebook",
+						"description": "Execute ABN_SEARCH_Notebook",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ForEachTable",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": {
+								"value": "@pipeline().parameters.abn_search_databrick_notebook",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@activity('GetSourceID').output.Firstrow['databricksclusterid']",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@activity('GetSourceID').output.Firstrow['databrickssecretname']",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID,databricksclusterid,databrickssecretname FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"abn_search_databrick_notebook": {
+						"type": "string",
+						"defaultValue": "/edw_discovery/ABN/ABN_Search"
+					},
+					"Source_Name": {
+						"type": "string",
+						"defaultValue": "ABN_SUPPLIER_BUSINESS"
+					}
+				},
+				"folder": {
+					"name": "ABN"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_BOM_DM_SourcetoBlob')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lkp_LocalDates",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "select substring(dbo.udf_covert_utc_to_local_Datetime(getdate()), 1,4)  as  currentyear\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(getdate()),6,2)  as  currentmonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(getdate()),9,2)  as  currentdayofmonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())), 1,4)  as  yesterdayyear\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())),6,2)  as  yesterdaymonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())),9,2)  as  yesterdaydayofmonth",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Lkp_FTPFolderDetails",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Lkp_LocalDates",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select \n\t\tss.*, STD.TableID\n From \n (\n\n\t SELECT \n\t\tsourceid, Fileserverlocation, FileFolderPath,value as STATION_POINT_NAME\n\tFROM  ETL.SourceSystem \n\t\tcross apply STRING_SPLIT(filefoldername, ',')\n\twhere sourceid = @{pipeline().parameters.SourceID}\n\n) SS join  [ETL].[SourceTableDetails] STD on STD.sourceid = ss.sourceid\nand TargetBlobFileName = ss.STATION_POINT_NAME",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "For each Station Point Name",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lkp_FTPFolderDetails",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lkp_FTPFolderDetails').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Execute PL_BOM_CopyandTransformSourceFile",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_BOM_CopyandTransformSourceFile",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"Fileserverlocation": {
+												"value": "@item().Fileserverlocation",
+												"type": "Expression"
+											},
+											"FileFolderPath": {
+												"value": "@item().FileFolderPath",
+												"type": "Expression"
+											},
+											"STATION_POINT_NAME": {
+												"value": "@item().STATION_POINT_NAME",
+												"type": "Expression"
+											},
+											"TableID": {
+												"value": "@item().TableID",
+												"type": "Expression"
+											},
+											"yesterdayyear": {
+												"value": "@activity('Lkp_LocalDates').output.firstrow.yesterdayyear",
+												"type": "Expression"
+											},
+											"yesterdaymonth": {
+												"value": "@activity('Lkp_LocalDates').output.firstrow.yesterdaymonth",
+												"type": "Expression"
+											},
+											"SourceID": {
+												"value": "@pipeline().parameters.SourceID",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceID": {
+						"type": "string",
+						"defaultValue": "38"
+					}
+				},
+				"variables": {
+					"Fileserverlocation": {
+						"type": "String"
+					},
+					"FileFolderPath": {
+						"type": "String"
+					},
+					"STATION_POINT_NAME": {
+						"type": "String"
+					},
+					"TableID": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "BOM"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_BOM_Forecast_BlobToASQL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExecutePL_TRFM_BLOBToASQL",
+						"description": "Loading Temetra API Data into databricks delta and Azure sql db",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceID": {
+									"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "BOM-FORECAST"
+					}
+				},
+				"folder": {
+					"name": "BOM"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Chris21_Main')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -2492,333 +3041,6 @@
 						}
 					}
 				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/QAO_File_Export_Monthly_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Every 2nd Monday of each Month at 9 : 00 AM",
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_File_Export_To_NFUJPRD200",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"FileExportName": "[parameters('QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_NFUJPRD200_parameters_FileExportName')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Month",
-						"interval": 1,
-						"startTime": "2020-09-22T02:04:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								23
-							],
-							"monthlyOccurrences": [
-								{
-									"day": "Sunday",
-									"occurrence": 2
-								}
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_ABN_Main')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Exec_PL_ABN",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_ABN_SourceToBlob",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "Exec_PL_ABN_BlobToASQL",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Exec_PL_ABN",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_ABN_BlobToASQL",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"folder": {
-					"name": "ABN"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_BOM_Forecast_Main')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "BOM_Brisbane_Forecast",
-						"type": "DatabricksNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 1,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/edw_discovery/BOM_Forecasts/BOM_Brisbane_Forecast"
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_DBR_ADF_Job_Cluster",
-							"type": "LinkedServiceReference",
-							"parameters": {
-								"databricksclusterid": {
-									"value": "@pipeline().parameters.databricksclusterid",
-									"type": "Expression"
-								},
-								"databrickssecretname": {
-									"value": "@pipeline().parameters.databrickssecretname",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "PL_BOM_Forecast_BlobToASQL",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "BOM_Brisbane_Forecast",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_BOM_Forecast_BlobToASQL",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"SourceName": {
-									"value": "@pipeline().parameters.SourceName",
-									"type": "Expression"
-								}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceName": {
-						"type": "string",
-						"defaultValue": "BOM-FORECAST"
-					},
-					"databricksclusterid": {
-						"type": "string",
-						"defaultValue": "1015-043022-have239"
-					},
-					"databrickssecretname": {
-						"type": "string",
-						"defaultValue": "databricks-token"
-					}
-				},
-				"folder": {
-					"name": "BOM"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_BOM_SourceToAsql')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "GetSourceID",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": true
-						}
-					},
-					{
-						"name": "CheckExecutionStatusForSourceToBlob",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "GetSourceID",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@pipeline().parameters.OnlySourceToBlob",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_BOM_DM_SourcetoBlob",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"SourceID": {
-												"value": "@activity('GetSourceID').output.FirstRow['SourceID']",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "CheckExecutionStatusForBlobToASQL",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "CheckExecutionStatusForSourceToBlob",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@pipeline().parameters.OnlyBlobtoASQL",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "ExecutePL_TRFM_BLOBToASQL",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"SourceID": {
-												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceName": {
-						"type": "string",
-						"defaultValue": "BOM Weather Data"
-					},
-					"OnlySourceToBlob": {
-						"type": "bool",
-						"defaultValue": true
-					},
-					"OnlyBlobtoASQL": {
-						"type": "bool",
-						"defaultValue": true
-					}
-				},
-				"folder": {
-					"name": "BOM"
-				},
-				"annotations": []
 			},
 			"dependsOn": []
 		}
