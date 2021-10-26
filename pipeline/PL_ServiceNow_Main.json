@@ -1,0 +1,192 @@
+{
+	"name": "PL_ServiceNow_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetSourceDetails",
+				"description": "Fetching SourceId from etl.SourceSystem",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select SourceID, Fileserverlocation, FileFolderName from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "CheckExecutionStatusForGSFileServerToBlob",
+				"description": "Execute only if OnlyGSFileServerToBlob = TRUE",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "CheckExecutionStatusForMidServerToGSFileServer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@pipeline().parameters.OnlyGSFileServerToBlob",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute_PL_ServiceNow_GSFileServer_To_Blob",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ServiceNow_DM_GSFileServerToBlob",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"p_GSFileFolderName": {
+										"value": "@activity('GetSourceDetails').output.Firstrow['FileFolderName']",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "CheckExecutionStatusForBlobToASQL",
+				"description": "Execute only if OnlyBlobtoASQL= TRUE",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "CheckExecutionStatusForGSFileServerToBlob",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@pipeline().parameters.OnlyBlobtoASQL",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "ExecutePL_TRFM_BLOBToASQL",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('GetSourceDetails').output.firstRow['SourceID']",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "CheckExecutionStatusForMidServerToGSFileServer",
+				"description": "Execute only if OnlySourceToGSFileServer = TRUE",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "GetSourceDetails",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@pipeline().parameters.OnlySourceToGSFileServer",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute_PL_ServiceNow_MidServer_To_GSFileServer",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ServiceNow_DM_SourceToGSFileServer",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"p_GSFileFolderName": {
+										"value": "@activity('GetSourceDetails').output.Firstrow['FileFolderName']",
+										"type": "Expression"
+									},
+									"p_SourceId": {
+										"value": "@activity('GetSourceDetails').output.Firstrow['SourceId']",
+										"type": "Expression"
+									},
+									"p_MidServerLocation": {
+										"value": "@pipeline().parameters.p_MidServerLocation",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "ServiceNow"
+			},
+			"OnlySourceToGSFileServer": {
+				"type": "bool",
+				"defaultValue": true
+			},
+			"OnlyGSFileServerToBlob": {
+				"type": "bool",
+				"defaultValue": true
+			},
+			"OnlyBlobtoASQL": {
+				"type": "bool",
+				"defaultValue": true
+			},
+			"p_MidServerLocation": {
+				"type": "string",
+				"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+			}
+		},
+		"folder": {
+			"name": "Service Now"
+		},
+		"annotations": []
+	}
+}
