@@ -1,0 +1,92 @@
+{
+	"name": "PL_ServiceNow_DM_SourceToGSFileServer",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy_All_Files_MidServer_to_GSFileServer",
+				"description": "Copy all the files from MidServer to GSFileServer\nMidServer Location: \\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates\n\nGSFileServer Location: \\\\nfujprd200\\EBI_PROD_LANDING\\ServiceNow",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "FileServerReadSettings",
+							"recursive": true,
+							"wildcardFileName": {
+								"value": "@variables('v_FileType')",
+								"type": "Expression"
+							},
+							"deleteFilesAfterCompletion": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "FileServerWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_FS_MidServer_ServiceNow_Source",
+						"type": "DatasetReference",
+						"parameters": {
+							"p_MidServerLocation": {
+								"value": "@pipeline().parameters.p_MidServerLocation",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_FS_MidServer_ServiceNow_Destination",
+						"type": "DatasetReference",
+						"parameters": {
+							"filefolder": {
+								"value": "@pipeline().parameters.p_GSFileFolderName",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"p_GSFileFolderName": {
+				"type": "string",
+				"defaultValue": "ServiceNow\\\\Pre-Prod"
+			},
+			"p_SourceId": {
+				"type": "string"
+			},
+			"p_MidServerLocation": {
+				"type": "string",
+				"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+			}
+		},
+		"variables": {
+			"v_FileType": {
+				"type": "String",
+				"defaultValue": "*.csv"
+			}
+		},
+		"folder": {
+			"name": "Service Now"
+		},
+		"annotations": []
+	}
+}
