@@ -1,0 +1,28 @@
+{
+	"name": "DS_FS_MidServer_ServiceNow_Destination",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_FS_Globalscape",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"filefolder": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Service Now"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"folderPath": {
+					"value": "@dataset().filefolder",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}
