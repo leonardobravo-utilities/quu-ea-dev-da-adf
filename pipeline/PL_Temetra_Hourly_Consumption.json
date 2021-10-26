@@ -38,17 +38,65 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Load Temp to Target",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "4_Temetra_Hourly_Consumption",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[ETL].[usp_load_target_table]",
+					"storedProcedureParameters": {
+						"isDebugFlag": {
+							"value": "false",
+							"type": "Boolean"
+						},
+						"isTruncateBeforeLoad": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"sourceObject": {
+							"value": "Temp.Temetra_Hourly_Consumption",
+							"type": "String"
+						},
+						"targetObject": {
+							"value": "Mart.Temetra_Hourly_Consumption",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWMart",
+					"type": "LinkedServiceReference"
+				}
 			}
 		],
 		"parameters": {
 			"databricks_cluster_id": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "0417-051914-axons909"
 			},
 			"databricks_secret_name": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "databricks2-token"
 			},
 			"Load_Type": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "Full"
 			}
 		},
 		"folder": {
