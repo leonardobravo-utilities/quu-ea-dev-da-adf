@@ -1,0 +1,31 @@
+{
+	"name": "DS_FS_MidServer_ServiceNow_Source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_FS_ServiceNow_MidServer",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"p_MidServerLocation": {
+					"value": "@dataset().p_MidServerLocation",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"p_MidServerLocation": {
+				"type": "string",
+				"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+			}
+		},
+		"folder": {
+			"name": "Service Now"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation"
+			}
+		}
+	}
+}
