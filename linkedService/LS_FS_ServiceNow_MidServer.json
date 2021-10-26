@@ -1,0 +1,30 @@
+{
+	"name": "LS_FS_ServiceNow_MidServer",
+	"properties": {
+		"description": "Service Now mid-server -    \\\\\\\\NFUJPRD281\\\\c$\\\\Utils\\\\PROD\\\\export\\\\updates",
+		"parameters": {
+			"p_MidServerLocation": {
+				"type": "string",
+				"defaultValue": "\\\\\\\\NFUJPRD281\\\\c$\\\\Utils\\\\PROD\\\\export\\\\updates"
+			}
+		},
+		"annotations": [],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "@{linkedService().p_MidServerLocation}",
+			"userId": "urbanutilities\\\\SVC-EBI_UATC02_AGT",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ADF_LS_AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "svc-ebi-prdc04-agt"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHostedRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
