@@ -3,14 +3,36 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Stopped",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_ServiceNow_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "ServiceNow",
+					"OnlySourceToGSFileServer": true,
+					"OnlyGSFileServerToBlob": true,
+					"OnlyBlobtoASQL": true,
+					"p_MidServerLocation": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Minute",
-				"interval": 15,
-				"startTime": "2021-10-26T10:51:00Z",
-				"timeZone": "UTC"
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2020-02-23T04:35:00Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						19
+					]
+				}
 			}
 		}
 	}
