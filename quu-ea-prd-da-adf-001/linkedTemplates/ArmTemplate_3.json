@@ -17,6 +17,122 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_SUMS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string",
+						"defaultValue": "\\\\Nfujprd200\\EBI_PROD_LANDING\\SUMS"
+					}
+				},
+				"folder": {
+					"name": "SUMS"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_TFS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Tanker Filling Station Card Services"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_NFUJPRD301_ICN')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_NFUJPRD301",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": "ICN\\Target"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_File_NFUJPRD200')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -497,6 +613,279 @@
 						}
 					}
 				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Framework_DM_DiscoveryToMart_DataCopy')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Load Each Model - Discovery to Mart Temp",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Model Objects To Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Model Objects To Load').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "Switch Load Type",
+									"type": "Switch",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"on": {
+											"value": "@item().LoadTypeName",
+											"type": "Expression"
+										},
+										"cases": [
+											{
+												"value": "Copy Activity",
+												"activities": [
+													{
+														"name": "Copy Dicovery to Mart Temp - Copy Activity",
+														"type": "Copy",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "7.00:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"source": {
+																"type": "AzureSqlSource",
+																"sqlReaderQuery": {
+																	"value": "@concat('SELECT * FROM ', item().SourceSchemaName, '.', item().SourceObjectName, ' (NOLOCK)')",
+																	"type": "Expression"
+																},
+																"queryTimeout": "02:00:00",
+																"partitionOption": "None"
+															},
+															"sink": {
+																"type": "AzureSqlSink",
+																"preCopyScript": {
+																	"value": "@{concat('TRUNCATE TABLE TEMP.', item().TargetSchemaName, '_', item().TargetObjectName)}",
+																	"type": "Expression"
+																},
+																"disableMetricsCollection": false,
+																"writeBehavior": "insert"
+															},
+															"enableStaging": false,
+															"translator": {
+																"type": "TabularTranslator",
+																"typeConversion": true,
+																"typeConversionSettings": {
+																	"allowDataTruncation": true,
+																	"treatBooleanAsNumber": false
+																}
+															}
+														},
+														"inputs": [
+															{
+																"referenceName": "DS_ASQL_EDWDiscovery",
+																"type": "DatasetReference",
+																"parameters": {}
+															}
+														],
+														"outputs": [
+															{
+																"referenceName": "DS_ASQL_EDWMart_Target",
+																"type": "DatasetReference",
+																"parameters": {
+																	"SchemaName": {
+																		"value": "TEMP",
+																		"type": "Expression"
+																	},
+																	"TableName": {
+																		"value": "@concat(item().TargetSchemaName, '_', item().TargetObjectName)",
+																		"type": "Expression"
+																	}
+																}
+															}
+														]
+													}
+												]
+											},
+											{
+												"value": "Databricks Notebook",
+												"activities": [
+													{
+														"name": "Copy Discovery to Mart Temp - Databricks Notebook",
+														"type": "DatabricksNotebook",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "7.00:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"notebookPath": {
+																"value": "@item().SourceTransformCommand",
+																"type": "Expression"
+															}
+														},
+														"linkedServiceName": {
+															"referenceName": "LS_DBR_ADF_Job_Cluster",
+															"type": "LinkedServiceReference",
+															"parameters": {
+																"databricksclusterid": {
+																	"value": "@item().DatabricksClusterID",
+																	"type": "Expression"
+																},
+																"databrickssecretname": "databricks-token"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Get Model Objects To Load",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_model_object_load_list]",
+								"storedProcedureParameters": {
+									"ModelName": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.ModelName",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Load Each Model - Mart Temp to Target",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Load Each Model - Discovery to Mart Temp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Model Objects To Load').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "Copy Temp to Target",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": {
+											"value": "@item().TargetLoadCommand",
+											"type": "Expression"
+										},
+										"storedProcedureParameters": {
+											"isDebugFlag": {
+												"value": "false",
+												"type": "Boolean"
+											},
+											"sourceObject": {
+												"value": {
+													"value": "@concat('TEMP.', item().TargetSchemaName, '_', item().TargetObjectName)",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"targetObject": {
+												"value": {
+													"value": "@concat(item().TargetSchemaName, '.', item().TargetObjectName)",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"isTruncateBeforeLoad": {
+												"value": {
+													"value": "@item().TruncateBeforeLoad",
+													"type": "Expression"
+												},
+												"type": "Boolean"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_EDWMart",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"ModelName": {
+						"type": "string",
+						"defaultValue": "Crew-Roster-Mart-Model"
+					}
+				},
+				"folder": {
+					"name": "FrameWork"
+				},
+				"annotations": []
 			},
 			"dependsOn": []
 		},
@@ -1879,1512 +2268,6 @@
 				"annotations": []
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_File_Export_To_NFUJPRD200')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "This pipeline will export the Files at Network Path \\\\Nfujprd200\\ebi_prod_landing",
-				"activities": [
-					{
-						"name": "Files List to Export",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "select * from ETL.FileExportList a where IsActive=1 and \nexists (select 1  from etl.fileexport b where  IsActive=1 and a.FileExportID=b.FileExportID and \nUpper(b.FileExportName)=Upper('@{pipeline().parameters.FileExportName}') )\n\n\n",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEachFile",
-						"description": "Generate the Files",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Files List to Export",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Files List to Export').output.value",
-								"type": "Expression"
-							},
-							"isSequential": false,
-							"batchCount": 20,
-							"activities": [
-								{
-									"name": "Query Rowcount",
-									"type": "Lookup",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlMISource",
-											"sqlReaderQuery": {
-												"value": "@if(empty(item().SourceRowCountQuery),'select 1 as SourceRowCount',item().SourceRowCountQuery)",
-												"type": "Expression"
-											},
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									}
-								},
-								{
-									"name": "First Row Exists",
-									"type": "IfCondition",
-									"dependsOn": [
-										{
-											"activity": "Query Rowcount",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@not(equals(activity('Query Rowcount').output.firstRow.SourceRowCount,0))",
-											"type": "Expression"
-										},
-										"ifTrueActivities": [
-											{
-												"name": "lkp_getlocattime",
-												"type": "Lookup",
-												"dependsOn": [],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "SqlMISource",
-														"sqlReaderQuery": {
-															"value": "DECLARE @DateTimeFormat as varchar(20);\nDECLARE @localdatetime as datetime;\nSet @DateTimeFormat ='@{item().DateTimeFormatInFileName}';\nEXEC @localdatetime = [dbo].[udf_getLocalDTM];\nselect FORMAT(@localdatetime, Case when len(@DateTimeFormat)=0 then'yyyy_MM_dd_HHmmss' else @DateTimeFormat end) as  localstarttime;",
-															"type": "Expression"
-														},
-														"partitionOption": "None"
-													},
-													"dataset": {
-														"referenceName": "DS_ASQL_EDWDiscovery",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												}
-											},
-											{
-												"name": "Generate File",
-												"description": "",
-												"type": "Copy",
-												"dependsOn": [
-													{
-														"activity": "lkp_getlocattime",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "@item().SourceQuery",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00",
-														"partitionOption": "None"
-													},
-													"sink": {
-														"type": "DelimitedTextSink",
-														"storeSettings": {
-															"type": "FileServerWriteSettings"
-														},
-														"formatSettings": {
-															"type": "DelimitedTextWriteSettings",
-															"quoteAllText": true,
-															"fileExtension": ""
-														}
-													},
-													"enableStaging": false,
-													"dataIntegrationUnits": 0
-												},
-												"inputs": [
-													{
-														"referenceName": "DS_ASQL_EDWDiscovery",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												],
-												"outputs": [
-													{
-														"referenceName": "DS_File_NFUJPRD200",
-														"type": "DatasetReference",
-														"parameters": {
-															"TargetFilePath": {
-																"value": "@item().TargetFilePath",
-																"type": "Expression"
-															},
-															"TargetFileName": {
-																"value": "@if(equals(item().IncludeDateTimeInFile_Name,1)\n,  concat(item().TargetFileName\n             ,'_'\n            ,activity('lkp_getlocattime').output.firstrow.localstarttime\n             ,item().TargetFileNameExt)\n,\nconcat(\nitem().TargetFileName\n,item().TargetFileNameExt)\n)\n\n",
-																"type": "Expression"
-															},
-															"ColumnDelimiter": {
-																"value": "@item().ColumnDelimiter",
-																"type": "Expression"
-															},
-															"QuoteCharacter": {
-																"value": "@item().QuoteCharacter",
-																"type": "Expression"
-															},
-															"EscapeCharacter": {
-																"value": "@item().EscapeCharacter",
-																"type": "Expression"
-															},
-															"FirstRowHeader": {
-																"value": "@item().FirstRowHeader",
-																"type": "Expression"
-															}
-														}
-													}
-												]
-											},
-											{
-												"name": "Update Incremental Date",
-												"type": "SqlServerStoredProcedure",
-												"dependsOn": [
-													{
-														"activity": "Generate File",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"storedProcedureName": "[ETL].usp_update_fileexport_incrementaldatevalue",
-													"storedProcedureParameters": {
-														"FileID": {
-															"value": {
-																"value": "@item().FileID",
-																"type": "Expression"
-															},
-															"type": "Int32"
-														}
-													}
-												},
-												"linkedServiceName": {
-													"referenceName": "LS_ASQL_EDWDiscovery",
-													"type": "LinkedServiceReference"
-												}
-											}
-										]
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"FileExportName": {
-						"type": "string",
-						"defaultValue": "QAO"
-					}
-				},
-				"folder": {
-					"name": "File Export"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_File_NFUJPRD200')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_File_Export_To_NFUJPRD202')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "This pipeline will export the Files at Network Path \\\\Nfujprd202\\FDrive",
-				"activities": [
-					{
-						"name": "Files List to Export",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "select * from ETL.FileExportList a where IsActive=1 and \nexists (select 1  from etl.fileexport b where  IsActive=1 and a.FileExportID=b.FileExportID and \nUpper(b.FileExportName)=Upper('@{pipeline().parameters.FileExportName}') )\n\n\n",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEachFile",
-						"description": "Generate the Files",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Files List to Export",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Files List to Export').output.value",
-								"type": "Expression"
-							},
-							"isSequential": false,
-							"batchCount": 20,
-							"activities": [
-								{
-									"name": "Query Rowcount",
-									"type": "Lookup",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlMISource",
-											"sqlReaderQuery": {
-												"value": "@if(empty(item().SourceRowCountQuery),'select 1 as SourceRowCount',item().SourceRowCountQuery)",
-												"type": "Expression"
-											},
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									}
-								},
-								{
-									"name": "First Row Exists",
-									"type": "IfCondition",
-									"dependsOn": [
-										{
-											"activity": "Query Rowcount",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@not(equals(activity('Query Rowcount').output.firstRow.SourceRowCount,0))",
-											"type": "Expression"
-										},
-										"ifTrueActivities": [
-											{
-												"name": "lkp_getlocattime",
-												"type": "Lookup",
-												"dependsOn": [],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "SqlMISource",
-														"sqlReaderQuery": {
-															"value": "DECLARE @DateTimeFormat as varchar(20);\nDECLARE @localdatetime as datetime;\nSet @DateTimeFormat ='@{item().DateTimeFormatInFileName}';\nEXEC @localdatetime = [dbo].[udf_getLocalDTM];\nselect FORMAT(@localdatetime, Case when len(@DateTimeFormat)=0 then'yyyy_MM_dd_HHmmss' else @DateTimeFormat end) as  localstarttime;",
-															"type": "Expression"
-														},
-														"partitionOption": "None"
-													},
-													"dataset": {
-														"referenceName": "DS_ASQL_EDWDiscovery",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												}
-											},
-											{
-												"name": "Generate File",
-												"description": "",
-												"type": "Copy",
-												"dependsOn": [
-													{
-														"activity": "lkp_getlocattime",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "@item().SourceQuery",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00",
-														"partitionOption": "None"
-													},
-													"sink": {
-														"type": "DelimitedTextSink",
-														"storeSettings": {
-															"type": "FileServerWriteSettings"
-														},
-														"formatSettings": {
-															"type": "DelimitedTextWriteSettings",
-															"quoteAllText": true,
-															"fileExtension": ""
-														}
-													},
-													"enableStaging": false,
-													"dataIntegrationUnits": 0
-												},
-												"inputs": [
-													{
-														"referenceName": "DS_ASQL_EDWDiscovery",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												],
-												"outputs": [
-													{
-														"referenceName": "DS_File_NFUJPRD202",
-														"type": "DatasetReference",
-														"parameters": {
-															"TargetFilePath": {
-																"value": "@item().TargetFilePath",
-																"type": "Expression"
-															},
-															"TargetFileName": {
-																"value": "@if(equals(item().IncludeDateTimeInFile_Name,1)\n,  concat(item().TargetFileName\n             ,'_'\n            ,activity('lkp_getlocattime').output.firstrow.localstarttime\n             ,item().TargetFileNameExt)\n,\nconcat(\nitem().TargetFileName\n,item().TargetFileNameExt)\n)\n\n",
-																"type": "Expression"
-															},
-															"ColumnDelimiter": {
-																"value": "@item().ColumnDelimiter",
-																"type": "Expression"
-															},
-															"QuoteCharacter": {
-																"value": "@item().QuoteCharacter",
-																"type": "Expression"
-															},
-															"EscapeCharacter": {
-																"value": "@item().EscapeCharacter",
-																"type": "Expression"
-															},
-															"FirstRowHeader": {
-																"value": "@item().FirstRowHeader",
-																"type": "Expression"
-															}
-														}
-													}
-												]
-											},
-											{
-												"name": "Update Incremental Date",
-												"type": "SqlServerStoredProcedure",
-												"dependsOn": [
-													{
-														"activity": "Generate File",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"storedProcedureName": "[ETL].usp_update_fileexport_incrementaldatevalue",
-													"storedProcedureParameters": {
-														"FileID": {
-															"value": {
-																"value": "@item().FileID",
-																"type": "Expression"
-															},
-															"type": "Int32"
-														}
-													}
-												},
-												"linkedServiceName": {
-													"referenceName": "LS_ASQL_EDWDiscovery",
-													"type": "LinkedServiceReference"
-												}
-											}
-										]
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"FileExportName": {
-						"type": "string",
-						"defaultValue": "ICN"
-					}
-				},
-				"folder": {
-					"name": "File Export"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_File_NFUJPRD202')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_File_Monitoring')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Lookup source files",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEach",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Lookup source files",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Lookup source files').output.value",
-								"type": "Expression"
-							},
-							"isSequential": true,
-							"activities": [
-								{
-									"name": "Get Metadata",
-									"description": "check if any files need to process in the blob container",
-									"type": "GetMetadata",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataset": {
-											"referenceName": "DS_FS_GlobalScape_FileSize",
-											"type": "DatasetReference",
-											"parameters": {
-												"filefolder": {
-													"value": "@item().FileFolderName",
-													"type": "Expression"
-												},
-												"file": {
-													"value": "@item().TargetFileName",
-													"type": "Expression"
-												}
-											}
-										},
-										"fieldList": [
-											"exists",
-											"lastModified"
-										],
-										"storeSettings": {
-											"type": "FileServerReadSettings",
-											"recursive": true
-										},
-										"formatSettings": {
-											"type": "DelimitedTextReadSettings"
-										}
-									}
-								},
-								{
-									"name": "Check if file exists",
-									"type": "IfCondition",
-									"dependsOn": [
-										{
-											"activity": "Get Metadata",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@activity('Get Metadata').output.exists",
-											"type": "Expression"
-										},
-										"ifFalseActivities": [
-											{
-												"name": "Send email file not received",
-												"type": "WebActivity",
-												"dependsOn": [],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"url": {
-														"value": "@pipeline().parameters.LogicAppURL",
-														"type": "Expression"
-													},
-													"method": "POST",
-													"headers": {},
-													"body": {
-														"value": "{\n   \"DataFactoryName\": \"@{pipeline().DataFactory}\",\n   \"PipelineName\": \"@{pipeline().Pipeline}\",\n   \"Subject\": \"@{pipeline().parameters.Subject}\",\n   \"ErrorMessage\": \" File @{item().TargetFileName}  is not received\",\n   \"EmailTo\": \"@{pipeline().parameters.EmailTo}\"\n}\t",
-														"type": "Expression"
-													}
-												}
-											}
-										],
-										"ifTrueActivities": [
-											{
-												"name": "Set File Name",
-												"type": "SetVariable",
-												"dependsOn": [],
-												"userProperties": [],
-												"typeProperties": {
-													"variableName": "FileName",
-													"value": {
-														"value": "@string(item().TargetFileName)",
-														"type": "Expression"
-													}
-												}
-											},
-											{
-												"name": "Retrieve File Size",
-												"type": "GetMetadata",
-												"dependsOn": [
-													{
-														"activity": "Set File Name",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"dataset": {
-														"referenceName": "DS_FS_GlobalScape_FileSize",
-														"type": "DatasetReference",
-														"parameters": {
-															"filefolder": {
-																"value": "@item().FileFolderName",
-																"type": "Expression"
-															},
-															"file": {
-																"value": "@variables('FileName')",
-																"type": "Expression"
-															}
-														}
-													},
-													"fieldList": [
-														"size"
-													],
-													"storeSettings": {
-														"type": "FileServerReadSettings",
-														"recursive": true
-													},
-													"formatSettings": {
-														"type": "DelimitedTextReadSettings"
-													}
-												}
-											},
-											{
-												"name": "Set File Size",
-												"description": "Assign the file size value to the variable",
-												"type": "SetVariable",
-												"dependsOn": [
-													{
-														"activity": "Retrieve File Size",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"userProperties": [],
-												"typeProperties": {
-													"variableName": "FileSize",
-													"value": {
-														"value": "@string(activity('Retrieve File Size').output.Size)",
-														"type": "Expression"
-													}
-												}
-											},
-											{
-												"name": "Retrieve File Modification Date",
-												"type": "GetMetadata",
-												"dependsOn": [
-													{
-														"activity": "Execute Pipeline for File size check",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"dataset": {
-														"referenceName": "DS_FS_GlobalScape_FileSize",
-														"type": "DatasetReference",
-														"parameters": {
-															"filefolder": {
-																"value": "@item().FileFolderName",
-																"type": "Expression"
-															},
-															"file": {
-																"value": "@variables('FileName')",
-																"type": "Expression"
-															}
-														}
-													},
-													"fieldList": [
-														"lastModified"
-													],
-													"storeSettings": {
-														"type": "FileServerReadSettings",
-														"recursive": true
-													},
-													"formatSettings": {
-														"type": "DelimitedTextReadSettings"
-													}
-												}
-											},
-											{
-												"name": "Set LastModified Date",
-												"type": "SetVariable",
-												"dependsOn": [
-													{
-														"activity": "Retrieve File Modification Date",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"userProperties": [],
-												"typeProperties": {
-													"variableName": "LastModifiedDate",
-													"value": {
-														"value": "@string(convertfromUtc(activity('Retrieve File Modification Date').output.LastModified,'E. Australia Standard Time'))",
-														"type": "Expression"
-													}
-												}
-											},
-											{
-												"name": "Execute Pipeline for File size check",
-												"type": "ExecutePipeline",
-												"dependsOn": [
-													{
-														"activity": "Set File Size",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"userProperties": [],
-												"typeProperties": {
-													"pipeline": {
-														"referenceName": "PL_File_Monitoring_File_Size_Check",
-														"type": "PipelineReference"
-													},
-													"waitOnCompletion": true,
-													"parameters": {
-														"FileSize": {
-															"value": "@variables('FileSize')",
-															"type": "Expression"
-														},
-														"Subject": {
-															"value": "@pipeline().parameters.Subject",
-															"type": "Expression"
-														},
-														"FileName": {
-															"value": "@variables('FileName')",
-															"type": "Expression"
-														},
-														"EmailTo": {
-															"value": "@pipeline().parameters.EmailTo",
-															"type": "Expression"
-														},
-														"LogicAppURL": {
-															"value": "@pipeline().parameters.LogicAppURL",
-															"type": "Expression"
-														}
-													}
-												}
-											},
-											{
-												"name": "Execute Pipeline for Lastmodified check",
-												"type": "ExecutePipeline",
-												"dependsOn": [
-													{
-														"activity": "Set LastModified Date",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"userProperties": [],
-												"typeProperties": {
-													"pipeline": {
-														"referenceName": "PL_File_Monitoring_File_LastModifiedDate_Check",
-														"type": "PipelineReference"
-													},
-													"waitOnCompletion": true,
-													"parameters": {
-														"LastModifiedDate": {
-															"value": "@variables('LastModifiedDate')",
-															"type": "Expression"
-														},
-														"Subject": {
-															"value": "@pipeline().parameters.Subject",
-															"type": "Expression"
-														},
-														"LastLoadedDate": {
-															"value": "@ITEM().LastLoadedDate",
-															"type": "Expression"
-														},
-														"FileName": {
-															"value": "@variables('FileName')",
-															"type": "Expression"
-														},
-														"EmailTo": {
-															"value": "@pipeline().parameters.EmailTo",
-															"type": "Expression"
-														},
-														"LogicAppURL": {
-															"value": "@pipeline().parameters.LogicAppURL",
-															"type": "Expression"
-														}
-													}
-												}
-											}
-										]
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"Sourcename": {
-						"type": "string",
-						"defaultValue": "CHRIS21"
-					},
-					"Subject": {
-						"type": "string",
-						"defaultValue": "Chris21"
-					},
-					"ErrorMessageFileNotReceived": {
-						"type": "string",
-						"defaultValue": "File not received"
-					},
-					"EmailTo": {
-						"type": "string"
-					},
-					"LogicAppURL": {
-						"type": "string"
-					}
-				},
-				"variables": {
-					"OldFile": {
-						"type": "Array"
-					},
-					"FileSize": {
-						"type": "String"
-					},
-					"LastModifiedDate": {
-						"type": "String"
-					},
-					"EmptyFile": {
-						"type": "Array"
-					},
-					"FileName": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "Source File Monitoring"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Framework_DM_SourceToBlob_Oracle')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Copy new or updated rows only from database using external control table",
-				"activities": [
-					{
-						"name": "Incremental or Full",
-						"type": "IfCondition",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@equals(pipeline().parameters.IncrementalLoadInd,'1')",
-								"type": "Expression"
-							},
-							"ifFalseActivities": [
-								{
-									"name": "FullCopyToBlob",
-									"description": "Full Copy from source table into blob storage",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "lkp_getlocalstarttime2",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "OracleSource",
-											"oracleReaderQuery": {
-												"value": "select @{pipeline().parameters.Source_Column_List}\nfrom @{pipeline().parameters.Data_Source_Table_Name} \n@{pipeline().parameters.Join_Condition}\n@{pipeline().parameters.source_where_filter}\n",
-												"type": "Expression"
-											},
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".csv"
-											}
-										},
-										"enableStaging": false,
-										"dataIntegrationUnits": 0
-									},
-									"inputs": [
-										{
-											"referenceName": "DS_Oracle_OnPrem",
-											"type": "DatasetReference",
-											"parameters": {
-												"HostName": {
-													"value": "@pipeline().parameters.Host_Name",
-													"type": "Expression"
-												},
-												"PortNo": {
-													"value": "@pipeline().parameters.Port_No",
-													"type": "Expression"
-												},
-												"SID": {
-													"value": "@pipeline().parameters.SID",
-													"type": "Expression"
-												},
-												"UserName": {
-													"value": "@pipeline().parameters.User_Name",
-													"type": "Expression"
-												},
-												"SecretPasswordName": {
-													"value": "@pipeline().parameters.Secret_Password_Name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "DS_ABLB_Datalanding",
-											"type": "DatasetReference",
-											"parameters": {
-												"FolderPath": {
-													"value": "@pipeline().parameters.Data_Destination_Folder_Path",
-													"type": "Expression"
-												},
-												"TargetFileName": {
-													"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1)\n,  concat(pipeline().parameters.Data_Destination_File_Name\n             ,'-'\n            ,activity('lkp_getlocalstarttime2').output.firstrow.localstarttime2\n             ,pipeline().parameters.File_Name_Ext)\n,\nconcat(\npipeline().parameters.Data_Destination_File_Name\n,pipeline().parameters.File_Name_Ext)\n)\n\n\n\n",
-													"type": "Expression"
-												},
-												"ColumnDelimiter": {
-													"value": "@pipeline().parameters.ColumnDelimiter",
-													"type": "Expression"
-												},
-												"QuoteCharacter": {
-													"value": "@pipeline().parameters.QuoteCharacter",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "SqlServerStoredProcedure2",
-									"description": "Stored procedure activity to store the new high-watermark value into external control table for delta data loading. ",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "FullCopyToBlob",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 3,
-										"retryIntervalInSeconds": 30
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[ETL].[usp_update_incrementaldatevalue]",
-										"storedProcedureParameters": {
-											"TableID": {
-												"value": {
-													"value": "@pipeline().parameters.TableID",
-													"type": "Expression"
-												},
-												"type": "Int32"
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "LS_ASQL_EDWDiscovery",
-										"type": "LinkedServiceReference"
-									}
-								},
-								{
-									"name": "lkp_getlocalstarttime2",
-									"type": "Lookup",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlMISource",
-											"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2",
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									}
-								}
-							],
-							"ifTrueActivities": [
-								{
-									"name": "lkp_getpreviousdatevalue",
-									"description": "Retrieve  the last high-watermark value stored in external control table",
-									"type": "Lookup",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlMISource",
-											"sqlReaderQuery": {
-												"value": "select isnull(@{pipeline().parameters.Control_Table_Column_Name},'1753-01-01') as WatermarkValue from @{pipeline().parameters.Control_Table_Table_Name}\nwhere TableID = @{pipeline().parameters.TableID}",
-												"type": "Expression"
-											},
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									}
-								},
-								{
-									"name": "lkp_getcurrentmaxvalue",
-									"description": "Retrieve  the current maximum value in watermark column of source data store",
-									"type": "Lookup",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "OracleSource",
-											"oracleReaderQuery": {
-												"value": "\nSELECT MAX(@{pipeline().parameters.Data_Source_WaterMarkColumn}) AS NewWatermarkValue from @{pipeline().parameters.Data_Source_Table_Name}",
-												"type": "Expression"
-											},
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "DS_Oracle_OnPrem",
-											"type": "DatasetReference",
-											"parameters": {
-												"HostName": {
-													"value": "@pipeline().parameters.Host_Name",
-													"type": "Expression"
-												},
-												"PortNo": {
-													"value": "@pipeline().parameters.Port_No",
-													"type": "Expression"
-												},
-												"SID": {
-													"value": "@pipeline().parameters.SID",
-													"type": "Expression"
-												},
-												"UserName": {
-													"value": "@pipeline().parameters.User_Name",
-													"type": "Expression"
-												},
-												"SecretPasswordName": {
-													"value": "@pipeline().parameters.Secret_Password_Name",
-													"type": "Expression"
-												}
-											}
-										}
-									}
-								},
-								{
-									"name": "DeltaCopyfromDB",
-									"description": "Copy activity to use query to filter the delta data by > last high-watermark and <= current high-watermark from source database, and then only copy the changes to the destination store.",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "lkp_getpreviousdatevalue",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "lkp_getcurrentmaxvalue",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "lkp_getlocattime",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "OracleSource",
-											"oracleReaderQuery": {
-												"value": "select   @{pipeline().parameters.Source_Column_List}\nfrom @{pipeline().parameters.Data_Source_Table_Name} \n@{pipeline().parameters.Join_Condition} \nWHERE\nTO_CHAR(@{pipeline().parameters.Data_Source_WaterMarkColumn} ,'YYYY-MM-DD HH24:MI:SS')>REPLACE( '@{activity('lkp_getpreviousdatevalue').output.firstRow.WatermarkValue}' ,'T',' ')\nand TO_CHAR(@{pipeline().parameters.Data_Source_WaterMarkColumn} ,'YYYY-MM-DD HH24:MI:SS')<= REPLACE('@{activity('lkp_getcurrentmaxvalue').output.firstRow.NewWatermarkValue}','T',' ')\n\n",
-												"type": "Expression"
-											},
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ""
-											}
-										},
-										"enableStaging": false,
-										"dataIntegrationUnits": 0
-									},
-									"inputs": [
-										{
-											"referenceName": "DS_Oracle_OnPrem",
-											"type": "DatasetReference",
-											"parameters": {
-												"HostName": {
-													"value": "@pipeline().parameters.Host_Name",
-													"type": "Expression"
-												},
-												"PortNo": {
-													"value": "@pipeline().parameters.Port_No",
-													"type": "Expression"
-												},
-												"SID": {
-													"value": "@pipeline().parameters.SID",
-													"type": "Expression"
-												},
-												"UserName": {
-													"value": "@pipeline().parameters.User_Name",
-													"type": "Expression"
-												},
-												"SecretPasswordName": {
-													"value": "@pipeline().parameters.Secret_Password_Name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "DS_ABLB_Datalanding",
-											"type": "DatasetReference",
-											"parameters": {
-												"FolderPath": {
-													"value": "@pipeline().parameters.Data_Destination_Folder_Path",
-													"type": "Expression"
-												},
-												"TargetFileName": {
-													"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1)\n,  concat(pipeline().parameters.Data_Destination_File_Name\n             ,'-'\n            ,activity('lkp_getlocattime').output.firstrow.localstarttime\n             ,pipeline().parameters.File_Name_Ext)\n,\nconcat(\npipeline().parameters.Data_Destination_File_Name\n,pipeline().parameters.File_Name_Ext)\n)\n\n",
-													"type": "Expression"
-												},
-												"ColumnDelimiter": {
-													"value": "@pipeline().parameters.ColumnDelimiter",
-													"type": "Expression"
-												},
-												"QuoteCharacter": {
-													"value": "@pipeline().parameters.QuoteCharacter",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "SqlServerStoredProcedure1",
-									"description": "Stored procedure activity to store the new high-watermark value into external control table for delta data loading. ",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "DeltaCopyfromDB",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 3,
-										"retryIntervalInSeconds": 30
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[ETL].[usp_update_incrementaldatevalue]",
-										"storedProcedureParameters": {
-											"LastModifiedDTM": {
-												"value": {
-													"value": "@activity('lkp_getcurrentmaxvalue').output.firstRow.NewWatermarkValue",
-													"type": "Expression"
-												},
-												"type": "DateTime"
-											},
-											"TableID": {
-												"value": {
-													"value": "@pipeline().parameters.TableID",
-													"type": "Expression"
-												},
-												"type": "Int32"
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "LS_ASQL_EDWDiscovery",
-										"type": "LinkedServiceReference"
-									}
-								},
-								{
-									"name": "lkp_getlocattime",
-									"type": "Lookup",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlMISource",
-											"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime",
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"Data_Source_Table_Name": {
-						"type": "String",
-						"defaultValue": "dbo.MSF660"
-					},
-					"Data_Source_WaterMarkColumn": {
-						"type": "String",
-						"defaultValue": "CASE WHEN LAST_MOD_DATE <> '' AND LAST_MOD_TIME<>'' THEN (CAST(LAST_MOD_DATE AS DATETIME) + CAST(stuff(stuff(LAST_MOD_TIME ,3,0,':'),6,0,':') AS DATETIME)) END"
-					},
-					"Data_Destination_Folder_Path": {
-						"type": "String",
-						"defaultValue": "ellipse9-datalanding/MSF660"
-					},
-					"Control_Table_Table_Name": {
-						"type": "String",
-						"defaultValue": "ETL.SourceTableDetails"
-					},
-					"Control_Table_Column_Name": {
-						"type": "String",
-						"defaultValue": "IncrementalKeyDateColumnLastRefreshValue"
-					},
-					"TableID": {
-						"type": "string",
-						"defaultValue": "1"
-					},
-					"Data_Destination_File_Name": {
-						"type": "string",
-						"defaultValue": "MSF660"
-					},
-					"SourceServerName": {
-						"type": "string",
-						"defaultValue": "NFUJDEV073"
-					},
-					"SourceDatabaseName": {
-						"type": "string",
-						"defaultValue": "Datamart"
-					},
-					"IncrementalLoadInd": {
-						"type": "int",
-						"defaultValue": 1
-					},
-					"File_Name_Ext": {
-						"type": "string",
-						"defaultValue": ".csv"
-					},
-					"File_Name_DateTime_Ind": {
-						"type": "int",
-						"defaultValue": 1
-					},
-					"Join_Condition": {
-						"type": "string",
-						"defaultValue": " "
-					},
-					"Source_Column_List": {
-						"type": "string",
-						"defaultValue": "*"
-					},
-					"ColumnDelimiter": {
-						"type": "string",
-						"defaultValue": ","
-					},
-					"QuoteCharacter": {
-						"type": "string",
-						"defaultValue": "¬"
-					},
-					"source_where_filter": {
-						"type": "string",
-						"defaultValue": " "
-					},
-					"Host_Name": {
-						"type": "string"
-					},
-					"Port_No": {
-						"type": "string"
-					},
-					"SID": {
-						"type": "string"
-					},
-					"User_Name": {
-						"type": "string"
-					},
-					"Secret_Password_Name": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "FrameWork"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_Oracle_OnPrem')]"
-			]
 		}
 	]
 }
