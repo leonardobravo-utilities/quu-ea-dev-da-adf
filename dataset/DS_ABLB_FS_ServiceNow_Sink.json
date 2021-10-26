@@ -1,0 +1,35 @@
+{
+	"name": "DS_ABLB_FS_ServiceNow_Sink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueadadlslanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"p_snk_blob_container_name": {
+				"type": "string"
+			},
+			"p_snk_blob_file_name": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Service Now"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().p_snk_blob_file_name",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().p_snk_blob_container_name",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}
