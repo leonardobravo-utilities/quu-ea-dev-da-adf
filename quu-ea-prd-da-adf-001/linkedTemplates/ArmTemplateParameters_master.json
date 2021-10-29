@@ -56,6 +56,12 @@
 		"LS_FS_NFUJPRD301_properties_typeProperties_userId": {
 			"value": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
+		"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
+			"value": "@{linkedService().p_MidServerLocation}"
+		},
+		"LS_FS_ServiceNow_MidServer_properties_typeProperties_userId": {
+			"value": "urbanutilities\\SVC-EBI_UATC02_AGT"
+		},
 		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
 			"value": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
 		},
@@ -230,6 +236,12 @@
 		"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL": {
 			"value": true
 		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
+			"value": "SILO"
+		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
+			"value": "Incremental"
+		},
 		"SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type": {
 			"value": "Incremental"
 		},
@@ -241,6 +253,21 @@
 		},
 		"Salesforce_Daily_Trigger_properties_PL_Salesforce_DM_SourcetoBlob_Master_parameters_BlobtoAsql": {
 			"value": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_SourceName": {
+			"value": "ServiceNow"
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlySourceToGSFileServer": {
+			"value": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyGSFileServerToBlob": {
+			"value": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_p_MidServerLocation": {
+			"value": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
 		},
 		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
 			"value": "0417-051914-axons909"
@@ -289,33 +316,6 @@
 		},
 		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
 			"value": true
-		},
-		"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
-			"value": "@{linkedService().p_MidServerLocation}"
-		},
-		"LS_FS_ServiceNow_MidServer_properties_typeProperties_userId": {
-			"value": "urbanutilities\\SVC-EBI_UATC02_AGT"
-		},
-		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_SourceName": {
-			"value": "ServiceNow"
-		},
-		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlySourceToGSFileServer": {
-			"value": true
-		},
-		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyGSFileServerToBlob": {
-			"value": true
-		},
-		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyBlobtoASQL": {
-			"value": true
-		},
-		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_p_MidServerLocation": {
-			"value": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
-		},
-		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
-			"value": "SILO"
-		},
-		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
-			"value": "Incremental"
 		},
 		"containerUri": {
 			"value": ""

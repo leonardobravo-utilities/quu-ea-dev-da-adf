@@ -75,6 +75,14 @@
 			"type": "string",
 			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
+		"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "@{linkedService().p_MidServerLocation}"
+		},
+		"LS_FS_ServiceNow_MidServer_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_UATC02_AGT"
+		},
 		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
@@ -307,6 +315,14 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
+			"type": "string",
+			"defaultValue": "SILO"
+		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
+			"type": "string",
+			"defaultValue": "Incremental"
+		},
 		"SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type": {
 			"type": "string",
 			"defaultValue": "Incremental"
@@ -322,6 +338,26 @@
 		"Salesforce_Daily_Trigger_properties_PL_Salesforce_DM_SourcetoBlob_Master_parameters_BlobtoAsql": {
 			"type": "bool",
 			"defaultValue": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "ServiceNow"
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlySourceToGSFileServer": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyGSFileServerToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_p_MidServerLocation": {
+			"type": "string",
+			"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
 		},
 		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
 			"type": "string",
@@ -386,42 +422,6 @@
 		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
-		},
-		"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "@{linkedService().p_MidServerLocation}"
-		},
-		"LS_FS_ServiceNow_MidServer_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "urbanutilities\\SVC-EBI_UATC02_AGT"
-		},
-		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "ServiceNow"
-		},
-		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlySourceToGSFileServer": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyGSFileServerToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_p_MidServerLocation": {
-			"type": "string",
-			"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
-		},
-		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
-			"type": "string",
-			"defaultValue": "SILO"
-		},
-		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
-			"type": "string",
-			"defaultValue": "Incremental"
 		}
 	},
 	"variables": {
@@ -8456,6 +8456,174 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_FSE_Source_To_ASQL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForSourceToBlob",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlySourceToBlob",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_SqlServer",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForBlobToASQL",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "CheckExecutionStatusForSourceToBlob",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyBlobtoASQL",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_TRFM_BLOBToASQL",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Execute EDW_Discovery to EDW_Mart Data Copy",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "CheckExecutionStatusForBlobToASQL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Framework_DM_DiscoveryToMart_DataCopy",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"ModelName": "Crew-Roster-Mart-Model"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "Field_Service_Edge_UAT_DailyRefresh"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					}
+				},
+				"folder": {
+					"name": "FieldServicesEdge"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Framework_DM_DiscoveryToMart_DataCopy')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlob_SqlServer')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_File_Export_To_NFUJPRD200')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -9737,6 +9905,284 @@
 				"annotations": []
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Framework_DM_DiscoveryToMart_DataCopy')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Load Each Model - Discovery to Mart Temp",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Model Objects To Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Model Objects To Load').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "Switch Load Type",
+									"type": "Switch",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"on": {
+											"value": "@item().LoadTypeName",
+											"type": "Expression"
+										},
+										"cases": [
+											{
+												"value": "Copy Activity",
+												"activities": [
+													{
+														"name": "Copy Dicovery to Mart Temp - Copy Activity",
+														"type": "Copy",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "7.00:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"source": {
+																"type": "AzureSqlSource",
+																"sqlReaderQuery": {
+																	"value": "@concat('SELECT * FROM ', item().SourceSchemaName, '.', item().SourceObjectName, ' (NOLOCK)')",
+																	"type": "Expression"
+																},
+																"queryTimeout": "02:00:00",
+																"partitionOption": "None"
+															},
+															"sink": {
+																"type": "AzureSqlSink",
+																"preCopyScript": {
+																	"value": "@{concat('TRUNCATE TABLE TEMP.', item().TargetSchemaName, '_', item().TargetObjectName)}",
+																	"type": "Expression"
+																},
+																"disableMetricsCollection": false,
+																"writeBehavior": "insert"
+															},
+															"enableStaging": false,
+															"translator": {
+																"type": "TabularTranslator",
+																"typeConversion": true,
+																"typeConversionSettings": {
+																	"allowDataTruncation": true,
+																	"treatBooleanAsNumber": false
+																}
+															}
+														},
+														"inputs": [
+															{
+																"referenceName": "DS_ASQL_EDWDiscovery",
+																"type": "DatasetReference",
+																"parameters": {}
+															}
+														],
+														"outputs": [
+															{
+																"referenceName": "DS_ASQL_EDWMart_Target",
+																"type": "DatasetReference",
+																"parameters": {
+																	"SchemaName": {
+																		"value": "TEMP",
+																		"type": "Expression"
+																	},
+																	"TableName": {
+																		"value": "@concat(item().TargetSchemaName, '_', item().TargetObjectName)",
+																		"type": "Expression"
+																	}
+																}
+															}
+														]
+													}
+												]
+											},
+											{
+												"value": "Databricks Notebook",
+												"activities": [
+													{
+														"name": "Copy Discovery to Mart Temp - Databricks Notebook",
+														"type": "DatabricksNotebook",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "7.00:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"notebookPath": {
+																"value": "@item().SourceTransformCommand",
+																"type": "Expression"
+															}
+														},
+														"linkedServiceName": {
+															"referenceName": "LS_DBR_ADF_Job_Cluster",
+															"type": "LinkedServiceReference",
+															"parameters": {
+																"databricksclusterid": {
+																	"value": "@item().DatabricksClusterID",
+																	"type": "Expression"
+																},
+																"databrickssecretname": "databricks-token"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Get Model Objects To Load",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_model_object_load_list]",
+								"storedProcedureParameters": {
+									"ModelName": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.ModelName",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Load Each Model - Mart Temp to Target",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Load Each Model - Discovery to Mart Temp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Model Objects To Load').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "Copy Temp to Target",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": {
+											"value": "@item().TargetLoadCommand",
+											"type": "Expression"
+										},
+										"storedProcedureParameters": {
+											"isDebugFlag": {
+												"value": "false",
+												"type": "Boolean"
+											},
+											"sourceObject": {
+												"value": {
+													"value": "@concat('TEMP.', item().TargetSchemaName, '_', item().TargetObjectName)",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"targetObject": {
+												"value": {
+													"value": "@concat(item().TargetSchemaName, '.', item().TargetObjectName)",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"isTruncateBeforeLoad": {
+												"value": {
+													"value": "@item().TruncateBeforeLoad",
+													"type": "Expression"
+												},
+												"type": "Boolean"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_EDWMart",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"ModelName": {
+						"type": "string",
+						"defaultValue": "Crew-Roster-Mart-Model"
+					}
+				},
+				"folder": {
+					"name": "FrameWork"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWMart_Target')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_Framework_DM_SourceToBlob_Oracle')]",
@@ -17905,6 +18351,662 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_ServiceNow_DM_GSFileServerToBlob')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Transfer file to Blob storage",
+				"activities": [
+					{
+						"name": "GetFileNames",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_FS_GlobalScape_ServiceNow",
+								"type": "DatasetReference",
+								"parameters": {
+									"p_FileFolder": {
+										"value": "@pipeline().parameters.p_GSFileFolderName",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"childItems",
+								"itemType"
+							],
+							"storeSettings": {
+								"type": "FileServerReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "FilterOnlyCSVFiles",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "GetFileNames",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetFileNames').output.childitems",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@endswith(item().name, 'csv')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "ForEachFile",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "FilterOnlyCSVFiles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('FilterOnlyCSVFiles').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "GetSourceDetails",
+									"description": "Fetching SourceId from etl.SourceSystem",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "select TableId, TargetBlobFilePath, IsActive from etl.SourceTableDetails a where a.SourceId = @{pipeline().parameters.p_SourceId} and lower(SUBSTRING(a.SourceFileName, 1, CHARINDEX('*', a.SourceFileName)-1)) = lower('@{substring(Item().name, 0, indexof(Item().name, '_'))}')",
+												"type": "Expression"
+											},
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_ASQL_EDWDiscovery",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								},
+								{
+									"name": "If Record Exists",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "GetSourceDetails",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@activity('GetSourceDetails').output.Firstrow['IsActive']",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Copy_Incident_Files_GSFileServer_to_Blob",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "BinarySource",
+														"storeSettings": {
+															"type": "FileServerReadSettings",
+															"recursive": true
+														},
+														"formatSettings": {
+															"type": "BinaryReadSettings"
+														}
+													},
+													"sink": {
+														"type": "BinarySink",
+														"storeSettings": {
+															"type": "AzureBlobStorageWriteSettings"
+														}
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "DS_BFS_GlobalScape_ServiceNow",
+														"type": "DatasetReference",
+														"parameters": {
+															"p_FileFolder": {
+																"value": "@pipeline().parameters.p_GSFileFolderName",
+																"type": "Expression"
+															},
+															"p_FileName": {
+																"value": "@item().name",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "DS_ABLB_FS_ServiceNow_Sink",
+														"type": "DatasetReference",
+														"parameters": {
+															"p_snk_blob_container_name": {
+																"value": "@activity('GetSourceDetails').output.Firstrow['TargetBlobFilePath']",
+																"type": "Expression"
+															},
+															"p_snk_blob_file_name": {
+																"value": "@item().name",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"name": "Archive_GSFileServer_File",
+												"type": "Copy",
+												"dependsOn": [
+													{
+														"activity": "Copy_Incident_Files_GSFileServer_to_Blob",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "BinarySource",
+														"storeSettings": {
+															"type": "FileServerReadSettings",
+															"recursive": false,
+															"deleteFilesAfterCompletion": false
+														},
+														"formatSettings": {
+															"type": "BinaryReadSettings"
+														}
+													},
+													"sink": {
+														"type": "BinarySink",
+														"storeSettings": {
+															"type": "FileServerWriteSettings"
+														}
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "DS_BFS_GlobalScape_ServiceNow",
+														"type": "DatasetReference",
+														"parameters": {
+															"p_FileFolder": {
+																"value": "@pipeline().parameters.p_GSFileFolderName",
+																"type": "Expression"
+															},
+															"p_FileName": {
+																"value": "@item().name",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "DS_BFS_GlobalScape_ServiceNow",
+														"type": "DatasetReference",
+														"parameters": {
+															"p_FileFolder": {
+																"value": "@concat(pipeline().parameters.p_GSFileFolderName,'\\Archive')",
+																"type": "Expression"
+															},
+															"p_FileName": {
+																"value": "@item().name",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"name": "Delete_Processed_GSFileServer_File",
+												"type": "Delete",
+												"dependsOn": [
+													{
+														"activity": "Archive_GSFileServer_File",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataset": {
+														"referenceName": "DS_BFS_GlobalScape_ServiceNow",
+														"type": "DatasetReference",
+														"parameters": {
+															"p_FileFolder": {
+																"value": "@pipeline().parameters.p_GSFileFolderName",
+																"type": "Expression"
+															},
+															"p_FileName": {
+																"value": "@item().name",
+																"type": "Expression"
+															}
+														}
+													},
+													"enableLogging": false,
+													"storeSettings": {
+														"type": "FileServerReadSettings",
+														"recursive": false
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"p_GSFileFolderName": {
+						"type": "string",
+						"defaultValue": "ServiceNow\\\\Pre-Prod"
+					},
+					"p_SourceId": {
+						"type": "string",
+						"defaultValue": "61"
+					}
+				},
+				"variables": {
+					"v_blob_container_name": {
+						"type": "String",
+						"defaultValue": "servicenow-datalanding"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_FS_GlobalScape_ServiceNow')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/datasets/DS_BFS_GlobalScape_ServiceNow')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ABLB_FS_ServiceNow_Sink')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ServiceNow_DM_SourceToGSFileServer')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy_All_Files_MidServer_to_GSFileServer",
+						"description": "Copy all the files from MidServer to GSFileServer\nMidServer Location: \\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates\n\nGSFileServer Location: \\\\nfujprd200\\EBI_PROD_LANDING\\ServiceNow",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "FileServerReadSettings",
+									"recursive": true,
+									"wildcardFileName": {
+										"value": "@variables('v_FileType')",
+										"type": "Expression"
+									},
+									"deleteFilesAfterCompletion": true
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "FileServerWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_FS_MidServer_ServiceNow_Source",
+								"type": "DatasetReference",
+								"parameters": {
+									"p_MidServerLocation": {
+										"value": "@pipeline().parameters.p_MidServerLocation",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_FS_MidServer_ServiceNow_Destination",
+								"type": "DatasetReference",
+								"parameters": {
+									"filefolder": {
+										"value": "@pipeline().parameters.p_GSFileFolderName",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"p_GSFileFolderName": {
+						"type": "string",
+						"defaultValue": "ServiceNow\\\\Pre-Prod"
+					},
+					"p_SourceId": {
+						"type": "string"
+					},
+					"p_MidServerLocation": {
+						"type": "string",
+						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+					}
+				},
+				"variables": {
+					"v_FileType": {
+						"type": "String",
+						"defaultValue": "*.csv"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_FS_MidServer_ServiceNow_Source')]",
+				"[concat(variables('factoryId'), '/datasets/DS_FS_MidServer_ServiceNow_Destination')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ServiceNow_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetSourceDetails",
+						"description": "Fetching SourceId from etl.SourceSystem",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID, Fileserverlocation, FileFolderName from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForGSFileServerToBlob",
+						"description": "Execute only if OnlyGSFileServerToBlob = TRUE",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "CheckExecutionStatusForMidServerToGSFileServer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyGSFileServerToBlob",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Execute_PL_ServiceNow_GSFileServer_To_Blob",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_ServiceNow_DM_GSFileServerToBlob",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"p_GSFileFolderName": {
+												"value": "@activity('GetSourceDetails').output.Firstrow['FileFolderName']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForBlobToASQL",
+						"description": "Execute only if OnlyBlobtoASQL= TRUE",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "CheckExecutionStatusForGSFileServerToBlob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyBlobtoASQL",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_TRFM_BLOBToASQL",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('GetSourceDetails').output.firstRow['SourceID']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForMidServerToGSFileServer",
+						"description": "Execute only if OnlySourceToGSFileServer = TRUE",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "GetSourceDetails",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlySourceToGSFileServer",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Execute_PL_ServiceNow_MidServer_To_GSFileServer",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_ServiceNow_DM_SourceToGSFileServer",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"p_GSFileFolderName": {
+												"value": "@activity('GetSourceDetails').output.Firstrow['FileFolderName']",
+												"type": "Expression"
+											},
+											"p_SourceId": {
+												"value": "@activity('GetSourceDetails').output.Firstrow['SourceId']",
+												"type": "Expression"
+											},
+											"p_MidServerLocation": {
+												"value": "@pipeline().parameters.p_MidServerLocation",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "ServiceNow"
+					},
+					"OnlySourceToGSFileServer": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyGSFileServerToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"p_MidServerLocation": {
+						"type": "string",
+						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_ServiceNow_DM_GSFileServerToBlob')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_ServiceNow_DM_SourceToGSFileServer')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_Silo_Weather_Observations')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -19131,6 +20233,123 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Hourly_Consumption')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Execute Temetra_Hourly_Consumption Notebook in databricks",
+				"activities": [
+					{
+						"name": "4_Temetra_Hourly_Consumption",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/Temetra/4_Temetra_Hourly_Consumption",
+							"baseParameters": {
+								"Load_Type": {
+									"value": "@pipeline().parameters.Load_Type",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Load Temp to Target",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "4_Temetra_Hourly_Consumption",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[ETL].[usp_load_target_table]",
+							"storedProcedureParameters": {
+								"isDebugFlag": {
+									"value": "false",
+									"type": "Boolean"
+								},
+								"isTruncateBeforeLoad": {
+									"value": "true",
+									"type": "Boolean"
+								},
+								"sourceObject": {
+									"value": "Temp.Temetra_Hourly_Consumption",
+									"type": "String"
+								},
+								"targetObject": {
+									"value": "Mart.Temetra_Hourly_Consumption",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"databricks_cluster_id": {
+						"type": "string",
+						"defaultValue": "0417-051914-axons909"
+					},
+					"databricks_secret_name": {
+						"type": "string",
+						"defaultValue": "databricks2-token"
+					},
+					"Load_Type": {
+						"type": "string",
+						"defaultValue": "Full"
+					}
+				},
+				"folder": {
+					"name": "Temetra"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Main')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -20154,6 +21373,46 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_ServiceNow_Sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"p_snk_blob_container_name": {
+						"type": "string"
+					},
+					"p_snk_blob_file_name": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().p_snk_blob_file_name",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().p_snk_blob_container_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_TFS_Sink')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -20319,6 +21578,84 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ASQL_EDWMart_Target')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWMart",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"SchemaName": {
+						"type": "string"
+					},
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().SchemaName",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_BFS_GlobalScape_ServiceNow')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"p_FileFolder": {
+						"type": "string"
+					},
+					"p_FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().p_FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().p_FileFolder",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
 			]
 		},
 		{
@@ -20562,6 +21899,44 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_ServiceNow')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"p_FileFolder": {
+						"type": "string",
+						"defaultValue": "ServiceNow\\Pre-Prod"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().p_FileFolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_TFS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -20597,6 +21972,75 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_MidServer_ServiceNow_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_MidServer_ServiceNow_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_ServiceNow_MidServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_MidServerLocation": {
+							"value": "@dataset().p_MidServerLocation",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"p_MidServerLocation": {
+						"type": "string",
+						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_ServiceNow_MidServer')]"
 			]
 		},
 		{
@@ -21331,6 +22775,37 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_ServiceNow_MidServer')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Service Now mid-server -    \\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates",
+				"parameters": {
+					"p_MidServerLocation": {
+						"type": "string",
+						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+					}
+				},
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SVC-EBI-UATC02-AGT"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_HTTPS_Temetra_Geospatial_API_EndPoint')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -21821,7 +23296,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -22596,6 +24071,47 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/SILO_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Silo_Weather_Observations",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"Source_Name": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name')]",
+							"Silo_load_type": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-05-15T00:47:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								16
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Silo_Weather_Observations')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SUMS_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -22675,6 +24191,50 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_Salesforce_DM_SourcetoBlob_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ServiceNow_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_ServiceNow_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_SourceName')]",
+							"OnlySourceToGSFileServer": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlySourceToGSFileServer')]",
+							"OnlyGSFileServerToBlob": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyGSFileServerToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyBlobtoASQL')]",
+							"p_MidServerLocation": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_p_MidServerLocation')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-02-23T04:35:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								19
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_ServiceNow_Main')]"
 			]
 		},
 		{
@@ -22975,1566 +24535,6 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ASQL_EDWMart_Target')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ASQL_EDWMart",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"SchemaName": {
-						"type": "string"
-					},
-					"TableName": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().SchemaName",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().TableName",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Framework_DM_DiscoveryToMart_DataCopy')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Load Each Model - Discovery to Mart Temp",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Get Model Objects To Load",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Get Model Objects To Load').output.value",
-								"type": "Expression"
-							},
-							"batchCount": 10,
-							"activities": [
-								{
-									"name": "Switch Load Type",
-									"type": "Switch",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"on": {
-											"value": "@item().LoadTypeName",
-											"type": "Expression"
-										},
-										"cases": [
-											{
-												"value": "Copy Activity",
-												"activities": [
-													{
-														"name": "Copy Dicovery to Mart Temp - Copy Activity",
-														"type": "Copy",
-														"dependsOn": [],
-														"policy": {
-															"timeout": "7.00:00:00",
-															"retry": 0,
-															"retryIntervalInSeconds": 30,
-															"secureOutput": false,
-															"secureInput": false
-														},
-														"userProperties": [],
-														"typeProperties": {
-															"source": {
-																"type": "AzureSqlSource",
-																"sqlReaderQuery": {
-																	"value": "@concat('SELECT * FROM ', item().SourceSchemaName, '.', item().SourceObjectName, ' (NOLOCK)')",
-																	"type": "Expression"
-																},
-																"queryTimeout": "02:00:00",
-																"partitionOption": "None"
-															},
-															"sink": {
-																"type": "AzureSqlSink",
-																"preCopyScript": {
-																	"value": "@{concat('TRUNCATE TABLE TEMP.', item().TargetSchemaName, '_', item().TargetObjectName)}",
-																	"type": "Expression"
-																},
-																"disableMetricsCollection": false,
-																"writeBehavior": "insert"
-															},
-															"enableStaging": false,
-															"translator": {
-																"type": "TabularTranslator",
-																"typeConversion": true,
-																"typeConversionSettings": {
-																	"allowDataTruncation": true,
-																	"treatBooleanAsNumber": false
-																}
-															}
-														},
-														"inputs": [
-															{
-																"referenceName": "DS_ASQL_EDWDiscovery",
-																"type": "DatasetReference",
-																"parameters": {}
-															}
-														],
-														"outputs": [
-															{
-																"referenceName": "DS_ASQL_EDWMart_Target",
-																"type": "DatasetReference",
-																"parameters": {
-																	"SchemaName": {
-																		"value": "TEMP",
-																		"type": "Expression"
-																	},
-																	"TableName": {
-																		"value": "@concat(item().TargetSchemaName, '_', item().TargetObjectName)",
-																		"type": "Expression"
-																	}
-																}
-															}
-														]
-													}
-												]
-											},
-											{
-												"value": "Databricks Notebook",
-												"activities": [
-													{
-														"name": "Copy Discovery to Mart Temp - Databricks Notebook",
-														"type": "DatabricksNotebook",
-														"dependsOn": [],
-														"policy": {
-															"timeout": "7.00:00:00",
-															"retry": 0,
-															"retryIntervalInSeconds": 30,
-															"secureOutput": false,
-															"secureInput": false
-														},
-														"userProperties": [],
-														"typeProperties": {
-															"notebookPath": {
-																"value": "@item().SourceTransformCommand",
-																"type": "Expression"
-															}
-														},
-														"linkedServiceName": {
-															"referenceName": "LS_DBR_ADF_Job_Cluster",
-															"type": "LinkedServiceReference",
-															"parameters": {
-																"databricksclusterid": {
-																	"value": "@item().DatabricksClusterID",
-																	"type": "Expression"
-																},
-																"databrickssecretname": "databricks-token"
-															}
-														}
-													}
-												]
-											}
-										]
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "Get Model Objects To Load",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_model_object_load_list]",
-								"storedProcedureParameters": {
-									"ModelName": {
-										"type": "String",
-										"value": {
-											"value": "@pipeline().parameters.ModelName",
-											"type": "Expression"
-										}
-									}
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Load Each Model - Mart Temp to Target",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Load Each Model - Discovery to Mart Temp",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Get Model Objects To Load').output.value",
-								"type": "Expression"
-							},
-							"batchCount": 10,
-							"activities": [
-								{
-									"name": "Copy Temp to Target",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": {
-											"value": "@item().TargetLoadCommand",
-											"type": "Expression"
-										},
-										"storedProcedureParameters": {
-											"isDebugFlag": {
-												"value": "false",
-												"type": "Boolean"
-											},
-											"sourceObject": {
-												"value": {
-													"value": "@concat('TEMP.', item().TargetSchemaName, '_', item().TargetObjectName)",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"targetObject": {
-												"value": {
-													"value": "@concat(item().TargetSchemaName, '.', item().TargetObjectName)",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"isTruncateBeforeLoad": {
-												"value": {
-													"value": "@item().TruncateBeforeLoad",
-													"type": "Expression"
-												},
-												"type": "Boolean"
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "LS_ASQL_EDWMart",
-										"type": "LinkedServiceReference"
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"ModelName": {
-						"type": "string",
-						"defaultValue": "Crew-Roster-Mart-Model"
-					}
-				},
-				"folder": {
-					"name": "FrameWork"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWMart_Target')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_FSE_Source_To_ASQL')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "GetSourceID",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					},
-					{
-						"name": "CheckExecutionStatusForSourceToBlob",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "GetSourceID",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@pipeline().parameters.OnlySourceToBlob",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_SqlServer",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"SourceID": {
-												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "CheckExecutionStatusForBlobToASQL",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "CheckExecutionStatusForSourceToBlob",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@pipeline().parameters.OnlyBlobtoASQL",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "ExecutePL_TRFM_BLOBToASQL",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"SourceID": {
-												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "Execute EDW_Discovery to EDW_Mart Data Copy",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "CheckExecutionStatusForBlobToASQL",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Framework_DM_DiscoveryToMart_DataCopy",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"ModelName": "Crew-Roster-Mart-Model"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceName": {
-						"type": "string",
-						"defaultValue": "Field_Service_Edge_UAT_DailyRefresh"
-					},
-					"OnlySourceToBlob": {
-						"type": "bool",
-						"defaultValue": true
-					},
-					"OnlyBlobtoASQL": {
-						"type": "bool",
-						"defaultValue": true
-					}
-				},
-				"folder": {
-					"name": "FieldServicesEdge"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_Framework_DM_DiscoveryToMart_DataCopy')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlob_SqlServer')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Hourly_Consumption')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Execute Temetra_Hourly_Consumption Notebook in databricks",
-				"activities": [
-					{
-						"name": "4_Temetra_Hourly_Consumption",
-						"type": "DatabricksNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/edw_discovery/Temetra/4_Temetra_Hourly_Consumption",
-							"baseParameters": {
-								"Load_Type": {
-									"value": "@pipeline().parameters.Load_Type",
-									"type": "Expression"
-								}
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_DBR_ADF_Job_Cluster",
-							"type": "LinkedServiceReference",
-							"parameters": {
-								"databricksclusterid": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databrickssecretname": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "Load Temp to Target",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [
-							{
-								"activity": "4_Temetra_Hourly_Consumption",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[[ETL].[usp_load_target_table]",
-							"storedProcedureParameters": {
-								"isDebugFlag": {
-									"value": "false",
-									"type": "Boolean"
-								},
-								"isTruncateBeforeLoad": {
-									"value": "true",
-									"type": "Boolean"
-								},
-								"sourceObject": {
-									"value": "Temp.Temetra_Hourly_Consumption",
-									"type": "String"
-								},
-								"targetObject": {
-									"value": "Mart.Temetra_Hourly_Consumption",
-									"type": "String"
-								}
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_ASQL_EDWMart",
-							"type": "LinkedServiceReference"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"databricks_cluster_id": {
-						"type": "string",
-						"defaultValue": "0417-051914-axons909"
-					},
-					"databricks_secret_name": {
-						"type": "string",
-						"defaultValue": "databricks2-token"
-					},
-					"Load_Type": {
-						"type": "string",
-						"defaultValue": "Full"
-					}
-				},
-				"folder": {
-					"name": "Temetra"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_ServiceNow')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"p_FileFolder": {
-						"type": "string",
-						"defaultValue": "ServiceNow\\Pre-Prod"
-					}
-				},
-				"folder": {
-					"name": "Service Now"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"folderPath": {
-							"value": "@dataset().p_FileFolder",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_FS_ServiceNow_MidServer')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Service Now mid-server -    \\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates",
-				"parameters": {
-					"p_MidServerLocation": {
-						"type": "string",
-						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
-					}
-				},
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_host')]",
-					"userId": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_userId')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "SVC-EBI-UATC02-AGT"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_FS_MidServer_ServiceNow_Source')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_ServiceNow_MidServer",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"p_MidServerLocation": {
-							"value": "@dataset().p_MidServerLocation",
-							"type": "Expression"
-						}
-					}
-				},
-				"parameters": {
-					"p_MidServerLocation": {
-						"type": "string",
-						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
-					}
-				},
-				"folder": {
-					"name": "Service Now"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_FS_ServiceNow_MidServer')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_FS_MidServer_ServiceNow_Destination')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"filefolder": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Service Now"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"folderPath": {
-							"value": "@dataset().filefolder",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_ServiceNow_Sink')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"p_snk_blob_container_name": {
-						"type": "string"
-					},
-					"p_snk_blob_file_name": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Service Now"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@dataset().p_snk_blob_file_name",
-							"type": "Expression"
-						},
-						"container": {
-							"value": "@dataset().p_snk_blob_container_name",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_BFS_GlobalScape_ServiceNow')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"p_FileFolder": {
-						"type": "string"
-					},
-					"p_FileName": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Service Now"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"fileName": {
-							"value": "@dataset().p_FileName",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().p_FileFolder",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_FS_Globalscape')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_ServiceNow_DM_SourceToGSFileServer')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy_All_Files_MidServer_to_GSFileServer",
-						"description": "Copy all the files from MidServer to GSFileServer\nMidServer Location: \\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates\n\nGSFileServer Location: \\\\nfujprd200\\EBI_PROD_LANDING\\ServiceNow",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "BinarySource",
-								"storeSettings": {
-									"type": "FileServerReadSettings",
-									"recursive": true,
-									"wildcardFileName": {
-										"value": "@variables('v_FileType')",
-										"type": "Expression"
-									},
-									"deleteFilesAfterCompletion": true
-								},
-								"formatSettings": {
-									"type": "BinaryReadSettings"
-								}
-							},
-							"sink": {
-								"type": "BinarySink",
-								"storeSettings": {
-									"type": "FileServerWriteSettings"
-								}
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_FS_MidServer_ServiceNow_Source",
-								"type": "DatasetReference",
-								"parameters": {
-									"p_MidServerLocation": {
-										"value": "@pipeline().parameters.p_MidServerLocation",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DS_FS_MidServer_ServiceNow_Destination",
-								"type": "DatasetReference",
-								"parameters": {
-									"filefolder": {
-										"value": "@pipeline().parameters.p_GSFileFolderName",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"p_GSFileFolderName": {
-						"type": "string",
-						"defaultValue": "ServiceNow\\\\Pre-Prod"
-					},
-					"p_SourceId": {
-						"type": "string"
-					},
-					"p_MidServerLocation": {
-						"type": "string",
-						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
-					}
-				},
-				"variables": {
-					"v_FileType": {
-						"type": "String",
-						"defaultValue": "*.csv"
-					}
-				},
-				"folder": {
-					"name": "Service Now"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_FS_MidServer_ServiceNow_Source')]",
-				"[concat(variables('factoryId'), '/datasets/DS_FS_MidServer_ServiceNow_Destination')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_ServiceNow_DM_GSFileServerToBlob')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Transfer file to Blob storage",
-				"activities": [
-					{
-						"name": "GetFileNames",
-						"type": "GetMetadata",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "DS_FS_GlobalScape_ServiceNow",
-								"type": "DatasetReference",
-								"parameters": {
-									"p_FileFolder": {
-										"value": "@pipeline().parameters.p_GSFileFolderName",
-										"type": "Expression"
-									}
-								}
-							},
-							"fieldList": [
-								"childItems",
-								"itemType"
-							],
-							"storeSettings": {
-								"type": "FileServerReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							},
-							"formatSettings": {
-								"type": "DelimitedTextReadSettings"
-							}
-						}
-					},
-					{
-						"name": "FilterOnlyCSVFiles",
-						"type": "Filter",
-						"dependsOn": [
-							{
-								"activity": "GetFileNames",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('GetFileNames').output.childitems",
-								"type": "Expression"
-							},
-							"condition": {
-								"value": "@endswith(item().name, 'csv')",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "ForEachFile",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "FilterOnlyCSVFiles",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('FilterOnlyCSVFiles').output.value",
-								"type": "Expression"
-							},
-							"batchCount": 10,
-							"activities": [
-								{
-									"name": "GetSourceDetails",
-									"description": "Fetching SourceId from etl.SourceSystem",
-									"type": "Lookup",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzureSqlSource",
-											"sqlReaderQuery": {
-												"value": "select TableId, TargetBlobFilePath, IsActive from etl.SourceTableDetails a where a.SourceId = @{pipeline().parameters.p_SourceId} and lower(SUBSTRING(a.SourceFileName, 1, CHARINDEX('*', a.SourceFileName)-1)) = lower('@{substring(Item().name, 0, indexof(Item().name, '_'))}')",
-												"type": "Expression"
-											},
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									}
-								},
-								{
-									"name": "If Record Exists",
-									"type": "IfCondition",
-									"dependsOn": [
-										{
-											"activity": "GetSourceDetails",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@activity('GetSourceDetails').output.Firstrow['IsActive']",
-											"type": "Expression"
-										},
-										"ifTrueActivities": [
-											{
-												"name": "Copy_Incident_Files_GSFileServer_to_Blob",
-												"type": "Copy",
-												"dependsOn": [],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "BinarySource",
-														"storeSettings": {
-															"type": "FileServerReadSettings",
-															"recursive": true
-														},
-														"formatSettings": {
-															"type": "BinaryReadSettings"
-														}
-													},
-													"sink": {
-														"type": "BinarySink",
-														"storeSettings": {
-															"type": "AzureBlobStorageWriteSettings"
-														}
-													},
-													"enableStaging": false
-												},
-												"inputs": [
-													{
-														"referenceName": "DS_BFS_GlobalScape_ServiceNow",
-														"type": "DatasetReference",
-														"parameters": {
-															"p_FileFolder": {
-																"value": "@pipeline().parameters.p_GSFileFolderName",
-																"type": "Expression"
-															},
-															"p_FileName": {
-																"value": "@item().name",
-																"type": "Expression"
-															}
-														}
-													}
-												],
-												"outputs": [
-													{
-														"referenceName": "DS_ABLB_FS_ServiceNow_Sink",
-														"type": "DatasetReference",
-														"parameters": {
-															"p_snk_blob_container_name": {
-																"value": "@activity('GetSourceDetails').output.Firstrow['TargetBlobFilePath']",
-																"type": "Expression"
-															},
-															"p_snk_blob_file_name": {
-																"value": "@item().name",
-																"type": "Expression"
-															}
-														}
-													}
-												]
-											},
-											{
-												"name": "Archive_GSFileServer_File",
-												"type": "Copy",
-												"dependsOn": [
-													{
-														"activity": "Copy_Incident_Files_GSFileServer_to_Blob",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "BinarySource",
-														"storeSettings": {
-															"type": "FileServerReadSettings",
-															"recursive": false,
-															"deleteFilesAfterCompletion": false
-														},
-														"formatSettings": {
-															"type": "BinaryReadSettings"
-														}
-													},
-													"sink": {
-														"type": "BinarySink",
-														"storeSettings": {
-															"type": "FileServerWriteSettings"
-														}
-													},
-													"enableStaging": false
-												},
-												"inputs": [
-													{
-														"referenceName": "DS_BFS_GlobalScape_ServiceNow",
-														"type": "DatasetReference",
-														"parameters": {
-															"p_FileFolder": {
-																"value": "@pipeline().parameters.p_GSFileFolderName",
-																"type": "Expression"
-															},
-															"p_FileName": {
-																"value": "@item().name",
-																"type": "Expression"
-															}
-														}
-													}
-												],
-												"outputs": [
-													{
-														"referenceName": "DS_BFS_GlobalScape_ServiceNow",
-														"type": "DatasetReference",
-														"parameters": {
-															"p_FileFolder": {
-																"value": "@concat(pipeline().parameters.p_GSFileFolderName,'\\Archive')",
-																"type": "Expression"
-															},
-															"p_FileName": {
-																"value": "@item().name",
-																"type": "Expression"
-															}
-														}
-													}
-												]
-											},
-											{
-												"name": "Delete_Processed_GSFileServer_File",
-												"type": "Delete",
-												"dependsOn": [
-													{
-														"activity": "Archive_GSFileServer_File",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"dataset": {
-														"referenceName": "DS_BFS_GlobalScape_ServiceNow",
-														"type": "DatasetReference",
-														"parameters": {
-															"p_FileFolder": {
-																"value": "@pipeline().parameters.p_GSFileFolderName",
-																"type": "Expression"
-															},
-															"p_FileName": {
-																"value": "@item().name",
-																"type": "Expression"
-															}
-														}
-													},
-													"enableLogging": false,
-													"storeSettings": {
-														"type": "FileServerReadSettings",
-														"recursive": false
-													}
-												}
-											}
-										]
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"p_GSFileFolderName": {
-						"type": "string",
-						"defaultValue": "ServiceNow\\\\Pre-Prod"
-					},
-					"p_SourceId": {
-						"type": "string",
-						"defaultValue": "61"
-					}
-				},
-				"variables": {
-					"v_blob_container_name": {
-						"type": "String",
-						"defaultValue": "servicenow-datalanding"
-					}
-				},
-				"folder": {
-					"name": "Service Now"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_FS_GlobalScape_ServiceNow')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BFS_GlobalScape_ServiceNow')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_FS_ServiceNow_Sink')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_ServiceNow_Main')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "GetSourceDetails",
-						"description": "Fetching SourceId from etl.SourceSystem",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "Select SourceID, Fileserverlocation, FileFolderName from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					},
-					{
-						"name": "CheckExecutionStatusForGSFileServerToBlob",
-						"description": "Execute only if OnlyGSFileServerToBlob = TRUE",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "CheckExecutionStatusForMidServerToGSFileServer",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@pipeline().parameters.OnlyGSFileServerToBlob",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "Execute_PL_ServiceNow_GSFileServer_To_Blob",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_ServiceNow_DM_GSFileServerToBlob",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"p_GSFileFolderName": {
-												"value": "@activity('GetSourceDetails').output.Firstrow['FileFolderName']",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "CheckExecutionStatusForBlobToASQL",
-						"description": "Execute only if OnlyBlobtoASQL= TRUE",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "CheckExecutionStatusForGSFileServerToBlob",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@pipeline().parameters.OnlyBlobtoASQL",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "ExecutePL_TRFM_BLOBToASQL",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"SourceID": {
-												"value": "@activity('GetSourceDetails').output.firstRow['SourceID']",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "CheckExecutionStatusForMidServerToGSFileServer",
-						"description": "Execute only if OnlySourceToGSFileServer = TRUE",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "GetSourceDetails",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@pipeline().parameters.OnlySourceToGSFileServer",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "Execute_PL_ServiceNow_MidServer_To_GSFileServer",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_ServiceNow_DM_SourceToGSFileServer",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"p_GSFileFolderName": {
-												"value": "@activity('GetSourceDetails').output.Firstrow['FileFolderName']",
-												"type": "Expression"
-											},
-											"p_SourceId": {
-												"value": "@activity('GetSourceDetails').output.Firstrow['SourceId']",
-												"type": "Expression"
-											},
-											"p_MidServerLocation": {
-												"value": "@pipeline().parameters.p_MidServerLocation",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceName": {
-						"type": "string",
-						"defaultValue": "ServiceNow"
-					},
-					"OnlySourceToGSFileServer": {
-						"type": "bool",
-						"defaultValue": true
-					},
-					"OnlyGSFileServerToBlob": {
-						"type": "bool",
-						"defaultValue": true
-					},
-					"OnlyBlobtoASQL": {
-						"type": "bool",
-						"defaultValue": true
-					},
-					"p_MidServerLocation": {
-						"type": "string",
-						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
-					}
-				},
-				"folder": {
-					"name": "Service Now"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_ServiceNow_DM_GSFileServerToBlob')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_ServiceNow_DM_SourceToGSFileServer')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ServiceNow_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_ServiceNow_Main",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_SourceName')]",
-							"OnlySourceToGSFileServer": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlySourceToGSFileServer')]",
-							"OnlyGSFileServerToBlob": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyGSFileServerToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyBlobtoASQL')]",
-							"p_MidServerLocation": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_p_MidServerLocation')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-02-23T04:35:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								19
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_ServiceNow_Main')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SILO_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_Silo_Weather_Observations",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"Source_Name": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name')]",
-							"Silo_load_type": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-05-15T00:47:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								30
-							],
-							"hours": [
-								16
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_Silo_Weather_Observations')]"
-			]
 		}
 	]
 }
