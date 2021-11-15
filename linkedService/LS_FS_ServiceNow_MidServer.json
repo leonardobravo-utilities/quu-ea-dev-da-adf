@@ -12,15 +12,19 @@
 		"type": "FileServer",
 		"typeProperties": {
 			"host": "@{linkedService().p_MidServerLocation}",
-			"userId": "urbanutilities\\SVC-EBI_UATC02_AGT",
+			"userId": "urbanutilities\\SVC-EBI_PRDC04_AGT",
 			"password": {
 				"type": "AzureKeyVaultSecret",
 				"store": {
 					"referenceName": "ADF_LS_AKV",
 					"type": "LinkedServiceReference"
 				},
-				"secretName": "SVC-EBI-UATC02-AGT"
+				"secretName": "svc-ebi-prdc04-agt"
 			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHostedRuntime",
+			"type": "IntegrationRuntimeReference"
 		}
 	},
 	"type": "Microsoft.DataFactory/factories/linkedservices"
