@@ -153,7 +153,7 @@
 					{
 						"activity": "dim_statistictype",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -352,7 +352,7 @@
 					{
 						"activity": "dim_supplier",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -407,7 +407,7 @@
 					{
 						"activity": "dim_stock",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -462,7 +462,7 @@
 					{
 						"activity": "dim_transactiontype",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -565,7 +565,7 @@
 					{
 						"activity": "dim_postingaccount",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -620,7 +620,7 @@
 					{
 						"activity": "dim_expenseelement",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -675,7 +675,7 @@
 					{
 						"activity": "dim_costcategory",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -728,45 +728,45 @@
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "dim_subasset",
+						"activity": "dim_employee",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					},
 					{
-						"activity": "dim_employee",
+						"activity": "dim_subasset",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					},
 					{
 						"activity": "dim_resourcetype",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					},
 					{
 						"activity": "dim_earningsclass",
 						"dependencyConditions": [
-							"Completed"
-						]
-					},
-					{
-						"activity": "dim_labourcostclass",
-						"dependencyConditions": [
-							"Completed"
-						]
-					},
-					{
-						"activity": "dim_balancetype",
-						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					},
 					{
 						"activity": "dim_project",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "dim_labourcostclass",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "dim_balancetype",
+						"dependencyConditions": [
+							"Succeeded"
 						]
 					}
 				],
@@ -786,7 +786,7 @@
 							"type": "DateTime"
 						},
 						"isdeltaload": {
-							"value": "0",
+							"value": "1",
 							"type": "Byte"
 						},
 						"row_execution_id": {
@@ -823,6 +823,12 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
+					},
+					{
+						"activity": "dim_ar_invoice",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
 				"policy": {
@@ -835,6 +841,128 @@
 				"userProperties": [],
 				"typeProperties": {
 					"storedProcedureName": "[Mart].[usp_load_Fact_GL_Transaction]",
+					"storedProcedureParameters": {
+						"from_dtm": {
+							"value": null,
+							"type": "DateTime"
+						},
+						"isdeltaload": {
+							"value": "1",
+							"type": "Byte"
+						},
+						"row_execution_id": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"sourcename": {
+							"value": {
+								"value": "@pipeline().parameters.sourcename",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"to_dtm": {
+							"value": null,
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWMart",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "dim_ar_invoice",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "dim_employee",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Mart].[usp_load_Dim_AR_Invoice]",
+					"storedProcedureParameters": {
+						"from_dtm": {
+							"value": null,
+							"type": "DateTime"
+						},
+						"isdeltaload": {
+							"value": "0",
+							"type": "Byte"
+						},
+						"row_execution_id": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"sourcename": {
+							"value": {
+								"value": "@pipeline().parameters.sourcename",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"to_dtm": {
+							"value": null,
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWMart",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "fact_gl_balances",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "dim_postingaccount",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "dim_expenseelement",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "dim_balancetype",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Mart].[usp_load_Fact_GL_Balances]",
 					"storedProcedureParameters": {
 						"from_dtm": {
 							"value": null,
