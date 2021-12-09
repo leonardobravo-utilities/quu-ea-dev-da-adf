@@ -123,14 +123,6 @@
 			"type": "bool",
 			"defaultValue": true
 		},
-		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
-			"type": "string",
-			"defaultValue": "0417-051914-axons909"
-		},
-		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
-			"type": "string",
-			"defaultValue": "databricks-token"
-		},
 		"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_sourcename": {
 			"type": "string",
 			"defaultValue": "TEMETRA-GEOSPATIAL-DEVICES"
@@ -154,6 +146,14 @@
 		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
+		},
+		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
+			"type": "string",
+			"defaultValue": "0818-004527-fleck168"
+		},
+		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
+			"type": "string",
+			"defaultValue": "databricks-token"
 		},
 		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 			"type": "string",
@@ -630,45 +630,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/TEMETRA_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_Temetra_Main",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"databricks_cluster_id": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id')]",
-							"databricks_secret_name": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-05-15T00:47:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								21
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/TFS_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -774,6 +735,45 @@
 						"schedule": {
 							"hours": [
 								6
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TEMETRA_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Temetra_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"databricks_cluster_id": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id')]",
+							"databricks_secret_name": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-05-15T00:47:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								21
 							]
 						}
 					}
