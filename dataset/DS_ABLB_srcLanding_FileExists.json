@@ -1,0 +1,33 @@
+{
+	"name": "DS_ABLB_srcLanding_FileExists",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueaprddasrclanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"blobcontainer": {
+				"type": "string"
+			},
+			"blobfolderpath": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().blobfolderpath",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().blobcontainer",
+					"type": "Expression"
+				}
+			}
+		},
+		"schema": {}
+	}
+}
