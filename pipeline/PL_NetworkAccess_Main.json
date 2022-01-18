@@ -1,0 +1,204 @@
+{
+	"name": "PL_NetworkAccess_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lkp_getfilemetadata",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select \ns.sourceID,\ntableID, \nSourceLandingContainer,\nconcat('networkaccess-datalanding/',SourceTableName) as SourceFilePath,\nTargetBlobContainer,\nTargetBlobFilePath,\nTargetBlobFileName = lower(TargetBlobFileName + '_' + cast(SYSDATETIME() as varchar(100))+ targetBlobFileNameExt ),\nColumnDelimiter,QuoteCharacter\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d\nON s.sourceid = d.sourceid \nand d.isactive = 1\nwhere sourcename='@{pipeline().parameters.sourcename}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FOREACH_json_to_csv",
+				"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lkp_getfilemetadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lkp_getfilemetadata').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "Execute_json_csv_conversion",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceLandingContainer": {
+										"value": "@item().SourceLandingContainer",
+										"type": "Expression"
+									},
+									"SourceFilePath": {
+										"value": "@item().SourceFilePath",
+										"type": "Expression"
+									},
+									"sourceID": {
+										"value": "@item().sourceID",
+										"type": "Expression"
+									},
+									"tableID": {
+										"value": "@item().tableID",
+										"type": "Expression"
+									},
+									"TargetBlobFilePath": {
+										"value": "@item().TargetBlobFilePath",
+										"type": "Expression"
+									},
+									"TargetBlobFileName": {
+										"value": "@item().TargetBlobFileName",
+										"type": "Expression"
+									},
+									"ColumnDelimiter": {
+										"value": "@item().ColumnDelimiter",
+										"type": "Expression"
+									},
+									"QuoteCharacter": {
+										"value": "@item().QuoteCharacter",
+										"type": "Expression"
+									},
+									"TargetBlobContainer": {
+										"value": "@item().TargetBlobContainer",
+										"type": "Expression"
+									},
+									"Additional_MappingParam": {
+										"value": "@pipeline().parameters.Additional_MappingParam",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "CheckExecutionStatusForBlobToASQL",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "FOREACH_json_to_csv",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@pipeline().parameters.OnlyBlobtoASQL",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "ExecutePL_TRFM_BLOBToASQL",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "GetSourceID",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "GetSourceID",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_ASQL_EDWDiscovery",
+									"type": "DatasetReference"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "NetworkAccess"
+			},
+			"OnlyBlobtoASQL": {
+				"type": "bool",
+				"defaultValue": true
+			},
+			"Additional_MappingParam": {
+				"type": "string",
+				"defaultValue": ",\"collectionReference\": \"$['Entry']['attribute']\",\"mapComplexValuesToString\": true"
+			}
+		},
+		"folder": {
+			"name": "NetworkAccess"
+		},
+		"annotations": []
+	}
+}
