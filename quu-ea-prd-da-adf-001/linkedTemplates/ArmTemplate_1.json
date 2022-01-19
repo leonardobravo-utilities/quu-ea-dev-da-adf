@@ -11,10 +11,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery_Dev_Test'"
 		},
-		"LS_MySQL_NetAppManagement_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_MySQL_NetAppManagement'"
-		},
 		"LS_FS_Globalscape_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "\\\\nfujprd200\\EBI_PROD_LANDING"
@@ -36,14 +32,6 @@
 			"defaultValue": "\\\\NFUJPRD301\\EBI_PROD_LANDING"
 		},
 		"LS_FS_NFUJPRD301_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
-		},
-		"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "@{linkedService().p_MidServerLocation}"
-		},
-		"LS_FS_ServiceNow_MidServer_properties_typeProperties_userId": {
 			"type": "string",
 			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		}
@@ -473,6 +461,78 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_srcLanding_FileExists')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"blobcontainer": {
+						"type": "string"
+					},
+					"blobfolderpath": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().blobfolderpath",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().blobcontainer",
+							"type": "Expression"
+						}
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_srclanding_json_source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Sourceblobfoldername": {
+						"type": "string"
+					},
+					"Sourceblobfilename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().Sourceblobfilename",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().Sourceblobfoldername",
+							"type": "Expression"
+						}
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_ASQL_EDWDiscovery')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -728,77 +788,6 @@
 				"connectVia": {
 					"referenceName": "SelfHostedRuntime",
 					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_FS_ServiceNow_MidServer')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Service Now mid-server -    \\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates",
-				"parameters": {
-					"p_MidServerLocation": {
-						"type": "string",
-						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
-					}
-				},
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_host')]",
-					"userId": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_userId')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "svc-ebi-prdc04-agt"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SelfHostedRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_MySQL_NetAppManagement')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"parameters": {
-					"Databasename": {
-						"type": "string"
-					},
-					"SecretPasswordName": {
-						"type": "string"
-					},
-					"Servername": {
-						"type": "string"
-					},
-					"Username": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "MySql",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_MySQL_NetAppManagement_connectionString')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": {
-							"value": "@linkedService().SecretPasswordName",
-							"type": "Expression"
-						}
-					}
 				}
 			},
 			"dependsOn": []

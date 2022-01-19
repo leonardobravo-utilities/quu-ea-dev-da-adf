@@ -47,6 +47,18 @@
 			"type": "string",
 			"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
 		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "NetworkAccess"
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_Additional_MappingParam": {
+			"type": "string",
+			"defaultValue": ",\"collectionReference\": \"$['Entry']['attribute']\",\"mapComplexValuesToString\": true"
+		},
 		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "BOM Weather Data"
@@ -58,18 +70,6 @@
 		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
-		},
-		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "BOM-FORECAST"
-		},
-		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid": {
-			"type": "string",
-			"defaultValue": "0417-051914-axons909"
-		},
-		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname": {
-			"type": "string",
-			"defaultValue": "databricks-token"
 		}
 	},
 	"variables": {
@@ -1988,6 +1988,43 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/NetworkAccess_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_NetworkAccess_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_SourceName')]",
+							"OnlyBlobtoASQL": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_OnlyBlobtoASQL')]",
+							"Additional_MappingParam": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_Additional_MappingParam')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-07-20T16:00:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"hours": [
+								16
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_SourceToDiscovery_Master')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -2251,46 +2288,6 @@
 							],
 							"hours": [
 								20
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Bom_Forecast_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_BOM_Forecast_Main",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName')]",
-							"databricksclusterid": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid')]",
-							"databrickssecretname": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-10-15T05:29:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								30
-							],
-							"hours": [
-								21
 							]
 						}
 					}

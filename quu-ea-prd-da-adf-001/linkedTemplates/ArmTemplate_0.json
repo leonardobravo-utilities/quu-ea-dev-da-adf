@@ -31,6 +31,10 @@
 			"type": "string",
 			"defaultValue": "https://quueaprddadlslanding001.blob.core.windows.net"
 		},
+		"LS_ABLB_quueaprddasrclanding001_properties_typeProperties_serviceEndpoint": {
+			"type": "string",
+			"defaultValue": "https://quueaprddasrclanding001.blob.core.windows.net/"
+		},
 		"LS_FS_FTP_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "@{linkedService().Host}"
@@ -38,10 +42,6 @@
 		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
-		},
-		"LS_ABLB_quueaprddasrclanding001_properties_typeProperties_serviceEndpoint": {
-			"type": "string",
-			"defaultValue": "https://quueaprddasrclanding001.blob.core.windows.net/"
 		}
 	},
 	"variables": {
@@ -646,6 +646,20 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_ABLB_quueaprddasrclanding001')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"serviceEndpoint": "[parameters('LS_ABLB_quueaprddasrclanding001_properties_typeProperties_serviceEndpoint')]",
+					"accountKind": "BlobStorage"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_ABLB_quueaprdicndlslanding001')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -758,20 +772,6 @@
 				"type": "SelfHosted",
 				"description": "Self hosted runtime gateway nfujprd298",
 				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ABLB_quueaprddasrclanding001')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"serviceEndpoint": "[parameters('LS_ABLB_quueaprddasrclanding001_properties_typeProperties_serviceEndpoint')]",
-					"accountKind": "BlobStorage"
-				}
 			},
 			"dependsOn": []
 		},
