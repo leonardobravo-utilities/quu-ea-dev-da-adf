@@ -6,13 +6,13 @@
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "PL_NetworkAccess_Source_To_ASQL",
+					"referenceName": "PL_NetworkAccess_Main",
 					"type": "PipelineReference"
 				},
 				"parameters": {
 					"SourceName": "NetworkAccess",
-					"OnlySourceToBlob": true,
-					"OnlyBlobtoASQL": true
+					"OnlyBlobtoASQL": true,
+					"Additional_MappingParam": ",\"collectionReference\": \"$['Entry']['attribute']\",\"mapComplexValuesToString\": true"
 				}
 			}
 		],
