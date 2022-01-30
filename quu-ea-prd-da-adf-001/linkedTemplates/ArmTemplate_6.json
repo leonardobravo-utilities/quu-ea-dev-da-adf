@@ -21,6 +21,223 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_NetworkAccess_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lkp_getfilemetadata",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select \ns.sourceID,\ntableID, \nSourceLandingContainer,\nconcat('networkaccess-datalanding/',SourceTableName) as SourceFilePath,\nTargetBlobContainer,\nTargetBlobFilePath,\nTargetBlobFileName = lower(TargetBlobFileName + '_' + cast(SYSDATETIME() as varchar(100))+ targetBlobFileNameExt ),\nColumnDelimiter,QuoteCharacter\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d\nON s.sourceid = d.sourceid \nand d.isactive = 1\nwhere sourcename='@{pipeline().parameters.sourcename}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "FOREACH_json_to_csv",
+						"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lkp_getfilemetadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lkp_getfilemetadata').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "Execute_json_csv_conversion",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_DM_json_to_csv",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceLandingContainer": {
+												"value": "@item().SourceLandingContainer",
+												"type": "Expression"
+											},
+											"SourceFilePath": {
+												"value": "@item().SourceFilePath",
+												"type": "Expression"
+											},
+											"sourceID": {
+												"value": "@item().sourceID",
+												"type": "Expression"
+											},
+											"tableID": {
+												"value": "@item().tableID",
+												"type": "Expression"
+											},
+											"TargetBlobFilePath": {
+												"value": "@item().TargetBlobFilePath",
+												"type": "Expression"
+											},
+											"TargetBlobFileName": {
+												"value": "@item().TargetBlobFileName",
+												"type": "Expression"
+											},
+											"ColumnDelimiter": {
+												"value": "@item().ColumnDelimiter",
+												"type": "Expression"
+											},
+											"QuoteCharacter": {
+												"value": "@item().QuoteCharacter",
+												"type": "Expression"
+											},
+											"TargetBlobContainer": {
+												"value": "@item().TargetBlobContainer",
+												"type": "Expression"
+											},
+											"Additional_MappingParam": {
+												"value": "@pipeline().parameters.Additional_MappingParam",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForBlobToASQL",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "FOREACH_json_to_csv",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyBlobtoASQL",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_TRFM_BLOBToASQL",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "GetSourceID",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "GetSourceID",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_ASQL_EDWDiscovery",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "NetworkAccess"
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"Additional_MappingParam": {
+						"type": "string",
+						"defaultValue": ",\"collectionReference\": \"$['Entry']['attribute']\",\"mapComplexValuesToString\": true"
+					}
+				},
+				"folder": {
+					"name": "NetworkAccess"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_SUMS_BlobToASQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1803,14 +2020,21 @@
 						"userProperties": [],
 						"typeProperties": {
 							"expression": {
-								"value": "@and(contains(activity('Query EA Job History').output,'firstRow'), equals(activity('Query EA Job History').output.Firstrow['JobOutCome'],1))",
+								"value": "@not(contains(activity('Query EA Job History').output,'firstRow'))",
 								"type": "Expression"
 							},
 							"activities": [
 								{
 									"name": "Query EA Job History",
 									"type": "Lookup",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "Copy MSFPackages table from EA to EDW Discovery",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"policy": {
 										"timeout": "7.00:00:00",
 										"retry": 0,
@@ -1821,13 +2045,13 @@
 									"userProperties": [],
 									"typeProperties": {
 										"source": {
-											"type": "SqlServerSource",
-											"sqlReaderQuery": "Select top(1 ) SUCCESS  as JobOutCome from dbo.z_run_history \nwhere cast(START_TIME as date) = cast(GETDATE() as date)  \n\norder by RUN_ID desc",
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": "select distinct case when MSFPackages.[Status] in (1,0) then 'SUCCESS' else 'FAIL' end\nfrom\tETL.SourceSystem SS join ETL.SourceTableDetails STD on SS.SourceID = STD.SourceID \n\t\tjoin [Ellipse9].[MSFPackages] MSFPackages on lower(MSFPackages.sourcetablename) = STD.SourceTableName\nwhere\tSS.sourcename = 'Ellipse9'\n\t\tand MSFPackages.[Status] not in (1,0) and cast(MSFPackages.StartTime as date) = cast([dbo].[udf_getLocalDTM]() as date)",
 											"queryTimeout": "02:00:00",
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "DS_SQL_ELLIPSE_ANALYTICS",
+											"referenceName": "DS_ASQL_EDWDiscovery",
 											"type": "DatasetReference",
 											"parameters": {}
 										}
@@ -1847,9 +2071,37 @@
 									"userProperties": [],
 									"typeProperties": {
 										"expression": {
-											"value": "@not(and(contains(activity('Query EA Job History').output,'firstRow'), equals(activity('Query EA Job History').output.Firstrow['JobOutCome'],1)))",
+											"value": "@contains(activity('Query EA Job History').output,'firstRow' )",
 											"type": "Expression"
 										},
+										"ifFalseActivities": [
+											{
+												"name": "Truncate MSFPackages Table",
+												"type": "Lookup",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": "Truncate table [Ellipse9].[MSFPackages]\n\nSelect top 10 * from [Ellipse9].[MSFPackages]",
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"dataset": {
+														"referenceName": "DS_ASQL_EDWDiscovery",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												}
+											}
+										],
 										"ifTrueActivities": [
 											{
 												"name": "Wait",
@@ -1863,6 +2115,57 @@
 											}
 										]
 									}
+								},
+								{
+									"name": "Copy MSFPackages table from EA to EDW Discovery",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"sqlReaderQuery": "select \n'NA' as ROW_NATURAL_KEY,\n'NA' as ROW_SOURCE,\n'NA' as ROW_HASH_KEY,\n'NA' as ROW_EXECUTION_ID,\ncast ('1900-01-01' as datetime) as ROW_CREATED_DTM,\ncast ('1900-01-01' as datetime) as ROW_LAST_MODIFIED_DTM,\n'NA' as ROW_ACTION_TYPE,\nPackageName,\nProjectName,\nDefaultRunTime,\nAvgRunTime,\nEnabled,\nStatus,\nEXECID,\nStartTime,\nEndTime,\nTotalSecs,\nOverrideEnabled,\nLastModDate,\nIsEllipseTable,\nIsDeltaLoad,\nSourceTableName,\nPrimaryFields,\nTargetTable,\nIsDeltaDefault,\nLastGoodLoadDate,\nCIOTable,\nErrorDesc,\nDerived,\nHostRowCount,\nHostRowCountSQL\nfrom dbo.MSFPackages",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"preCopyScript": "Truncate table [Ellipse9].[MSFPackages]",
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_SQL_ELLIPSE_ANALYTICS",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ASQL_EDWDiscovery_Table",
+											"type": "DatasetReference",
+											"parameters": {
+												"TableName": "[[Ellipse9].[MSFPackages]"
+											}
+										}
+									]
 								}
 							],
 							"timeout": "01:00:00"
@@ -2180,146 +2483,6 @@
 					"SourceName": {
 						"type": "string",
 						"defaultValue": "GIS"
-					},
-					"OnlySourceToBlob": {
-						"type": "bool",
-						"defaultValue": true
-					},
-					"OnlyBlobtoASQL": {
-						"type": "bool",
-						"defaultValue": true
-					}
-				},
-				"folder": {
-					"name": "GIS"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_GIS_Source_To_ASQL_SQLServer')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "GetSourceID",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					},
-					{
-						"name": "CheckExecutionStatusForSourceToBlob",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "GetSourceID",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@pipeline().parameters.OnlySourceToBlob",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_SqlServer",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"SourceID": {
-												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "CheckExecutionStatusForBlobToASQL",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "CheckExecutionStatusForSourceToBlob",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@pipeline().parameters.OnlyBlobtoASQL",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "ExecutePL_TRFM_BLOBToASQL",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"SourceID": {
-												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceName": {
-						"type": "string",
-						"defaultValue": "GIS_SQLServer_SDUV_SQL"
 					},
 					"OnlySourceToBlob": {
 						"type": "bool",

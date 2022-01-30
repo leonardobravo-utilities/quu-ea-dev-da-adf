@@ -8491,14 +8491,21 @@
 						"userProperties": [],
 						"typeProperties": {
 							"expression": {
-								"value": "@and(contains(activity('Query EA Job History').output,'firstRow'), equals(activity('Query EA Job History').output.Firstrow['JobOutCome'],1))",
+								"value": "@not(contains(activity('Query EA Job History').output,'firstRow'))",
 								"type": "Expression"
 							},
 							"activities": [
 								{
 									"name": "Query EA Job History",
 									"type": "Lookup",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "Copy MSFPackages table from EA to EDW Discovery",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"policy": {
 										"timeout": "7.00:00:00",
 										"retry": 0,
@@ -8509,13 +8516,13 @@
 									"userProperties": [],
 									"typeProperties": {
 										"source": {
-											"type": "SqlServerSource",
-											"sqlReaderQuery": "Select top(1 ) SUCCESS  as JobOutCome from dbo.z_run_history \nwhere cast(START_TIME as date) = cast(GETDATE() as date)  \n\norder by RUN_ID desc",
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": "select distinct case when MSFPackages.[Status] in (1,0) then 'SUCCESS' else 'FAIL' end\nfrom\tETL.SourceSystem SS join ETL.SourceTableDetails STD on SS.SourceID = STD.SourceID \n\t\tjoin [Ellipse9].[MSFPackages] MSFPackages on lower(MSFPackages.sourcetablename) = STD.SourceTableName\nwhere\tSS.sourcename = 'Ellipse9'\n\t\tand MSFPackages.[Status] not in (1,0) and cast(MSFPackages.StartTime as date) = cast([dbo].[udf_getLocalDTM]() as date)",
 											"queryTimeout": "02:00:00",
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "DS_SQL_ELLIPSE_ANALYTICS",
+											"referenceName": "DS_ASQL_EDWDiscovery",
 											"type": "DatasetReference",
 											"parameters": {}
 										}
@@ -8535,9 +8542,37 @@
 									"userProperties": [],
 									"typeProperties": {
 										"expression": {
-											"value": "@not(and(contains(activity('Query EA Job History').output,'firstRow'), equals(activity('Query EA Job History').output.Firstrow['JobOutCome'],1)))",
+											"value": "@contains(activity('Query EA Job History').output,'firstRow' )",
 											"type": "Expression"
 										},
+										"ifFalseActivities": [
+											{
+												"name": "Truncate MSFPackages Table",
+												"type": "Lookup",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": "Truncate table [Ellipse9].[MSFPackages]\n\nSelect top 10 * from [Ellipse9].[MSFPackages]",
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"dataset": {
+														"referenceName": "DS_ASQL_EDWDiscovery",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												}
+											}
+										],
 										"ifTrueActivities": [
 											{
 												"name": "Wait",
@@ -8551,6 +8586,57 @@
 											}
 										]
 									}
+								},
+								{
+									"name": "Copy MSFPackages table from EA to EDW Discovery",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"sqlReaderQuery": "select \n'NA' as ROW_NATURAL_KEY,\n'NA' as ROW_SOURCE,\n'NA' as ROW_HASH_KEY,\n'NA' as ROW_EXECUTION_ID,\ncast ('1900-01-01' as datetime) as ROW_CREATED_DTM,\ncast ('1900-01-01' as datetime) as ROW_LAST_MODIFIED_DTM,\n'NA' as ROW_ACTION_TYPE,\nPackageName,\nProjectName,\nDefaultRunTime,\nAvgRunTime,\nEnabled,\nStatus,\nEXECID,\nStartTime,\nEndTime,\nTotalSecs,\nOverrideEnabled,\nLastModDate,\nIsEllipseTable,\nIsDeltaLoad,\nSourceTableName,\nPrimaryFields,\nTargetTable,\nIsDeltaDefault,\nLastGoodLoadDate,\nCIOTable,\nErrorDesc,\nDerived,\nHostRowCount,\nHostRowCountSQL\nfrom dbo.MSFPackages",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"preCopyScript": "Truncate table [Ellipse9].[MSFPackages]",
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_SQL_ELLIPSE_ANALYTICS",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ASQL_EDWDiscovery_Table",
+											"type": "DatasetReference",
+											"parameters": {
+												"TableName": "[[Ellipse9].[MSFPackages]"
+											}
+										}
+									]
 								}
 							],
 							"timeout": "01:00:00"
@@ -8584,7 +8670,8 @@
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlob_SqlServer')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]",
-				"[concat(variables('factoryId'), '/datasets/DS_SQL_ELLIPSE_ANALYTICS')]"
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_ELLIPSE_ANALYTICS')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery_Table')]"
 			]
 		},
 		{
@@ -10105,8 +10192,8 @@
 																	"value": "@{concat('TRUNCATE TABLE TEMP.', item().TargetSchemaName, '_', item().TargetObjectName)}",
 																	"type": "Expression"
 																},
-																"disableMetricsCollection": false,
-																"writeBehavior": "insert"
+																"writeBehavior": "insert",
+																"disableMetricsCollection": false
 															},
 															"enableStaging": false,
 															"translator": {
@@ -22681,6 +22768,36 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ASQL_EDWDiscovery_Table')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWDiscovery",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TableName": {
+						"type": "string",
+						"defaultValue": "[[Ellipse9].[MSFPackages]"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "Ellipse9",
+					"table": "MSFPackages"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_ASQL_EDWMart_Target')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -24438,10 +24555,10 @@
 						"timeZone": "E. Australia Standard Time",
 						"schedule": {
 							"minutes": [
-								30
+								0
 							],
 							"hours": [
-								3
+								2
 							]
 						}
 					}

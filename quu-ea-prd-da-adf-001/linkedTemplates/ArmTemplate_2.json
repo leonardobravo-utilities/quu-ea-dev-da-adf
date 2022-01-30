@@ -19,6 +19,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'"
 		},
+		"LS_FS_NFUJPRD301_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\NFUJPRD301\\EBI_PROD_LANDING"
+		},
+		"LS_FS_NFUJPRD301_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
 		"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "@{linkedService().p_MidServerLocation}"
@@ -52,6 +60,32 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_NFUJPRD301')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SVC-EBI-PRDC04-AGT"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_FS_ServiceNow_MidServer')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -953,8 +987,8 @@
 																	"value": "@{concat('TRUNCATE TABLE TEMP.', item().TargetSchemaName, '_', item().TargetObjectName)}",
 																	"type": "Expression"
 																},
-																"disableMetricsCollection": false,
-																"writeBehavior": "insert"
+																"writeBehavior": "insert",
+																"disableMetricsCollection": false
 															},
 															"enableStaging": false,
 															"translator": {
@@ -4233,64 +4267,6 @@
 				},
 				"folder": {
 					"name": "Temetra"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Potential_Leaks')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Execute Temetra_Potential_Leaks databricks notebook",
-				"activities": [
-					{
-						"name": "Temetra_Potential_Leaks",
-						"description": "/edw_discovery/Temetra/Temetra_Potential_Leaks",
-						"type": "DatabricksNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/edw_discovery/Temetra/Temetra_Potential_Leaks"
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_DBR_ADF_Job_Cluster",
-							"type": "LinkedServiceReference",
-							"parameters": {
-								"databricksclusterid": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databrickssecretname": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"databricks_cluster_id": {
-						"type": "string"
-					},
-					"databricks_secret_name": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Temetra/backup"
 				},
 				"annotations": []
 			},
