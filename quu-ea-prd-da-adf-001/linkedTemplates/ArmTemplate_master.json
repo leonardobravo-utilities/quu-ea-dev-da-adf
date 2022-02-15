@@ -427,6 +427,18 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "eForms"
+		},
+		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param": {
+			"type": "string",
+			"defaultValue": ",\"collectionReference\": \"$['Entry']['PhotoTable']\""
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -738,6 +750,15 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"eForms_daily_trigger_properties_PL_eForms_Main_parameters_SourceName": {
+						"value": "[parameters('eForms_daily_trigger_properties_PL_eForms_Main_parameters_SourceName')]"
+					},
+					"eForms_daily_trigger_properties_PL_eForms_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('eForms_daily_trigger_properties_PL_eForms_Main_parameters_OnlyBlobtoASQL')]"
+					},
+					"eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param": {
+						"value": "[parameters('eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param')]"
+					},
 					"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
 						"value": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName')]"
 					},
@@ -878,21 +899,6 @@
 					},
 					"Salesforce_Daily_Trigger_properties_PL_Salesforce_DM_SourcetoBlob_Master_parameters_BlobtoAsql": {
 						"value": "[parameters('Salesforce_Daily_Trigger_properties_PL_Salesforce_DM_SourcetoBlob_Master_parameters_BlobtoAsql')]"
-					},
-					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
-						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id')]"
-					},
-					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
-						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name')]"
-					},
-					"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_sourcename": {
-						"value": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_sourcename')]"
-					},
-					"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_cluster_id": {
-						"value": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_cluster_id')]"
-					},
-					"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_secret_name": {
-						"value": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_secret_name')]"
 					}
 				}
 			},
@@ -913,6 +919,21 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
+						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id')]"
+					},
+					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
+						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name')]"
+					},
+					"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_sourcename": {
+						"value": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_sourcename')]"
+					},
+					"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_cluster_id": {
+						"value": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_cluster_id')]"
+					},
+					"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_secret_name": {
+						"value": "[parameters('Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_secret_name')]"
 					},
 					"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
 						"value": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName')]"
