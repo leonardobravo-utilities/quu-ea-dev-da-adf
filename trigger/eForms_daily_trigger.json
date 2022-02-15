@@ -1,15 +1,28 @@
 {
 	"name": "eForms_daily_trigger",
 	"properties": {
+		"description": "eForms_daily_trigger",
 		"annotations": [],
-		"runtimeState": "Stopped",
-		"pipelines": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_eForms_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "eForms",
+					"OnlyBlobtoASQL": true,
+					"additional_param": ",\"collectionReference\": \"$['Entry']['PhotoTable']\""
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
 				"frequency": "Minute",
 				"interval": 15,
-				"startTime": "2022-02-15T03:50:00Z",
+				"startTime": "2022-02-14T02:36:00Z",
 				"timeZone": "UTC"
 			}
 		}
