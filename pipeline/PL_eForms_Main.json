@@ -155,6 +155,23 @@
 												}
 											},
 											"enableStaging": false,
+											"logSettings": {
+												"enableCopyActivityLog": true,
+												"copyActivityLogSettings": {
+													"logLevel": "Warning",
+													"enableReliableLogging": false
+												},
+												"logLocationSettings": {
+													"linkedServiceName": {
+														"referenceName": "LS_ABLB_quueadadlslanding001",
+														"type": "LinkedServiceReference"
+													},
+													"path": {
+														"value": "@concat(item().TargetBlobContainer,'/logs/',item().SourceTableName)",
+														"type": "Expression"
+													}
+												}
+											},
 											"translator": {
 												"value": "@json(activity('GetSchemaMapping').output.firstrow.json_output)",
 												"type": "Expression"
