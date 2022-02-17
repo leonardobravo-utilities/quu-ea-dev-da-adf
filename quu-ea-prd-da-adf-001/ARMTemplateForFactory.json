@@ -57,7 +57,7 @@
 		},
 		"LS_FS_Globalscape_properties_typeProperties_host": {
 			"type": "string",
-			"defaultValue": "\\\\nfujprd200\\EBI_PROD_LANDING"
+			"defaultValue": "\\\\nfujprd310\\EBI_PROD_LANDING"
 		},
 		"LS_FS_Globalscape_properties_typeProperties_userId": {
 			"type": "string",
@@ -303,7 +303,7 @@
 			"type": "bool",
 			"defaultValue": true
 		},
-		"QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_NFUJPRD200_parameters_FileExportName": {
+		"QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_globalscape_parameters_FileExportName": {
 			"type": "string",
 			"defaultValue": "QAO"
 		},
@@ -8855,11 +8855,11 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_File_Export_To_NFUJPRD200')]",
+			"name": "[concat(parameters('factoryName'), '/PL_File_Export_To_globalscape')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"description": "This pipeline will export the Files at Network Path \\\\Nfujprd200\\ebi_prod_landing",
+				"description": "This pipeline will export the Files at Network Path \\\\Nfujprd310\\ebi_prod_landing",
 				"activities": [
 					{
 						"name": "Files List to Export",
@@ -9037,7 +9037,7 @@
 												],
 												"outputs": [
 													{
-														"referenceName": "DS_File_NFUJPRD200",
+														"referenceName": "DS_File_globalscape",
 														"type": "DatasetReference",
 														"parameters": {
 															"TargetFilePath": {
@@ -9128,7 +9128,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/datasets/DS_File_NFUJPRD200')]",
+				"[concat(variables('factoryId'), '/datasets/DS_File_globalscape')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWDiscovery')]"
 			]
 		},
@@ -23299,7 +23299,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_File_NFUJPRD200')]",
+			"name": "[concat(parameters('factoryName'), '/DS_File_globalscape')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -25240,11 +25240,11 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "PL_File_Export_To_NFUJPRD200",
+							"referenceName": "PL_File_Export_To_globalscape",
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"FileExportName": "[parameters('QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_NFUJPRD200_parameters_FileExportName')]"
+							"FileExportName": "[parameters('QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_globalscape_parameters_FileExportName')]"
 						}
 					}
 				],
@@ -25273,7 +25273,7 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_File_Export_To_NFUJPRD200')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_File_Export_To_globalscape')]"
 			]
 		},
 		{
