@@ -13,6 +13,120 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Hourly_Consumption')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Execute Temetra_Hourly_Consumption Notebook in databricks",
+				"activities": [
+					{
+						"name": "4_Temetra_Hourly_Consumption",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/Temetra/4_Temetra_Hourly_Consumption",
+							"baseParameters": {
+								"Load_Type": {
+									"value": "@pipeline().parameters.Load_Type",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Load Temp to Target",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "4_Temetra_Hourly_Consumption",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[ETL].[usp_load_target_table]",
+							"storedProcedureParameters": {
+								"isDebugFlag": {
+									"value": "false",
+									"type": "Boolean"
+								},
+								"isTruncateBeforeLoad": {
+									"value": "true",
+									"type": "Boolean"
+								},
+								"sourceObject": {
+									"value": "Temp.Temetra_Hourly_Consumption",
+									"type": "String"
+								},
+								"targetObject": {
+									"value": "Mart.Temetra_Hourly_Consumption",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"databricks_cluster_id": {
+						"type": "string",
+						"defaultValue": "0417-051914-axons909"
+					},
+					"databricks_secret_name": {
+						"type": "string",
+						"defaultValue": "databricks2-token"
+					},
+					"Load_Type": {
+						"type": "string",
+						"defaultValue": "Full"
+					}
+				},
+				"folder": {
+					"name": "Temetra"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Potential_Leaks')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -533,73 +647,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_File_globalscape')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"TargetFilePath": {
-						"type": "string"
-					},
-					"TargetFileName": {
-						"type": "string"
-					},
-					"ColumnDelimiter": {
-						"type": "string"
-					},
-					"QuoteCharacter": {
-						"type": "string"
-					},
-					"EscapeCharacter": {
-						"type": "string"
-					},
-					"FirstRowHeader": {
-						"type": "int"
-					}
-				},
-				"folder": {
-					"name": "File Extract"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"fileName": {
-							"value": "@dataset().TargetFileName",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().TargetFilePath",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": {
-						"value": "@dataset().ColumnDelimiter",
-						"type": "Expression"
-					},
-					"escapeChar": {
-						"value": "@dataset().EscapeCharacter",
-						"type": "Expression"
-					},
-					"firstRowAsHeader": {
-						"value": "@equals(dataset().FirstRowHeader,1)",
-						"type": "Expression"
-					},
-					"quoteChar": {
-						"value": "@dataset().QuoteCharacter",
-						"type": "Expression"
-					}
-				},
-				"schema": []
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/DS_File_NFUJPRD202')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -706,6 +753,73 @@
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
 					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_File_globalscape')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TargetFilePath": {
+						"type": "string"
+					},
+					"TargetFileName": {
+						"type": "string"
+					},
+					"ColumnDelimiter": {
+						"type": "string"
+					},
+					"QuoteCharacter": {
+						"type": "string"
+					},
+					"EscapeCharacter": {
+						"type": "string"
+					},
+					"FirstRowHeader": {
+						"type": "int"
+					}
+				},
+				"folder": {
+					"name": "File Extract"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().TargetFileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().TargetFilePath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().ColumnDelimiter",
+						"type": "Expression"
+					},
+					"escapeChar": {
+						"value": "@dataset().EscapeCharacter",
+						"type": "Expression"
+					},
+					"firstRowAsHeader": {
+						"value": "@equals(dataset().FirstRowHeader,1)",
+						"type": "Expression"
+					},
+					"quoteChar": {
+						"value": "@dataset().QuoteCharacter",
+						"type": "Expression"
+					}
 				},
 				"schema": []
 			},
@@ -860,61 +974,6 @@
 				},
 				"annotations": [],
 				"type": "OracleTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_SQL_EDWDiscovery_OnPrem')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_SQL_Framework",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"Servername": {
-							"value": "@dataset().ServerName",
-							"type": "Expression"
-						},
-						"Databasename": {
-							"value": "@dataset().DatabaseName",
-							"type": "Expression"
-						},
-						"SecretPasswordName": {
-							"value": "@dataset().SecretPasswordName",
-							"type": "Expression"
-						},
-						"UserName": {
-							"value": "@dataset().UserName",
-							"type": "Expression"
-						}
-					}
-				},
-				"parameters": {
-					"ServerName": {
-						"type": "string",
-						"defaultValue": "PRDC04-SQL"
-					},
-					"DatabaseName": {
-						"type": "string",
-						"defaultValue": "EDW_Discovery"
-					},
-					"UserName": {
-						"type": "string",
-						"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
-					},
-					"SecretPasswordName": {
-						"type": "string",
-						"defaultValue": "SVC-EBI-PRDC04-AGT"
-					}
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
 				"schema": [],
 				"typeProperties": {}
 			},
