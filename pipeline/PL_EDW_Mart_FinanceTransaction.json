@@ -785,6 +785,13 @@
 							"value": null,
 							"type": "DateTime"
 						},
+						"incr_days": {
+							"value": {
+								"value": "@pipeline().parameters.incrementaldays",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
 						"isdeltaload": {
 							"value": "1",
 							"type": "Byte"
@@ -845,6 +852,13 @@
 						"from_dtm": {
 							"value": null,
 							"type": "DateTime"
+						},
+						"incr_days": {
+							"value": {
+								"value": "@pipeline().parameters.incrementaldays",
+								"type": "Expression"
+							},
+							"type": "Int32"
 						},
 						"isdeltaload": {
 							"value": "1",
@@ -1002,6 +1016,10 @@
 			"sourcename": {
 				"type": "string",
 				"defaultValue": "Ellipse9"
+			},
+			"incrementaldays": {
+				"type": "string",
+				"defaultValue": "5"
 			}
 		},
 		"folder": {
