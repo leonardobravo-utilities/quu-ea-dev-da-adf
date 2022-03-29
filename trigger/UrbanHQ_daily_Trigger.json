@@ -2,15 +2,32 @@
 	"name": "UrbanHQ_daily_Trigger",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
-		"pipelines": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_UrbanHQ_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "UrbanHQ",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Minute",
-				"interval": 15,
-				"startTime": "2022-03-29T04:03:00Z",
-				"timeZone": "UTC"
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2021-06-05T06:00:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"hours": [
+						2
+					]
+				}
 			}
 		}
 	}
