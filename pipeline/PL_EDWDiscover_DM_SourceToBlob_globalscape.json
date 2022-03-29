@@ -1,0 +1,295 @@
+{
+	"name": "PL_EDWDiscover_DM_SourceToBlob_globalscape",
+	"properties": {
+		"activities": [
+			{
+				"name": "lkp_getfilemetadata",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select S.FileFolderName,T.SourceFileName,TargetBlobFilePath,\n File_Name_DateTime_Ind,TargetBlobFileName,TargetBlobFileNameExt\n,ColumnDelimiter,QuoteCharacter \nfrom [ETL].[SourceSystem] S INNER JOIN [ETL].[SourceTableDetails] T\nON S.sourceID = T.sourceID  \n where  S.sourceID=@{pipeline().parameters.sourceID} and  isactive=1",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Copy_files_toBlob",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "lkp_getfilemetadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('lkp_getfilemetadata').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "CopyFiles_to_Blob",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "lkp_getlocalstarttime2",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "FileServerReadSettings",
+										"recursive": false,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"dataIntegrationUnits": 2
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_FS_globalscape_urbanHQ",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileFolder": {
+											"value": "@item().FileFolderName",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@item().SourceFileName",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_ABLB_Datalanding",
+									"type": "DatasetReference",
+									"parameters": {
+										"FolderPath": {
+											"value": "@item().TargetBlobFilePath",
+											"type": "Expression"
+										},
+										"TargetFileName": {
+											"value": "@if(equals(item().File_Name_DateTime_Ind,1),\nconcat(item().TargetBlobFileName,'-',\nactivity('lkp_getlocalstarttime2').output.firstrow.localstarttime2,item().TargetBlobFileNameExt),\nconcat(item().TargetBlobFileName,item().TargetBlobFileNameExt))",
+											"type": "Expression"
+										},
+										"ColumnDelimiter": {
+											"value": "@item().ColumnDelimiter",
+											"type": "Expression"
+										},
+										"QuoteCharacter": {
+											"value": "@item().QuoteCharacter",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Archive_Data",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "CopyFiles_to_Blob",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "FileServerReadSettings",
+										"recursive": false,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "FileServerWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_FS_globalscape_urbanHQ",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileFolder": {
+											"value": "@item().FileFolderName",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@item().SourceFileName",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_FS_globalscape_urbanHQ",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileFolder": {
+											"value": "@concat(item().FileFolderName,'/Archived')",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@if(equals(item().File_Name_DateTime_Ind,1),\nconcat(item().TargetBlobFileName,'-',\nactivity('lkp_getlocalstarttime2').output.firstrow.localstarttime2,item().TargetBlobFileNameExt),\nconcat(item().TargetBlobFileName,item().TargetBlobFileNameExt))",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Delete_Old_From_UrbanHQ",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "Archive_Data",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_FS_globalscape_urbanHQ",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileFolder": {
+											"value": "@item().FileFolderName",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@item().SourceFileName",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "FileServerReadSettings",
+									"recursive": false
+								}
+							}
+						},
+						{
+							"name": "lkp_getlocalstarttime2",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlMISource",
+									"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_ASQL_EDWDiscovery",
+									"type": "DatasetReference"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"sourceID": {
+				"type": "string",
+				"defaultValue": "117"
+			}
+		},
+		"folder": {
+			"name": "UrbanHQ"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
