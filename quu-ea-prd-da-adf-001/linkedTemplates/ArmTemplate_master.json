@@ -451,6 +451,26 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"LS_FS_globalscape_PowerBI_file_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\NFUJPRD310\\Power_BI"
+		},
+		"LS_FS_globalscape_PowerBI_file_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "UrbanHQ"
+		},
+		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -593,6 +613,12 @@
 					},
 					"LS_SQL_Framework_properties_typeProperties_userName": {
 						"value": "[parameters('LS_SQL_Framework_properties_typeProperties_userName')]"
+					},
+					"LS_FS_globalscape_PowerBI_file_properties_typeProperties_host": {
+						"value": "[parameters('LS_FS_globalscape_PowerBI_file_properties_typeProperties_host')]"
+					},
+					"LS_FS_globalscape_PowerBI_file_properties_typeProperties_userId": {
+						"value": "[parameters('LS_FS_globalscape_PowerBI_file_properties_typeProperties_userId')]"
 					}
 				}
 			},
@@ -702,6 +728,26 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_6')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_8",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_8.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName": {
 						"value": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName')]"
@@ -741,26 +787,6 @@
 					},
 					"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_p_MidServerLocation": {
 						"value": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_p_MidServerLocation')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_6')]"
-			]
-		},
-		{
-			"name": "quu-ea-prd-da-adf-001_ArmTemplate_8",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_8.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"eForms_daily_trigger_properties_PL_eForms_Main_parameters_SourceName": {
 						"value": "[parameters('eForms_daily_trigger_properties_PL_eForms_Main_parameters_SourceName')]"
@@ -770,6 +796,15 @@
 					},
 					"eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param": {
 						"value": "[parameters('eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param')]"
+					},
+					"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName": {
+						"value": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName')]"
+					},
+					"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlySourceToBlob": {
+						"value": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlySourceToBlob')]"
+					},
+					"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlyBlobtoASQL')]"
 					},
 					"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
 						"value": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName')]"
@@ -872,6 +907,26 @@
 					},
 					"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_7')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_9",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_9.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName": {
 						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName')]"
@@ -911,26 +966,6 @@
 					},
 					"Salesforce_Daily_Trigger_properties_PL_Salesforce_DM_SourcetoBlob_Master_parameters_BlobtoAsql": {
 						"value": "[parameters('Salesforce_Daily_Trigger_properties_PL_Salesforce_DM_SourcetoBlob_Master_parameters_BlobtoAsql')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_7')]"
-			]
-		},
-		{
-			"name": "quu-ea-prd-da-adf-001_ArmTemplate_9",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_9.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
 						"value": "[parameters('TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id')]"
