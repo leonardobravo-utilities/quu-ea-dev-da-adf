@@ -1,0 +1,39 @@
+{
+	"name": "DS_FS_globalscape_urbanHQ",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_FS_globalscape_PowerBI_file",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FileFolder": {
+				"type": "string"
+			},
+			"FileName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "UrbanHQ"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"fileName": {
+					"value": "@dataset().FileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().FileFolder",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
