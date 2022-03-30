@@ -87,6 +87,14 @@
 			"type": "string",
 			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
+		"LS_FS_globalscape_PowerBI_file_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\NFUJPRD310\\Power_BI"
+		},
+		"LS_FS_globalscape_PowerBI_file_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
 		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
@@ -415,6 +423,30 @@
 			"type": "string",
 			"defaultValue": "databricks-token"
 		},
+		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "UrbanHQ"
+		},
+		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "WWI_SEC"
+		},
+		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "WWI"
@@ -438,38 +470,6 @@
 		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param": {
 			"type": "string",
 			"defaultValue": ",\"collectionReference\": \"$['Entry']['PhotoTable']\""
-		},
-		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "WWI_SEC"
-		},
-		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"LS_FS_globalscape_PowerBI_file_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "\\\\NFUJPRD310\\Power_BI"
-		},
-		"LS_FS_globalscape_PowerBI_file_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
-		},
-		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "UrbanHQ"
-		},
-		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
 		}
 	},
 	"variables": {
@@ -3524,6 +3524,272 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_DM_SourcetoBlob_File')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscover_DM_SourceToBlob_globalscape')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "lkp_getfilemetadata",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select S.FileFolderName,T.SourceFileName,TargetBlobFilePath,\n File_Name_DateTime_Ind,TargetBlobFileName,TargetBlobFileNameExt\n,ColumnDelimiter,QuoteCharacter \nfrom [ETL].[SourceSystem] S INNER JOIN [ETL].[SourceTableDetails] T\nON S.sourceID = T.sourceID  \n where  S.sourceID=@{pipeline().parameters.sourceID} and  isactive=1",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Copy_files_toBlob",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "lkp_getfilemetadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('lkp_getfilemetadata').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "CopyFiles_to_Blob",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "lkp_getlocalstarttime2",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "FileServerReadSettings",
+												"recursive": false,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".csv"
+											}
+										},
+										"enableStaging": false,
+										"dataIntegrationUnits": 2
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_FS_globalscape_urbanHQ",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileFolder": {
+													"value": "@item().FileFolderName",
+													"type": "Expression"
+												},
+												"FileName": {
+													"value": "@item().SourceFileName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ABLB_Datalanding",
+											"type": "DatasetReference",
+											"parameters": {
+												"FolderPath": {
+													"value": "@item().TargetBlobFilePath",
+													"type": "Expression"
+												},
+												"TargetFileName": {
+													"value": "@if(equals(item().File_Name_DateTime_Ind,1),\nconcat(item().TargetBlobFileName,'-',\nactivity('lkp_getlocalstarttime2').output.firstrow.localstarttime2,item().TargetBlobFileNameExt),\nconcat(item().TargetBlobFileName,item().TargetBlobFileNameExt))",
+													"type": "Expression"
+												},
+												"ColumnDelimiter": {
+													"value": "@item().ColumnDelimiter",
+													"type": "Expression"
+												},
+												"QuoteCharacter": {
+													"value": "@item().QuoteCharacter",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Archive_Data",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "CopyFiles_to_Blob",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "FileServerReadSettings",
+												"recursive": false,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "FileServerWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".csv"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_FS_globalscape_urbanHQ",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileFolder": {
+													"value": "@item().FileFolderName",
+													"type": "Expression"
+												},
+												"FileName": {
+													"value": "@item().SourceFileName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_FS_globalscape_urbanHQ",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileFolder": {
+													"value": "@concat(item().FileFolderName,'/Archived')",
+													"type": "Expression"
+												},
+												"FileName": {
+													"value": "@if(equals(item().File_Name_DateTime_Ind,1),\nconcat(item().TargetBlobFileName,'-',\nactivity('lkp_getlocalstarttime2').output.firstrow.localstarttime2,item().TargetBlobFileNameExt),\nconcat(item().TargetBlobFileName,item().TargetBlobFileNameExt))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "lkp_getlocalstarttime2",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlMISource",
+											"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_ASQL_EDWDiscovery",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"sourceID": {
+						"type": "string",
+						"defaultValue": "117"
+					}
+				},
+				"folder": {
+					"name": "UrbanHQ"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/datasets/DS_FS_globalscape_urbanHQ')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ABLB_Datalanding')]"
 			]
 		},
 		{
@@ -22254,6 +22520,150 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_UrbanHQ_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForSourceToBlob",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlySourceToBlob",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_EDWDiscover_DM_SourceToBlob_globalscape",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscover_DM_SourceToBlob_globalscape",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"sourceID": {
+												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForBlobToASQL",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "CheckExecutionStatusForSourceToBlob",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyBlobtoASQL",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_TRFM_BLOBToASQL",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "UrbanHQ"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					}
+				},
+				"folder": {
+					"name": "UrbanHQ"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscover_DM_SourceToBlob_globalscape')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_WWI_Main')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -23986,6 +24396,50 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_globalscape_urbanHQ')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_globalscape_PowerBI_file",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileFolder": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "UrbanHQ"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FileFolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_globalscape_PowerBI_file')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_File_NFUJPRD202')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -24721,6 +25175,35 @@
 				"typeProperties": {
 					"host": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_host')]",
 					"userId": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "svc-ebi-prdc04-agt"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedRuntime')]",
+				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_globalscape_PowerBI_file')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_globalscape_PowerBI_file_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_globalscape_PowerBI_file_properties_typeProperties_userId')]",
 					"password": {
 						"type": "AzureKeyVaultSecret",
 						"store": {
@@ -26410,6 +26893,84 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/UrbanHQ_daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_UrbanHQ_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-06-05T06:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"hours": [
+								2
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_UrbanHQ_Main')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/WWI_Daily_Scondary_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_WWI_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-06-05T06:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"hours": [
+								7
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_WWI_Main')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/WWI_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -26540,608 +27101,6 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/WWI_Daily_Scondary_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_WWI_Main",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2021-06-05T06:00:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"hours": [
-								7
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_WWI_Main')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_FS_globalscape_PowerBI_file')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('LS_FS_globalscape_PowerBI_file_properties_typeProperties_host')]",
-					"userId": "[parameters('LS_FS_globalscape_PowerBI_file_properties_typeProperties_userId')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "svc-ebi-prdc04-agt"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SelfHostedRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedRuntime')]",
-				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_FS_globalscape_urbanHQ')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_globalscape_PowerBI_file",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"FileFolder": {
-						"type": "string"
-					},
-					"FileName": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "UrbanHQ"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"fileName": {
-							"value": "@dataset().FileName",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().FileFolder",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_FS_globalscape_PowerBI_file')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscover_DM_SourceToBlob_globalscape')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "lkp_getfilemetadata",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "select S.FileFolderName,T.SourceFileName,TargetBlobFilePath,\n File_Name_DateTime_Ind,TargetBlobFileName,TargetBlobFileNameExt\n,ColumnDelimiter,QuoteCharacter \nfrom [ETL].[SourceSystem] S INNER JOIN [ETL].[SourceTableDetails] T\nON S.sourceID = T.sourceID  \n where  S.sourceID=@{pipeline().parameters.sourceID} and  isactive=1",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Copy_files_toBlob",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "lkp_getfilemetadata",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('lkp_getfilemetadata').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "CopyFiles_to_Blob",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "lkp_getlocalstarttime2",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "FileServerReadSettings",
-												"recursive": false,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings"
-											}
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".csv"
-											}
-										},
-										"enableStaging": false,
-										"dataIntegrationUnits": 2
-									},
-									"inputs": [
-										{
-											"referenceName": "DS_FS_globalscape_urbanHQ",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileFolder": {
-													"value": "@item().FileFolderName",
-													"type": "Expression"
-												},
-												"FileName": {
-													"value": "@item().SourceFileName",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "DS_ABLB_Datalanding",
-											"type": "DatasetReference",
-											"parameters": {
-												"FolderPath": {
-													"value": "@item().TargetBlobFilePath",
-													"type": "Expression"
-												},
-												"TargetFileName": {
-													"value": "@if(equals(item().File_Name_DateTime_Ind,1),\nconcat(item().TargetBlobFileName,'-',\nactivity('lkp_getlocalstarttime2').output.firstrow.localstarttime2,item().TargetBlobFileNameExt),\nconcat(item().TargetBlobFileName,item().TargetBlobFileNameExt))",
-													"type": "Expression"
-												},
-												"ColumnDelimiter": {
-													"value": "@item().ColumnDelimiter",
-													"type": "Expression"
-												},
-												"QuoteCharacter": {
-													"value": "@item().QuoteCharacter",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "Archive_Data",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "CopyFiles_to_Blob",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "FileServerReadSettings",
-												"recursive": false,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings"
-											}
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "FileServerWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".csv"
-											}
-										},
-										"enableStaging": false
-									},
-									"inputs": [
-										{
-											"referenceName": "DS_FS_globalscape_urbanHQ",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileFolder": {
-													"value": "@item().FileFolderName",
-													"type": "Expression"
-												},
-												"FileName": {
-													"value": "@item().SourceFileName",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "DS_FS_globalscape_urbanHQ",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileFolder": {
-													"value": "@concat(item().FileFolderName,'/Archived')",
-													"type": "Expression"
-												},
-												"FileName": {
-													"value": "@if(equals(item().File_Name_DateTime_Ind,1),\nconcat(item().TargetBlobFileName,'-',\nactivity('lkp_getlocalstarttime2').output.firstrow.localstarttime2,item().TargetBlobFileNameExt),\nconcat(item().TargetBlobFileName,item().TargetBlobFileNameExt))",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "Delete_Old_From_UrbanHQ",
-									"type": "Delete",
-									"dependsOn": [
-										{
-											"activity": "Archive_Data",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataset": {
-											"referenceName": "DS_FS_globalscape_urbanHQ",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileFolder": {
-													"value": "@item().FileFolderName",
-													"type": "Expression"
-												},
-												"FileName": {
-													"value": "@item().SourceFileName",
-													"type": "Expression"
-												}
-											}
-										},
-										"enableLogging": false,
-										"storeSettings": {
-											"type": "FileServerReadSettings",
-											"recursive": false
-										}
-									}
-								},
-								{
-									"name": "lkp_getlocalstarttime2",
-									"type": "Lookup",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlMISource",
-											"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2",
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "DS_ASQL_EDWDiscovery",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"sourceID": {
-						"type": "string",
-						"defaultValue": "117"
-					}
-				},
-				"folder": {
-					"name": "UrbanHQ"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/datasets/DS_FS_globalscape_urbanHQ')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_Datalanding')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_UrbanHQ_Main')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "GetSourceID",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					},
-					{
-						"name": "CheckExecutionStatusForSourceToBlob",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "GetSourceID",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@pipeline().parameters.OnlySourceToBlob",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "ExecutePL_EDWDiscover_DM_SourceToBlob_globalscape",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_EDWDiscover_DM_SourceToBlob_globalscape",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"sourceID": {
-												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "CheckExecutionStatusForBlobToASQL",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "CheckExecutionStatusForSourceToBlob",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@pipeline().parameters.OnlyBlobtoASQL",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "ExecutePL_TRFM_BLOBToASQL",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"SourceID": {
-												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceName": {
-						"type": "string",
-						"defaultValue": "UrbanHQ"
-					},
-					"OnlySourceToBlob": {
-						"type": "bool",
-						"defaultValue": true
-					},
-					"OnlyBlobtoASQL": {
-						"type": "bool",
-						"defaultValue": true
-					}
-				},
-				"folder": {
-					"name": "UrbanHQ"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscover_DM_SourceToBlob_globalscape')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/UrbanHQ_daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_UrbanHQ_Main",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlyBlobtoASQL')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2021-06-05T06:00:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"hours": [
-								2
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_UrbanHQ_Main')]"
-			]
 		}
 	]
 }

@@ -59,18 +59,6 @@
 			"type": "string",
 			"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD2\\ServiceNow MID Server NFUJPRD281_Kusanagi\\agent\\export\\updates"
 		},
-		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "eForms"
-		},
-		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param": {
-			"type": "string",
-			"defaultValue": ",\"collectionReference\": \"$['Entry']['PhotoTable']\""
-		},
 		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "UrbanHQ"
@@ -82,6 +70,18 @@
 		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
+		},
+		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "eForms"
+		},
+		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param": {
+			"type": "string",
+			"defaultValue": ",\"collectionReference\": \"$['Entry']['PhotoTable']\""
 		},
 		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
 			"type": "string",
@@ -387,6 +387,43 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/UrbanHQ_daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_UrbanHQ_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-06-05T06:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"hours": [
+								2
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/eForms_daily_trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -418,43 +455,6 @@
 							"minutes": [
 								0
 							],
-							"hours": [
-								2
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/UrbanHQ_daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_UrbanHQ_Main",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlyBlobtoASQL')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2021-06-05T06:00:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
 							"hours": [
 								2
 							]
