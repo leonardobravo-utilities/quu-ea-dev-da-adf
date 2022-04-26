@@ -19,6 +19,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'"
 		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\NFUJPRD202\\FDrive"
+		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
 		"LS_FS_NFUJPRD301_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "\\\\NFUJPRD301\\EBI_PROD_LANDING"
@@ -68,6 +76,32 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_NFUJPRD202')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SVC-EBI-PRDC04-AGT"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_FS_NFUJPRD301')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -1440,6 +1474,279 @@
 					"ModelName": {
 						"type": "string",
 						"defaultValue": "Crew-Roster-Mart-Model"
+					}
+				},
+				"folder": {
+					"name": "FrameWork"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Framework_DM_SourcetoBlob_ExcelFile')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Copy new or updated rows only from database using external control table",
+				"activities": [
+					{
+						"name": "FullCopyToBlob",
+						"description": "Full Copy from source table into blob storage",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "GetLastModifiedDate",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ExcelSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"dataIntegrationUnits": 0
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_ExcelFile_Source",
+								"type": "DatasetReference",
+								"parameters": {
+									"DirectoryName": {
+										"value": "@pipeline().parameters.SourceFolderLocation",
+										"type": "Expression"
+									},
+									"FileName": {
+										"value": "@pipeline().parameters.SourceFileName",
+										"type": "Expression"
+									},
+									"SheetName": {
+										"value": "@pipeline().parameters.Data_Source_Table_Name",
+										"type": "Expression"
+									},
+									"ContainerName": {
+										"value": "@pipeline().parameters.SourceLandingContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ABLB_Datalanding",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderPath": {
+										"value": "@pipeline().parameters.Data_Destination_Folder_Path",
+										"type": "Expression"
+									},
+									"TargetFileName": {
+										"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1)\n,  concat(pipeline().parameters.Data_Destination_File_Name\n             ,'-'\n            , formatDateTime(convertFromUtc(activity('GetLastModifiedDate').output.lastModified,'E. Australia Standard Time'),'yyyyMMdd-HHmmss')\n             ,pipeline().parameters.File_Name_Ext)\n,\nconcat(\npipeline().parameters.Data_Destination_File_Name\n,pipeline().parameters.File_Name_Ext)\n)",
+										"type": "Expression"
+									},
+									"ColumnDelimiter": {
+										"value": "@pipeline().parameters.ColumnDelimiter",
+										"type": "Expression"
+									},
+									"QuoteCharacter": {
+										"value": "@pipeline().parameters.QuoteCharacter",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "SqlServerStoredProcedure2",
+						"description": "Stored procedure activity to store the new high-watermark value into external control table for delta data loading. ",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "FullCopyToBlob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[ETL].[usp_update_incrementaldatevalue]",
+							"storedProcedureParameters": {
+								"TableID": {
+									"value": {
+										"value": "@pipeline().parameters.TableID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWDiscovery",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "GetLastModifiedDate",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_ExcelFile_Source",
+								"type": "DatasetReference",
+								"parameters": {
+									"DirectoryName": {
+										"value": "@pipeline().parameters.SourceFolderLocation",
+										"type": "Expression"
+									},
+									"FileName": {
+										"value": "@pipeline().parameters.SourceFileName",
+										"type": "Expression"
+									},
+									"SheetName": {
+										"value": "@pipeline().parameters.Data_Source_Table_Name",
+										"type": "Expression"
+									},
+									"ContainerName": {
+										"value": "@pipeline().parameters.SourceLandingContainer",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"lastModified"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"Data_Source_Table_Name": {
+						"type": "String",
+						"defaultValue": "dbo.MSF660"
+					},
+					"Data_Source_WaterMarkColumn": {
+						"type": "String",
+						"defaultValue": "CASE WHEN LAST_MOD_DATE <> '' AND LAST_MOD_TIME<>'' THEN (CAST(LAST_MOD_DATE AS DATETIME) + CAST(stuff(stuff(LAST_MOD_TIME ,3,0,':'),6,0,':') AS DATETIME)) END"
+					},
+					"Data_Destination_Folder_Path": {
+						"type": "String",
+						"defaultValue": "ellipse9-datalanding/MSF660"
+					},
+					"Control_Table_Table_Name": {
+						"type": "String",
+						"defaultValue": "ETL.SourceTableDetails"
+					},
+					"Control_Table_Column_Name": {
+						"type": "String",
+						"defaultValue": "IncrementalKeyDateColumnLastRefreshValue"
+					},
+					"TableID": {
+						"type": "string",
+						"defaultValue": "1"
+					},
+					"Data_Destination_File_Name": {
+						"type": "string",
+						"defaultValue": "MSF660"
+					},
+					"SourceServerName": {
+						"type": "string",
+						"defaultValue": "NFUJDEV073"
+					},
+					"SourceDatabaseName": {
+						"type": "string",
+						"defaultValue": "Datamart"
+					},
+					"IncrementalLoadInd": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"File_Name_Ext": {
+						"type": "string",
+						"defaultValue": ".csv"
+					},
+					"File_Name_DateTime_Ind": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"Join_Condition": {
+						"type": "string",
+						"defaultValue": " "
+					},
+					"Source_Column_List": {
+						"type": "string",
+						"defaultValue": "*"
+					},
+					"ColumnDelimiter": {
+						"type": "string",
+						"defaultValue": ","
+					},
+					"QuoteCharacter": {
+						"type": "string",
+						"defaultValue": "¬"
+					},
+					"source_where_filter": {
+						"type": "string",
+						"defaultValue": " "
+					},
+					"UserName": {
+						"type": "string"
+					},
+					"SecretPasswordName": {
+						"type": "string"
+					},
+					"SourceFolderLocation": {
+						"type": "string"
+					},
+					"SourceFileName": {
+						"type": "string"
+					},
+					"SourceLandingContainer": {
+						"type": "string"
 					}
 				},
 				"folder": {
@@ -4193,141 +4500,6 @@
 						"userProperties": [],
 						"typeProperties": {
 							"notebookPath": "/edw_discovery/Temetra/Temetra_24Hr_Stats"
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_DBR_ADF_Job_Cluster",
-							"type": "LinkedServiceReference",
-							"parameters": {
-								"databricksclusterid": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databrickssecretname": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"databricks_cluster_id": {
-						"type": "string"
-					},
-					"databricks_secret_name": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Temetra/backup"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Temetra_API_Call')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "3_Temetra_API_Response_Management",
-						"type": "DatabricksNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 1,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/edw_discovery/Temetra/3_Temetra_API_Response_Management",
-							"baseParameters": {
-								"Load_Type": {
-									"value": "@pipeline().parameters.param_load_type",
-									"type": "Expression"
-								},
-								"InitialStartDate": {
-									"value": "@pipeline().parameters.param_startdate",
-									"type": "Expression"
-								},
-								"InitialEndDate": {
-									"value": "@pipeline().parameters.param_enddate",
-									"type": "Expression"
-								}
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_DBR_ADF_Job_Cluster",
-							"type": "LinkedServiceReference",
-							"parameters": {
-								"databricksclusterid": "0818-004527-fleck168",
-								"databrickssecretname": "databricks-token"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"databricks_cluster_id": {
-						"type": "string",
-						"defaultValue": "0417-051914-axons909"
-					},
-					"databricks_secret_name": {
-						"type": "string",
-						"defaultValue": "databricks-token"
-					},
-					"param_load_type": {
-						"type": "string",
-						"defaultValue": "Incremental"
-					},
-					"param_startdate": {
-						"type": "string",
-						"defaultValue": "20200101"
-					},
-					"param_enddate": {
-						"type": "string",
-						"defaultValue": "20201231"
-					}
-				},
-				"folder": {
-					"name": "Temetra"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Temetra_API_Response')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Execute Temetra_API_Response databricks notebook for API data ingestion",
-				"activities": [
-					{
-						"name": "Temetra_API_Response",
-						"type": "DatabricksNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/edw_discovery/Temetra/Temetra_API_Response"
 						},
 						"linkedServiceName": {
 							"referenceName": "LS_DBR_ADF_Job_Cluster",

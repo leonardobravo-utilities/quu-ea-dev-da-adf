@@ -155,6 +155,22 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Daptiv"
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
 		"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "EAMS Integration"
@@ -551,12 +567,6 @@
 					},
 					"LS_FS_Globalscape_properties_typeProperties_userId": {
 						"value": "[parameters('LS_FS_Globalscape_properties_typeProperties_userId')]"
-					},
-					"LS_FS_NFUJPRD202_properties_typeProperties_host": {
-						"value": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_host')]"
-					},
-					"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
-						"value": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_userId')]"
 					}
 				}
 			},
@@ -586,6 +596,12 @@
 					},
 					"LS_SQL_Framework_connectionString": {
 						"value": "[parameters('LS_SQL_Framework_connectionString')]"
+					},
+					"LS_FS_NFUJPRD202_properties_typeProperties_host": {
+						"value": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_host')]"
+					},
+					"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
+						"value": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_userId')]"
 					},
 					"LS_FS_NFUJPRD301_properties_typeProperties_host": {
 						"value": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_host')]"
@@ -886,6 +902,26 @@
 					},
 					"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlyBlobtoASQL')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_7')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_9",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_9.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"GIS_SD_REFERENCE_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName": {
 						"value": "[parameters('GIS_SD_REFERENCE_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName')]"
@@ -907,26 +943,6 @@
 					},
 					"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_7')]"
-			]
-		},
-		{
-			"name": "quu-ea-prd-da-adf-001_ArmTemplate_9",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_9.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName": {
 						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName')]"
@@ -999,6 +1015,18 @@
 					},
 					"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
+					},
+					"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+						"value": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
+					},
+					"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]"
+					},
+					"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+						"value": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]"
+					},
+					"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+						"value": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
 					},
 					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
