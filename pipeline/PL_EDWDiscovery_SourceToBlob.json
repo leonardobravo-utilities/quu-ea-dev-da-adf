@@ -60,6 +60,30 @@
 									}
 								}
 							]
+						},
+						{
+							"value": "Excel File",
+							"activities": [
+								{
+									"name": "Execute DM_SourcetoBlob_ExcelFile",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_ExcelFile",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@pipeline().parameters.SourceID",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
 						}
 					]
 				}
