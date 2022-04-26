@@ -1,0 +1,48 @@
+{
+	"name": "DS_ExcelFile_Source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueaprddasrclanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"DirectoryName": {
+				"type": "string"
+			},
+			"FileName": {
+				"type": "string"
+			},
+			"SheetName": {
+				"type": "string"
+			},
+			"ContainerName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": {
+				"value": "@dataset().SheetName",
+				"type": "Expression"
+			},
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().FileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().DirectoryName",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().ContainerName",
+					"type": "Expression"
+				}
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	}
+}

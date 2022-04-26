@@ -1,0 +1,38 @@
+{
+	"name": "Daptiv_Daily_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "Daptiv",
+					"OnlyBlobtoASQL": true,
+					"OnlySourceToBlob": true,
+					"AllowPartialUpdateOfDiscovery": false
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-04-07T11:30:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						11
+					]
+				}
+			}
+		}
+	}
+}
