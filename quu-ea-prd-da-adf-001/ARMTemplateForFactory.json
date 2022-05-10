@@ -143,6 +143,10 @@
 			"type": "string",
 			"defaultValue": "databricks-token"
 		},
+		"Chloroclam_Daily_Trigger_properties_PL_Evoqua_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Evoqua-metadata"
+		},
 		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "CHRIS21"
@@ -26846,6 +26850,46 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_BOM_Forecast_Main')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Chloroclam_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Evoqua_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Chloroclam_Daily_Trigger_properties_PL_Evoqua_Main_parameters_SourceName')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-05-09T03:55:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								5
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Evoqua_Main')]"
 			]
 		},
 		{
