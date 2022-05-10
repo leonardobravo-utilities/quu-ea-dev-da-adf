@@ -1,0 +1,271 @@
+{
+	"name": "PL_Evoqua_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute 2-Evoqua-Unit-Level-Telemetry notebook",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Execute Pipeline PL_Evoqua_Metadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/edw_discovery/Evoqua/2-Evoqua_Unit_Level_Telemetry"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_DBR_ADF_Job_Cluster",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"databricksclusterid": {
+							"value": "@variables('ClusterId')",
+							"type": "Expression"
+						},
+						"databrickssecretname": {
+							"value": "@variables('ClusterSecret')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute Pipeline PL_Evoqua_Metadata",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ForEach on tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Evoqua_Metadata",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceName": "Evoqua-metadata"
+					}
+				}
+			},
+			{
+				"name": "Execute Pipeline PL_Evoqua_Telemetry",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute 2-Evoqua-Unit-Level-Telemetry notebook",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Evoqua_Telemetry",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceName": "Evoqua-telemetry"
+					}
+				}
+			},
+			{
+				"name": "Get Tables",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Get Source details",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select * \nfrom [ETL].[SourceTableDetails] \nwhere SourceID = '@{activity('Get Source details').output.firstRow.SourceId}' and IsActive = 1",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach on tables",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Set ClusterId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set ClusterSecret",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Tables').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 4,
+					"activities": [
+						{
+							"name": "Execute API ingestion pipeline",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Evoqua_API_Parallel_Ingestion",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"TableName": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"DatabricksClusterId": {
+										"value": "@variables('ClusterId')",
+										"type": "Expression"
+									},
+									"DatabricksSecretName": {
+										"value": "@variables('ClusterSecret')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get Source details",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select * from [ETL].[SourceSystem] where SourceName = '@{pipeline().parameters.SourceName}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery_Table",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": "[ETL].[SourceSystem]"
+						}
+					}
+				}
+			},
+			{
+				"name": "Set ClusterId",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ClusterId",
+					"value": {
+						"value": "@activity('Get Source details').output.firstRow.databricksclusterid",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set ClusterSecret",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ClusterSecret",
+					"value": {
+						"value": "@activity('Get Source details').output.firstRow.databrickssecretname",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "Evoqua-metadata"
+			}
+		},
+		"variables": {
+			"ClusterId": {
+				"type": "String"
+			},
+			"ClusterSecret": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Evoqua"
+		},
+		"annotations": []
+	}
+}
