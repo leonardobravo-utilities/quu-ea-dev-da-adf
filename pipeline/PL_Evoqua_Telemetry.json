@@ -1,0 +1,71 @@
+{
+	"name": "PL_Evoqua_Telemetry",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExecutePL_TRFM_BLOBToASQL",
+				"description": "Loading Temetra API Data into databricks delta and Azure sql db",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "GetSourceID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceID": {
+							"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "GetSourceID",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "Evoqua-telemetry"
+			}
+		},
+		"folder": {
+			"name": "Evoqua"
+		},
+		"annotations": []
+	}
+}
