@@ -2,15 +2,32 @@
 	"name": "eDNA_Daily_Scondary_Trigger",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
-		"pipelines": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_WWI_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "eDNA_SEC",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Minute",
-				"interval": 15,
-				"startTime": "2022-05-24T01:45:00Z",
-				"timeZone": "UTC"
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-05-24T06:00:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"hours": [
+						7
+					]
+				}
 			}
 		}
 	}
