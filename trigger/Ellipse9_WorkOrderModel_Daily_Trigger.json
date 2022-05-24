@@ -1,14 +1,18 @@
 {
-	"name": "WorkOrder_DataModel_Daily_Trigger",
+	"name": "Ellipse9_WorkOrderModel_Daily_Trigger",
 	"properties": {
-		"description": "updating dimensional work order tables in edw_mart",
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "PL_WorkOrder_Model_Main",
+					"referenceName": "PL_EA_Ellipse9_DataModel_Main",
 					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "Ellipse9",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true
 				}
 			}
 		],
@@ -17,14 +21,14 @@
 			"recurrence": {
 				"frequency": "Day",
 				"interval": 1,
-				"startTime": "2020-07-28T06:52:00",
+				"startTime": "2022-05-19T03:12:00",
 				"timeZone": "E. Australia Standard Time",
 				"schedule": {
 					"minutes": [
-						30
+						0
 					],
 					"hours": [
-						6
+						2
 					]
 				}
 			}

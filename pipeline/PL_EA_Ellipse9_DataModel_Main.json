@@ -1,0 +1,72 @@
+{
+	"name": "PL_EA_Ellipse9_DataModel_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute PL_Ellipse9_Main",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Ellipse9_Main",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceName": {
+							"value": "@pipeline().parameters.SourceName",
+							"type": "Expression"
+						},
+						"OnlySourceToBlob": {
+							"value": "@pipeline().parameters.OnlySourceToBlob",
+							"type": "Expression"
+						},
+						"OnlyBlobtoASQL": {
+							"value": "@pipeline().parameters.OnlyBlobtoASQL",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute PL_WorkOrder_Model_Main",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute PL_Ellipse9_Main",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_WorkOrder_Model_Main",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"parameters": {
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "Ellipse9"
+			},
+			"OnlySourceToBlob": {
+				"type": "bool",
+				"defaultValue": true
+			},
+			"OnlyBlobtoASQL": {
+				"type": "bool",
+				"defaultValue": true
+			}
+		},
+		"folder": {
+			"name": "Ellipse9"
+		},
+		"annotations": []
+	}
+}
