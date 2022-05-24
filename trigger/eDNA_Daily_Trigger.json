@@ -2,15 +2,32 @@
 	"name": "eDNA_Daily_Trigger",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
-		"pipelines": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_WWI_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "eDNA",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Minute",
-				"interval": 15,
-				"startTime": "2022-05-24T01:43:00Z",
-				"timeZone": "UTC"
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-05-24T06:00:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"hours": [
+						6
+					]
+				}
 			}
 		}
 	}
