@@ -7,15 +7,15 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
-		"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
 			"type": "string",
-			"defaultValue": "eDNA"
+			"defaultValue": "Field Service Edge"
 		},
-		"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
 			"type": "bool",
 			"defaultValue": true
 		},
-		"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
 		},
@@ -85,7 +85,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/eDNA_Daily_Trigger')]",
+			"name": "[concat(parameters('factoryName'), '/FSE_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -94,13 +94,13 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "PL_WWI_Main",
+							"referenceName": "PL_FSE_Source_To_ASQL",
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"SourceName": "[parameters('eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
+							"SourceName": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
 						}
 					}
 				],
@@ -109,11 +109,14 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2022-05-24T06:00:00",
+						"startTime": "2020-06-23T06:30:00",
 						"timeZone": "E. Australia Standard Time",
 						"schedule": {
+							"minutes": [
+								45
+							],
 							"hours": [
-								6
+								0
 							]
 						}
 					}

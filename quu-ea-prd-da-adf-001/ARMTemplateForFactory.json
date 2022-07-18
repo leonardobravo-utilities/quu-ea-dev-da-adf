@@ -211,30 +211,6 @@
 			"type": "bool",
 			"defaultValue": true
 		},
-		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "Field Service Edge"
-		},
-		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "Field Service Edge Hourly_Refresh"
-		},
-		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
 		"GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "GIS_SQLServer_SDCM_SQL"
@@ -526,6 +502,30 @@
 		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param": {
 			"type": "string",
 			"defaultValue": ",\"collectionReference\": \"$['Entry']['PhotoTable']\""
+		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Field Service Edge Hourly_Refresh"
+		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Field Service Edge"
+		},
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
 		}
 	},
 	"variables": {
@@ -1207,16 +1207,16 @@
 												"value": "@item().TableID",
 												"type": "Expression"
 											},
-											"Data_Destination_File_Name": {
-												"value": "@item().Data_Destination_File_Name",
-												"type": "Expression"
-											},
 											"SourceServerName": {
 												"value": "@item().SourceServerName",
 												"type": "Expression"
 											},
 											"SourceDatabaseName": {
 												"value": "@item().SourceDatabaseName",
+												"type": "Expression"
+											},
+											"Data_Destination_File_Name": {
+												"value": "@item().Data_Destination_File_Name",
 												"type": "Expression"
 											},
 											"IncrementalLoadInd": {
@@ -1257,6 +1257,14 @@
 											},
 											"SecretPasswordName": {
 												"value": "@item().SecretPasswordName\n",
+												"type": "Expression"
+											},
+											"CDCMigrationCompleted": {
+												"value": "@item().CDCMigrationCompleted",
+												"type": "Expression"
+											},
+											"CDCMigrationInd": {
+												"value": "@item().CDCMigrationInd",
 												"type": "Expression"
 											},
 											"SourceName": {
@@ -27257,157 +27265,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/FSE_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_FSE_Source_To_ASQL",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-06-23T06:30:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								45
-							],
-							"hours": [
-								14
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_FSE_Source_To_ASQL')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/FSE_Hourly_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "FSE_Hourly_Trigger",
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_FSE_Source_To_ASQL",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-06-23T06:31:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								50
-							],
-							"hours": [
-								19,
-								20,
-								21,
-								22,
-								23,
-								0,
-								1,
-								2,
-								3,
-								4,
-								5,
-								6,
-								7,
-								8,
-								9
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_FSE_Source_To_ASQL')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/FSE_StartFSECluster_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_StartFSECluster",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-06-24T05:27:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								45
-							],
-							"hours": [
-								20,
-								21,
-								22,
-								23,
-								0,
-								1,
-								2,
-								3,
-								4,
-								5,
-								6,
-								7,
-								8,
-								18,
-								19
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_StartFSECluster')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/GIS_SDCM_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -28658,6 +28515,159 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FSE_StartFSECluster_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_StartFSECluster",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-06-24T05:27:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								45
+							],
+							"hours": [
+								5,
+								6,
+								7,
+								8,
+								9,
+								10,
+								11,
+								12,
+								13,
+								14,
+								15,
+								16,
+								17,
+								18,
+								19,
+								4
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_StartFSECluster')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FSE_Hourly_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "FSE_Hourly_Trigger",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_FSE_Source_To_ASQL",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-06-23T06:31:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								50
+							],
+							"hours": [
+								5,
+								6,
+								7,
+								8,
+								9,
+								10,
+								11,
+								12,
+								13,
+								14,
+								15,
+								16,
+								17,
+								18,
+								19,
+								4
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_FSE_Source_To_ASQL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FSE_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_FSE_Source_To_ASQL",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-06-23T06:30:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								45
+							],
+							"hours": [
+								0
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_FSE_Source_To_ASQL')]"
+			]
 		}
 	]
 }
