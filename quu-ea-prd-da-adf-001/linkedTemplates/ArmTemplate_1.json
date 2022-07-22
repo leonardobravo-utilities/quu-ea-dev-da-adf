@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery_Dev_Test'"
 		},
+		"LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "@linkedService().databricksclusterid"
+		},
 		"LS_FS_Globalscape_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "\\\\nfujprd310\\EBI_PROD_LANDING"
@@ -772,7 +776,7 @@
 							"type": "Expression"
 						}
 					},
-					"existingClusterId": "@linkedService().databricksclusterid"
+					"existingClusterId": "[parameters('LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId')]"
 				}
 			},
 			"dependsOn": []

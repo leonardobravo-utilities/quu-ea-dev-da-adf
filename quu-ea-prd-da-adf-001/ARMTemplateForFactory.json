@@ -51,6 +51,10 @@
 			"type": "string",
 			"defaultValue": "https://quueaprddasrclanding001.blob.core.windows.net/"
 		},
+		"LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "@linkedService().databricksclusterid"
+		},
 		"LS_FS_FTP_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "@{linkedService().Host}"
@@ -26403,7 +26407,7 @@
 							"type": "Expression"
 						}
 					},
-					"existingClusterId": "@linkedService().databricksclusterid"
+					"existingClusterId": "[parameters('LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId')]"
 				}
 			},
 			"dependsOn": [
@@ -28177,7 +28181,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -28345,7 +28349,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {

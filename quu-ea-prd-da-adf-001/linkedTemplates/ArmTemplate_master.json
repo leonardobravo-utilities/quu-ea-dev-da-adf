@@ -51,6 +51,10 @@
 			"type": "string",
 			"defaultValue": "https://quueaprddasrclanding001.blob.core.windows.net/"
 		},
+		"LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "@linkedService().databricksclusterid"
+		},
 		"LS_FS_FTP_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "@{linkedService().Host}"
@@ -601,6 +605,9 @@
 					},
 					"LS_ASQL_EDWDiscovery_Dev_Test_connectionString": {
 						"value": "[parameters('LS_ASQL_EDWDiscovery_Dev_Test_connectionString')]"
+					},
+					"LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId": {
+						"value": "[parameters('LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId')]"
 					},
 					"LS_FS_Globalscape_properties_typeProperties_host": {
 						"value": "[parameters('LS_FS_Globalscape_properties_typeProperties_host')]"
