@@ -9821,43 +9821,6 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Execute 2-Evoqua-Unit-Level-Telemetry notebook",
-						"type": "DatabricksNotebook",
-						"dependsOn": [
-							{
-								"activity": "Execute Pipeline PL_Evoqua_Metadata",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/edw_discovery/Evoqua/2-Evoqua_Unit_Level_Telemetry"
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_DBR_ADF_Job_Cluster",
-							"type": "LinkedServiceReference",
-							"parameters": {
-								"databricksclusterid": {
-									"value": "@variables('ClusterId')",
-									"type": "Expression"
-								},
-								"databrickssecretname": {
-									"value": "@variables('ClusterSecret')",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
 						"name": "Execute Pipeline PL_Evoqua_Metadata",
 						"type": "ExecutePipeline",
 						"dependsOn": [
@@ -9877,29 +9840,6 @@
 							"waitOnCompletion": true,
 							"parameters": {
 								"SourceName": "Evoqua-metadata"
-							}
-						}
-					},
-					{
-						"name": "Execute Pipeline PL_Evoqua_Telemetry",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Execute 2-Evoqua-Unit-Level-Telemetry notebook",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Evoqua_Telemetry",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"SourceName": "Evoqua-telemetry"
 							}
 						}
 					},
@@ -10092,9 +10032,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Evoqua_Metadata')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_Evoqua_Telemetry')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery_Table')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Evoqua_API_Parallel_Ingestion')]"
