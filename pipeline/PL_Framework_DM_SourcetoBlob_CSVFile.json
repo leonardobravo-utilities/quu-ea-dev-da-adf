@@ -1,0 +1,789 @@
+{
+	"name": "PL_Framework_DM_SourcetoBlob_CSVFile",
+	"properties": {
+		"description": "Copy new or updated rows only from database using external control table",
+		"activities": [
+			{
+				"name": "GetLandingMetadata",
+				"description": "check if any files need to process in the blob container",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_FS_GlobalScape_FileExists",
+						"type": "DatasetReference",
+						"parameters": {
+							"p_FileFolder": {
+								"value": "@pipeline().parameters.SourceFolderLocation",
+								"type": "Expression"
+							},
+							"p_FileName": {
+								"value": "@pipeline().parameters.SourceFileName",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"recursive": true
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "CheckAnyCSVFilesAndExecuteCopy",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "lkp_Sort_Landing_Collection",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('lkp_Sort_Landing_Collection').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "SetFileName",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "FileName",
+								"value": {
+									"value": "@replace(string(item().FileName),'\\\"\\\"','')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Copy_dataTocsvFile",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "SetProcessFile",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@variables('processfile')",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "CopyFileToArchive_Empty",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "DelimitedTextSource",
+												"storeSettings": {
+													"type": "FileServerReadSettings",
+													"recursive": false,
+													"enablePartitionDiscovery": false
+												},
+												"formatSettings": {
+													"type": "DelimitedTextReadSettings"
+												}
+											},
+											"sink": {
+												"type": "DelimitedTextSink",
+												"storeSettings": {
+													"type": "FileServerWriteSettings"
+												},
+												"formatSettings": {
+													"type": "DelimitedTextWriteSettings",
+													"quoteAllText": true,
+													"fileExtension": ".csv"
+												}
+											},
+											"enableStaging": false
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_FS_GlobalScape_SUMS_Source",
+												"type": "DatasetReference",
+												"parameters": {
+													"filefolder": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
+													},
+													"filename": {
+														"value": "@variables('FileName')",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_FS_GlobalScape_SUMS",
+												"type": "DatasetReference",
+												"parameters": {
+													"filefolder": {
+														"value": "@{concat(pipeline().parameters.SourceFolderLocation, '\\Archive')}",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "DeleteSourceFile_Empty",
+										"type": "Delete",
+										"dependsOn": [
+											{
+												"activity": "CopyFileToArchive_Empty",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"dataset": {
+												"referenceName": "DS_FS_GlobalScape_SUMS_Source",
+												"type": "DatasetReference",
+												"parameters": {
+													"filefolder": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
+													},
+													"filename": {
+														"value": "@variables('FileName')",
+														"type": "Expression"
+													}
+												}
+											},
+											"enableLogging": false,
+											"storeSettings": {
+												"type": "FileServerReadSettings",
+												"recursive": false
+											}
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "Copy_CSV_to_Blob",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "DelimitedTextSource",
+												"storeSettings": {
+													"type": "FileServerReadSettings",
+													"recursive": false,
+													"enablePartitionDiscovery": false
+												},
+												"formatSettings": {
+													"type": "DelimitedTextReadSettings"
+												}
+											},
+											"sink": {
+												"type": "DelimitedTextSink",
+												"storeSettings": {
+													"type": "AzureBlobStorageWriteSettings"
+												},
+												"formatSettings": {
+													"type": "DelimitedTextWriteSettings",
+													"quoteAllText": true,
+													"fileExtension": ".csv"
+												}
+											},
+											"enableStaging": false,
+											"dataIntegrationUnits": 2
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_FS_GlobalScape_SUMS_Source",
+												"type": "DatasetReference",
+												"parameters": {
+													"filefolder": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
+													},
+													"filename": {
+														"value": "@variables('FileName')",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_ABLB_FS_SUMS",
+												"type": "DatasetReference",
+												"parameters": {
+													"targetblobfoldername": {
+														"value": "@replace(pipeline().parameters.Data_Destination_Folder_Path, 'ETL_READY/', '')",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "Archive_Data",
+										"type": "Copy",
+										"dependsOn": [
+											{
+												"activity": "Copy_CSV_to_Blob",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "DelimitedTextSource",
+												"storeSettings": {
+													"type": "FileServerReadSettings",
+													"recursive": false,
+													"enablePartitionDiscovery": false
+												},
+												"formatSettings": {
+													"type": "DelimitedTextReadSettings"
+												}
+											},
+											"sink": {
+												"type": "DelimitedTextSink",
+												"storeSettings": {
+													"type": "FileServerWriteSettings"
+												},
+												"formatSettings": {
+													"type": "DelimitedTextWriteSettings",
+													"quoteAllText": true,
+													"fileExtension": ".csv"
+												}
+											},
+											"enableStaging": false
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_FS_GlobalScape_SUMS_Source",
+												"type": "DatasetReference",
+												"parameters": {
+													"filefolder": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
+													},
+													"filename": {
+														"value": "@variables('FileName')",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_FS_GlobalScape_SUMS",
+												"type": "DatasetReference",
+												"parameters": {
+													"filefolder": {
+														"value": "@{concat(pipeline().parameters.SourceFolderLocation, '\\Archive')}",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "Delete_Old_From_GS",
+										"type": "Delete",
+										"dependsOn": [
+											{
+												"activity": "Archive_Data",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"dataset": {
+												"referenceName": "DS_FS_GlobalScape_SUMS_Source",
+												"type": "DatasetReference",
+												"parameters": {
+													"filefolder": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
+													},
+													"filename": {
+														"value": "@variables('FileName')",
+														"type": "Expression"
+													}
+												}
+											},
+											"enableLogging": false,
+											"storeSettings": {
+												"type": "FileServerReadSettings",
+												"recursive": false
+											}
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "SetProcessFile",
+							"description": "Process file if the file is csv and the file size is > 0 else do nothing",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "SetFileSize",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "processfile",
+								"value": {
+									"value": "@if(AND(greater(variables('FileSize'),'0'), contains(variables('FileName'),'.csv') ),true,false)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "RetrieveFileSize",
+							"type": "GetMetadata",
+							"dependsOn": [
+								{
+									"activity": "SetFileName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_FS_GlobalScape_SUMS_Source",
+									"type": "DatasetReference",
+									"parameters": {
+										"filefolder": {
+											"value": "@pipeline().parameters.SourceFolderLocation",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@variables('FileName')",
+											"type": "Expression"
+										}
+									}
+								},
+								"fieldList": [
+									"size"
+								],
+								"storeSettings": {
+									"type": "FileServerReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "SetFileSize",
+							"description": "Assign the file size value to the variable",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "RetrieveFileSize",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "FileSize",
+								"value": {
+									"value": "@string(activity('RetrieveFileSize').output.size)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "lkp_Sort_Landing_Collection",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "GetLandingMetadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[ETL].[usp_sort_blob_file_name]",
+						"storedProcedureParameters": {
+							"json": {
+								"type": "String",
+								"value": {
+									"value": "@string(activity('GetLandingMetadata').output)",
+									"type": "Expression"
+								}
+							}
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Merge CSV Files in Blob",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "lkp_Sort_Blob_Collection",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@{if(AND(greater(int(string(activity('lkp_Sort_Blob_Collection').output.count)), 0), equals(toLower(substring(pipeline().parameters.Data_Source_Table_Name, 0, indexOf(pipeline().parameters.Data_Source_Table_Name, '.'))), 'sums')), if(or(equals(toLower(substring(pipeline().parameters.Data_Source_Table_Name, add(indexOf(pipeline().parameters.Data_Source_Table_Name, '.'),1), sub(length(pipeline().parameters.Data_Source_Table_Name), add(indexOf(pipeline().parameters.Data_Source_Table_Name, '.'),1)))), 'meterdetails'), equals(toLower(substring(pipeline().parameters.Data_Source_Table_Name, add(indexOf(pipeline().parameters.Data_Source_Table_Name, '.'),1), sub(length(pipeline().parameters.Data_Source_Table_Name), add(indexOf(pipeline().parameters.Data_Source_Table_Name, '.'),1)))), 'observeredmeterreadings')), 'SUMS_MERGE', 'SUMS_UNMERGE'), 'OTHERS_UNMERGE')}",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "SUMS_MERGE",
+							"activities": [
+								{
+									"name": "Sums_Prepare_Notebook",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/edw_discovery/SUMS/SUMS_Prepare",
+										"baseParameters": {
+											"Source_File_Name": {
+												"value": "@pipeline().parameters.SourceFileName",
+												"type": "Expression"
+											},
+											"initial_load": {
+												"value": "@{if(equals(pipeline().parameters.IsInitialLoad, '1'), 'true', 'false')}",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_DBR_ADF_Job_Cluster",
+										"type": "LinkedServiceReference",
+										"parameters": {
+											"databricksclusterid": {
+												"value": "@pipeline().parameters.databricksclusterid",
+												"type": "Expression"
+											},
+											"databrickssecretname": {
+												"value": "@pipeline().parameters.databrickssecretname",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "GetBlobStorageMetadata",
+				"description": "check if any files need to process in the blob container",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "CheckAnyCSVFilesAndExecuteCopy",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_ABLB_FS_SUMS",
+						"type": "DatasetReference",
+						"parameters": {
+							"targetblobfoldername": {
+								"value": "@replace(pipeline().parameters.Data_Destination_Folder_Path, 'ETL_READY/', '')",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "lkp_Sort_Blob_Collection",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "GetBlobStorageMetadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[ETL].[usp_sort_blob_file_name]",
+						"storedProcedureParameters": {
+							"json": {
+								"type": "String",
+								"value": {
+									"value": "@string(activity('GetBlobStorageMetadata').output)",
+									"type": "Expression"
+								}
+							}
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"parameters": {
+			"Data_Source_Table_Name": {
+				"type": "String",
+				"defaultValue": "dbo.MSF660"
+			},
+			"Data_Source_WaterMarkColumn": {
+				"type": "String",
+				"defaultValue": "CASE WHEN LAST_MOD_DATE <> '' AND LAST_MOD_TIME<>'' THEN (CAST(LAST_MOD_DATE AS DATETIME) + CAST(stuff(stuff(LAST_MOD_TIME ,3,0,':'),6,0,':') AS DATETIME)) END"
+			},
+			"Data_Destination_Folder_Path": {
+				"type": "String",
+				"defaultValue": "ellipse9-datalanding/MSF660"
+			},
+			"Control_Table_Table_Name": {
+				"type": "String",
+				"defaultValue": "ETL.SourceTableDetails"
+			},
+			"Control_Table_Column_Name": {
+				"type": "String",
+				"defaultValue": "IncrementalKeyDateColumnLastRefreshValue"
+			},
+			"TableID": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"Data_Destination_File_Name": {
+				"type": "string",
+				"defaultValue": "MSF660"
+			},
+			"SourceServerName": {
+				"type": "string",
+				"defaultValue": "NFUJDEV073"
+			},
+			"SourceDatabaseName": {
+				"type": "string",
+				"defaultValue": "Datamart"
+			},
+			"IncrementalLoadInd": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"File_Name_Ext": {
+				"type": "string",
+				"defaultValue": ".csv"
+			},
+			"File_Name_DateTime_Ind": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"Join_Condition": {
+				"type": "string",
+				"defaultValue": " "
+			},
+			"Source_Column_List": {
+				"type": "string",
+				"defaultValue": "*"
+			},
+			"ColumnDelimiter": {
+				"type": "string",
+				"defaultValue": ","
+			},
+			"QuoteCharacter": {
+				"type": "string",
+				"defaultValue": "¬"
+			},
+			"source_where_filter": {
+				"type": "string",
+				"defaultValue": " "
+			},
+			"UserName": {
+				"type": "string"
+			},
+			"SecretPasswordName": {
+				"type": "string"
+			},
+			"SourceFolderLocation": {
+				"type": "string"
+			},
+			"SourceFileName": {
+				"type": "string"
+			},
+			"SourceLandingContainer": {
+				"type": "string"
+			},
+			"SourceName": {
+				"type": "string"
+			},
+			"DatabricksClusterId": {
+				"type": "string"
+			},
+			"DatabricksSecretName": {
+				"type": "string"
+			},
+			"SourceTableName": {
+				"type": "string"
+			},
+			"IsInitialLoad": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"FileName": {
+				"type": "String"
+			},
+			"processfile": {
+				"type": "Boolean"
+			},
+			"FileSize": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "FrameWork"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

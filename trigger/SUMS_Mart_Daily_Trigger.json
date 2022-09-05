@@ -1,0 +1,36 @@
+{
+	"name": "SUMS_Mart_Daily_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_SUMS_Daily_Consumption_And_Analysis",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"Source_Name": "SUMS",
+					"Load_Type": "Incremental"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-08-03T00:15:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						15
+					],
+					"hours": [
+						12
+					]
+				}
+			}
+		}
+	}
+}

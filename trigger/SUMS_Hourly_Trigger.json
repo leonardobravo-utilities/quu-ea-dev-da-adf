@@ -1,34 +1,28 @@
 {
-	"name": "SUMS_Daily_Trigger",
+	"name": "SUMS_Hourly_Trigger",
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "PL_SUMS_Main",
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
 					"type": "PipelineReference"
 				},
 				"parameters": {
-					"Load_Type": "Incremental"
+					"SourceName": "SUMS",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true
 				}
 			}
 		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Day",
+				"frequency": "Hour",
 				"interval": 1,
-				"startTime": "2020-05-15T00:44:00Z",
-				"timeZone": "UTC",
-				"schedule": {
-					"minutes": [
-						0
-					],
-					"hours": [
-						23
-					]
-				}
+				"startTime": "2022-08-03T00:15:00",
+				"timeZone": "E. Australia Standard Time"
 			}
 		}
 	}
