@@ -3,14 +3,26 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Stopped",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "SUMS",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Minute",
-				"interval": 15,
-				"startTime": "2022-09-05T15:22:00Z",
-				"timeZone": "UTC"
+				"frequency": "Hour",
+				"interval": 1,
+				"startTime": "2022-08-03T00:15:00",
+				"timeZone": "E. Australia Standard Time"
 			}
 		}
 	}
