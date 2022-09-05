@@ -1,0 +1,35 @@
+{
+	"name": "DS_FS_GlobalScape_FileExists",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_FS_Globalscape",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"p_FileFolder": {
+				"type": "string"
+			},
+			"p_FileName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Framework"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"fileName": {
+					"value": "@dataset().p_FileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().p_FileFolder",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}
