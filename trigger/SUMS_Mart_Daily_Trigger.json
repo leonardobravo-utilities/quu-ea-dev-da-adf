@@ -3,14 +3,33 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Stopped",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_SUMS_Daily_Consumption_And_Analysis",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"Source_Name": "SUMS",
+					"Load_Type": "Incremental"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Minute",
-				"interval": 15,
-				"startTime": "2022-09-05T15:23:00Z",
-				"timeZone": "UTC"
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-08-03T00:15:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						15
+					],
+					"hours": [
+						12
+					]
+				}
 			}
 		}
 	}
