@@ -371,7 +371,23 @@
 			"type": "string",
 			"defaultValue": "Incremental"
 		},
-		"SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type": {
+		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "SUMS"
+		},
+		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"SUMS_Mart_Daily_Trigger_properties_PL_SUMS_Daily_Consumption_And_Analysis_parameters_Source_Name": {
+			"type": "string",
+			"defaultValue": "SUMS"
+		},
+		"SUMS_Mart_Daily_Trigger_properties_PL_SUMS_Daily_Consumption_And_Analysis_parameters_Load_Type": {
 			"type": "string",
 			"defaultValue": "Incremental"
 		},
@@ -745,6 +761,12 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"SUMS_Mart_Daily_Trigger_properties_PL_SUMS_Daily_Consumption_And_Analysis_parameters_Source_Name": {
+						"value": "[parameters('SUMS_Mart_Daily_Trigger_properties_PL_SUMS_Daily_Consumption_And_Analysis_parameters_Source_Name')]"
+					},
+					"SUMS_Mart_Daily_Trigger_properties_PL_SUMS_Daily_Consumption_And_Analysis_parameters_Load_Type": {
+						"value": "[parameters('SUMS_Mart_Daily_Trigger_properties_PL_SUMS_Daily_Consumption_And_Analysis_parameters_Load_Type')]"
 					}
 				}
 			},
@@ -886,18 +908,6 @@
 					},
 					"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname": {
 						"value": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname')]"
-					},
-					"Chloroclam_Daily_Trigger_properties_PL_Evoqua_Main_parameters_SourceName": {
-						"value": "[parameters('Chloroclam_Daily_Trigger_properties_PL_Evoqua_Main_parameters_SourceName')]"
-					},
-					"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_SourceName": {
-						"value": "[parameters('EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_SourceName')]"
-					},
-					"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlySourceToBlob": {
-						"value": "[parameters('EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlySourceToBlob')]"
-					},
-					"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlyBlobtoASQL')]"
 					}
 				}
 			},
@@ -918,6 +928,18 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"Chloroclam_Daily_Trigger_properties_PL_Evoqua_Main_parameters_SourceName": {
+						"value": "[parameters('Chloroclam_Daily_Trigger_properties_PL_Evoqua_Main_parameters_SourceName')]"
+					},
+					"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_SourceName": {
+						"value": "[parameters('EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_SourceName')]"
+					},
+					"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlySourceToBlob": {
+						"value": "[parameters('EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlySourceToBlob')]"
+					},
+					"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlyBlobtoASQL')]"
 					},
 					"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName": {
 						"value": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName')]"
@@ -1021,9 +1043,6 @@
 					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL')]"
 					},
-					"SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type": {
-						"value": "[parameters('SUMS_Daily_Trigger_properties_PL_SUMS_Main_parameters_Load_Type')]"
-					},
 					"Salesforce_Daily_Trigger_properties_PL_Salesforce_DM_SourcetoBlob_Master_parameters_Source_Name": {
 						"value": "[parameters('Salesforce_Daily_Trigger_properties_PL_Salesforce_DM_SourcetoBlob_Master_parameters_Source_Name')]"
 					},
@@ -1065,15 +1084,6 @@
 					},
 					"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
-					},
-					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
-						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName')]"
-					},
-					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
-						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]"
-					},
-					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
 					}
 				}
 			},
@@ -1094,6 +1104,15 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName')]"
+					},
+					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]"
+					},
+					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
 					},
 					"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
 						"value": "[parameters('eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName')]"
@@ -1124,6 +1143,15 @@
 					},
 					"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL')]"
+					},
+					"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+						"value": "[parameters('SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
+					},
+					"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+						"value": "[parameters('SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]"
+					},
+					"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]"
 					},
 					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
