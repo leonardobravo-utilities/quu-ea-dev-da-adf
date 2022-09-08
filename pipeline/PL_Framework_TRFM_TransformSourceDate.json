@@ -1,0 +1,132 @@
+{
+	"name": "PL_Framework_TRFM_TransformSourceDate",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get List of Columns for Date Transformation",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "\nSelect SDTD.TableID \n\t\t,SDTD.SourceColumn\n\t\t,STD.targetblobfilename\n\t\t,STD.targetblobcontainer \n\t\t,case when SS.sourcename = 'Daptiv' then 'Daptiv/' + STD.targetblobfilename else STD.targetblobfilename end as targetblobfilefolder \n\t\t,replace(STD.targetblobfilepath,'/transformed','') as targetblobfilefolderpath\n\t\t,STD.ColumnDelimiter\n\t\t,STD.QuoteCharacter\n\t\t,replace(STD.targetblobfilepath,'/transformed','') as blobfilename /* Keeping the blobfile name as targetblobcontainer. The actual filename gets appended to it at execute notebook - ETL_Change_DateFormat step in the \n\t\tPL_Framework_TRFM_TransformDateForEachtable pipeline*/\n\t\t,STD.sourcecolumnlist\n\t\t,STD.storageaccount\n\t\t,SS.databricksclusterid\n\t\t,SS.databrickssecretname\nFrom ETL.sourcesystem SS join ETL.sourcetabledetails STD on SS.sourceid = STD.sourceid\njoin ETL.SourceDateTransformationDetails SDTD on SDTD.tableid = STD.tableid \nwhere SS.sourcename = '@{pipeline().parameters.SourceName}'\nand STD.isactive = 1\nand SDTD.isactive = 1",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "For each date transformation",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get List of Columns for Date Transformation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get List of Columns for Date Transformation').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "Execute PL_Framework_TRFM_TransformDateForEachtable",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Framework_TRFM_TransformDateForEachtable",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"TableID": {
+										"value": "@item().TableID",
+										"type": "Expression"
+									},
+									"SourceColumn": {
+										"value": "@item().SourceColumn",
+										"type": "Expression"
+									},
+									"targetblobcontainer": {
+										"value": "@item().targetblobcontainer",
+										"type": "Expression"
+									},
+									"targetblobfilefolderpath": {
+										"value": "@item().targetblobfilefolderpath",
+										"type": "Expression"
+									},
+									"ColumnDelimiter": {
+										"value": "@item().ColumnDelimiter",
+										"type": "Expression"
+									},
+									"QuoteCharacter": {
+										"value": "@item().QuoteCharacter",
+										"type": "Expression"
+									},
+									"sourcecolumnlist": {
+										"value": "@item().sourcecolumnlist",
+										"type": "Expression"
+									},
+									"storageaccount": {
+										"value": "@item().storageaccount",
+										"type": "Expression"
+									},
+									"targetblobfilefolder": {
+										"value": "@item().targetblobfilefolder",
+										"type": "Expression"
+									},
+									"databricksclusterid": {
+										"value": "@item().databricksclusterid",
+										"type": "Expression"
+									},
+									"databrickssecretname": {
+										"value": "@item().databrickssecretname",
+										"type": "Expression"
+									},
+									"blobfilename": {
+										"value": "@item().blobfilename",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "Daptiv"
+			}
+		},
+		"folder": {
+			"name": "FrameWork"
+		},
+		"annotations": []
+	}
+}
