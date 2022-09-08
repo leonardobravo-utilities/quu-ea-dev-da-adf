@@ -21,6 +21,280 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_File_Export_To_NFUJPRD202')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This pipeline will export the Files at Network Path \\\\Nfujprd202\\FDrive",
+				"activities": [
+					{
+						"name": "Files List to Export",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select * from ETL.FileExportList a where IsActive=1 and \nexists (select 1  from etl.fileexport b where  IsActive=1 and a.FileExportID=b.FileExportID and \nUpper(b.FileExportName)=Upper('@{pipeline().parameters.FileExportName}') )\n\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachFile",
+						"description": "Generate the Files",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Files List to Export",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Files List to Export').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 20,
+							"activities": [
+								{
+									"name": "Query Rowcount",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlMISource",
+											"sqlReaderQuery": {
+												"value": "@if(empty(item().SourceRowCountQuery),'select 1 as SourceRowCount',item().SourceRowCountQuery)",
+												"type": "Expression"
+											},
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_ASQL_EDWDiscovery",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								},
+								{
+									"name": "First Row Exists",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Query Rowcount",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@not(equals(activity('Query Rowcount').output.firstRow.SourceRowCount,0))",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "lkp_getlocattime",
+												"type": "Lookup",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "SqlMISource",
+														"sqlReaderQuery": {
+															"value": "DECLARE @DateTimeFormat as varchar(20);\nDECLARE @localdatetime as datetime;\nSet @DateTimeFormat ='@{item().DateTimeFormatInFileName}';\nEXEC @localdatetime = [dbo].[udf_getLocalDTM];\nselect FORMAT(@localdatetime, Case when len(@DateTimeFormat)=0 then'yyyy_MM_dd_HHmmss' else @DateTimeFormat end) as  localstarttime;",
+															"type": "Expression"
+														},
+														"partitionOption": "None"
+													},
+													"dataset": {
+														"referenceName": "DS_ASQL_EDWDiscovery",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												}
+											},
+											{
+												"name": "Generate File",
+												"description": "",
+												"type": "Copy",
+												"dependsOn": [
+													{
+														"activity": "lkp_getlocattime",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "@item().SourceQuery",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "FileServerWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ""
+														}
+													},
+													"enableStaging": false,
+													"dataIntegrationUnits": 0
+												},
+												"inputs": [
+													{
+														"referenceName": "DS_ASQL_EDWDiscovery",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "DS_File_NFUJPRD202",
+														"type": "DatasetReference",
+														"parameters": {
+															"TargetFilePath": {
+																"value": "@item().TargetFilePath",
+																"type": "Expression"
+															},
+															"TargetFileName": {
+																"value": "@if(equals(item().IncludeDateTimeInFile_Name,1)\n,  concat(item().TargetFileName\n             ,'_'\n            ,activity('lkp_getlocattime').output.firstrow.localstarttime\n             ,item().TargetFileNameExt)\n,\nconcat(\nitem().TargetFileName\n,item().TargetFileNameExt)\n)\n\n",
+																"type": "Expression"
+															},
+															"ColumnDelimiter": {
+																"value": "@item().ColumnDelimiter",
+																"type": "Expression"
+															},
+															"QuoteCharacter": {
+																"value": "@item().QuoteCharacter",
+																"type": "Expression"
+															},
+															"EscapeCharacter": {
+																"value": "@item().EscapeCharacter",
+																"type": "Expression"
+															},
+															"FirstRowHeader": {
+																"value": "@item().FirstRowHeader",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"name": "Update Incremental Date",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "Generate File",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[ETL].usp_update_fileexport_incrementaldatevalue",
+													"storedProcedureParameters": {
+														"FileID": {
+															"value": {
+																"value": "@item().FileID",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "LS_ASQL_EDWDiscovery",
+													"type": "LinkedServiceReference"
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"FileExportName": {
+						"type": "string",
+						"defaultValue": "ICN"
+					}
+				},
+				"folder": {
+					"name": "File Export"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_File_Export_To_globalscape')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -5481,6 +5755,146 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_Framework_TRFM_TransformSourceDate')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get List of Columns for Date Transformation",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "\nSelect SDTD.TableID \n\t\t,SDTD.SourceColumn\n\t\t,STD.targetblobfilename\n\t\t,STD.targetblobcontainer \n\t\t,case when SS.sourcename = 'Daptiv' then 'Daptiv/' + STD.targetblobfilename else STD.targetblobfilename end as targetblobfilefolder \n\t\t,replace(STD.targetblobfilepath,'/transformed','') as targetblobfilefolderpath\n\t\t,STD.ColumnDelimiter\n\t\t,STD.QuoteCharacter\n\t\t,replace(STD.targetblobfilepath,'/transformed','') as blobfilename /* Keeping the blobfile name as targetblobcontainer. The actual filename gets appended to it at execute notebook - ETL_Change_DateFormat step in the \n\t\tPL_Framework_TRFM_TransformDateForEachtable pipeline*/\n\t\t,STD.sourcecolumnlist\n\t\t,STD.storageaccount\n\t\t,SS.databricksclusterid\n\t\t,SS.databrickssecretname\nFrom ETL.sourcesystem SS join ETL.sourcetabledetails STD on SS.sourceid = STD.sourceid\njoin ETL.SourceDateTransformationDetails SDTD on SDTD.tableid = STD.tableid \nwhere SS.sourcename = '@{pipeline().parameters.SourceName}'\nand STD.isactive = 1\nand SDTD.isactive = 1",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "For each date transformation",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get List of Columns for Date Transformation",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get List of Columns for Date Transformation').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "Execute PL_Framework_TRFM_TransformDateForEachtable",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_TRFM_TransformDateForEachtable",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"TableID": {
+												"value": "@item().TableID",
+												"type": "Expression"
+											},
+											"SourceColumn": {
+												"value": "@item().SourceColumn",
+												"type": "Expression"
+											},
+											"targetblobcontainer": {
+												"value": "@item().targetblobcontainer",
+												"type": "Expression"
+											},
+											"targetblobfilefolderpath": {
+												"value": "@item().targetblobfilefolderpath",
+												"type": "Expression"
+											},
+											"ColumnDelimiter": {
+												"value": "@item().ColumnDelimiter",
+												"type": "Expression"
+											},
+											"QuoteCharacter": {
+												"value": "@item().QuoteCharacter",
+												"type": "Expression"
+											},
+											"sourcecolumnlist": {
+												"value": "@item().sourcecolumnlist",
+												"type": "Expression"
+											},
+											"storageaccount": {
+												"value": "@item().storageaccount",
+												"type": "Expression"
+											},
+											"targetblobfilefolder": {
+												"value": "@item().targetblobfilefolder",
+												"type": "Expression"
+											},
+											"databricksclusterid": {
+												"value": "@item().databricksclusterid",
+												"type": "Expression"
+											},
+											"databrickssecretname": {
+												"value": "@item().databrickssecretname",
+												"type": "Expression"
+											},
+											"blobfilename": {
+												"value": "@item().blobfilename",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "Daptiv"
+					}
+				},
+				"folder": {
+					"name": "FrameWork"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_ICN_Data_Copy')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -6411,318 +6825,6 @@
 				}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/WorkOrder_DataModel_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "updating dimensional work order tables in edw_mart",
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_WorkOrder_Model_Main",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-07-28T06:52:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"minutes": [
-								30
-							],
-							"hours": [
-								6
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_ABN_SourceToBlob')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "This pipeline is to validate the Supplier ABN Number.,",
-				"activities": [
-					{
-						"name": "usp_get_tablelist_by_sourceid",
-						"description": "Lookup activity to retrieve the list of partitions stored in the external control table.",
-						"type": "Lookup",
-						"dependsOn": [
-							{
-								"activity": "GetSourceID",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_tablelist_by_sourceid]",
-								"storedProcedureParameters": {
-									"sourceid": {
-										"type": "Int32",
-										"value": {
-											"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
-											"type": "Expression"
-										}
-									}
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEachTable",
-						"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "usp_get_tablelist_by_sourceid",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('usp_get_tablelist_by_sourceid').output.value",
-								"type": "Expression"
-							},
-							"isSequential": false,
-							"batchCount": 5,
-							"activities": [
-								{
-									"name": "Framework_CopyDBtoBlob_Pipeline",
-									"description": "Execute copy db to blob storage pipeline",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_Framework_DM_SourcetoBlob_SqlServer",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"Data_Source_Table_Name": {
-												"value": "@item().Data_Source_Table_Name",
-												"type": "Expression"
-											},
-											"Data_Source_WaterMarkColumn": {
-												"value": "@item().Data_Source_WaterMarkColumn",
-												"type": "Expression"
-											},
-											"Data_Destination_Folder_Path": {
-												"value": "@item().Data_Destination_Folder_Path",
-												"type": "Expression"
-											},
-											"Control_Table_Table_Name": {
-												"value": "@item().Control_Table_Table_Name",
-												"type": "Expression"
-											},
-											"Control_Table_Column_Name": {
-												"value": "@item().Control_Table_Column_Name",
-												"type": "Expression"
-											},
-											"TableID": {
-												"value": "@item().TableID",
-												"type": "Expression"
-											},
-											"SourceServerName": {
-												"value": "@item().SourceServerName",
-												"type": "Expression"
-											},
-											"SourceDatabaseName": {
-												"value": "@item().SourceDatabaseName",
-												"type": "Expression"
-											},
-											"Data_Destination_File_Name": {
-												"value": "@item().Data_Destination_File_Name",
-												"type": "Expression"
-											},
-											"IncrementalLoadInd": {
-												"value": "@item().IncrementalLoadInd",
-												"type": "Expression"
-											},
-											"File_Name_Ext": {
-												"value": "@item().File_Name_Ext",
-												"type": "Expression"
-											},
-											"File_Name_DateTime_Ind": {
-												"value": "@item().File_Name_DateTime_Ind",
-												"type": "Expression"
-											},
-											"Join_Condition": {
-												"value": "@item().Join_Condition",
-												"type": "Expression"
-											},
-											"Source_Column_List": {
-												"value": "@item().Source_Column_List",
-												"type": "Expression"
-											},
-											"ColumnDelimiter": {
-												"value": "@item().ColumnDelimiter",
-												"type": "Expression"
-											},
-											"QuoteCharacter": {
-												"value": "@item().QuoteCharacter",
-												"type": "Expression"
-											},
-											"source_where_filter": {
-												"value": "@item().Source_Where_Filter",
-												"type": "Expression"
-											},
-											"UserName": {
-												"value": "@item().UserName\n",
-												"type": "Expression"
-											},
-											"SecretPasswordName": {
-												"value": "@item().SecretPasswordName\n",
-												"type": "Expression"
-											},
-											"CDCMigrationCompleted": {
-												"value": "@item().CDCMigrationCompleted",
-												"type": "Expression"
-											},
-											"CDCMigrationInd": {
-												"value": "@item().CDCMigrationInd",
-												"type": "Expression"
-											},
-											"SourceName": {
-												"value": "@item().SourceName",
-												"type": "Expression"
-											},
-											"DeltaTargetTableName": {
-												"value": "@item().DeltaTargetTableName",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "Databricks_ABN_SEARCH_Notebook",
-						"description": "Execute ABN_SEARCH_Notebook",
-						"type": "DatabricksNotebook",
-						"dependsOn": [
-							{
-								"activity": "ForEachTable",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 1,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": {
-								"value": "@pipeline().parameters.abn_search_databrick_notebook",
-								"type": "Expression"
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_DBR_ADF_Job_Cluster",
-							"type": "LinkedServiceReference",
-							"parameters": {
-								"databricksclusterid": {
-									"value": "@activity('GetSourceID').output.Firstrow['databricksclusterid']",
-									"type": "Expression"
-								},
-								"databrickssecretname": {
-									"value": "@activity('GetSourceID').output.Firstrow['databrickssecretname']",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "GetSourceID",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "Select SourceID,databricksclusterid,databrickssecretname FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"abn_search_databrick_notebook": {
-						"type": "string",
-						"defaultValue": "/edw_discovery/ABN/ABN_Search"
-					},
-					"Source_Name": {
-						"type": "string",
-						"defaultValue": "ABN_SUPPLIER_BUSINESS"
-					}
-				},
-				"folder": {
-					"name": "ABN"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_Framework_DM_SourcetoBlob_SqlServer')]"
-			]
 		}
 	]
 }
