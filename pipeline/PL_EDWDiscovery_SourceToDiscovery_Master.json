@@ -69,6 +69,28 @@
 									}
 								}
 							}
+						},
+						{
+							"name": "Execute PL_Framework_TRFM_TransformSourceDate",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceName": {
+										"value": "@pipeline().parameters.SourceName",
+										"type": "Expression"
+									}
+								}
+							}
 						}
 					]
 				}
@@ -157,13 +179,13 @@
 		"parameters": {
 			"SourceName": {
 				"type": "string",
-				"defaultValue": "SUMS"
+				"defaultValue": "Takadu-Reporting-API"
 			},
-			"OnlySourceToBlob": {
+			"OnlyBlobtoASQL": {
 				"type": "bool",
 				"defaultValue": true
 			},
-			"OnlyBlobtoASQL": {
+			"OnlySourceToBlob": {
 				"type": "bool",
 				"defaultValue": true
 			},
@@ -181,6 +203,8 @@
 		"folder": {
 			"name": "EDW_Discovery"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2021-09-06T05:55:01Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
