@@ -96,6 +96,10 @@
 							"value": "@activity('getlistofblobfile').output.firstrow.TargetBlobContainer",
 							"type": "Expression"
 						},
+						"blobfolderpath": {
+							"value": "@pipeline().parameters.STATION_POINT_NAME",
+							"type": "Expression"
+						},
 						"storageaccount": {
 							"value": "@activity('getlistofblobfile').output.firstrow.StorageAccount",
 							"type": "Expression"
@@ -108,10 +112,6 @@
 							"value": "@activity('getlistofblobfile').output.firstrow.ColumnSchemaList",
 							"type": "Expression"
 						},
-						"ColumnDelimiter": {
-							"value": "@activity('getlistofblobfile').output.firstrow.ColumnDelimiter",
-							"type": "Expression"
-						},
 						"QuoteCharacter": {
 							"value": "@activity('getlistofblobfile').output.firstrow.QuoteCharacter",
 							"type": "Expression"
@@ -120,8 +120,8 @@
 							"value": "@pipeline().parameters.STATION_POINT_NAME",
 							"type": "Expression"
 						},
-						"blobfolderpath": {
-							"value": "@pipeline().parameters.STATION_POINT_NAME",
+						"ColumnDelimiter": {
+							"value": "@activity('getlistofblobfile').output.firstrow.ColumnDelimiter",
 							"type": "Expression"
 						}
 					}
@@ -166,7 +166,8 @@
 									"type": "Expression"
 								}
 							}
-						}
+						},
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",
@@ -202,6 +203,8 @@
 		"folder": {
 			"name": "BOM"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2020-03-26T00:04:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
