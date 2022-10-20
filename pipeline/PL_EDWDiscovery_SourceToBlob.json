@@ -86,6 +86,24 @@
 							]
 						},
 						{
+							"value": "CSV File",
+							"activities": [
+								{
+									"name": "Execute DM_SourcetoBlob_CSVFile",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_CSVFile",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true
+									}
+								}
+							]
+						},
+						{
 							"value": "API",
 							"activities": [
 								{
