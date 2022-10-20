@@ -66,6 +66,10 @@
 									"LoadTypeName": {
 										"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
 										"type": "Expression"
+									},
+									"Additional_MappingParam": {
+										"value": "@pipeline().parameters.Additional_MappingParam",
+										"type": "Expression"
 									}
 								}
 							}
@@ -183,7 +187,7 @@
 		"parameters": {
 			"SourceName": {
 				"type": "string",
-				"defaultValue": "Takadu-Reporting-API"
+				"defaultValue": "Envizi"
 			},
 			"OnlyBlobtoASQL": {
 				"type": "bool",
@@ -196,6 +200,9 @@
 			"AllowPartialUpdateOfDiscovery": {
 				"type": "bool",
 				"defaultValue": false
+			},
+			"Additional_MappingParam": {
+				"type": "string"
 			}
 		},
 		"variables": {
