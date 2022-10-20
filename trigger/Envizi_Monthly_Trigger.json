@@ -2,15 +2,36 @@
 	"name": "Envizi_Monthly_Trigger",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
-		"pipelines": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "Envizi",
+					"OnlyBlobtoASQL": true,
+					"OnlySourceToBlob": true,
+					"AllowPartialUpdateOfDiscovery": false
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Minute",
-				"interval": 15,
-				"startTime": "2022-10-20T07:56:00Z",
-				"timeZone": "UTC"
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2022-10-21T00:00:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"hours": [
+						5
+					],
+					"monthDays": [
+						1
+					]
+				}
 			}
 		}
 	}
