@@ -86,16 +86,16 @@
 							]
 						},
 						{
-							"value": "CSV File",
+							"value": "API",
 							"activities": [
 								{
-									"name": "Execute DM_SourcetoBlob_CSVFile",
+									"name": "Execute DM_SourcetoBlob_API",
 									"type": "ExecutePipeline",
 									"dependsOn": [],
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_CSVFile",
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_API",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -119,11 +119,16 @@
 			},
 			"LoadTypeName": {
 				"type": "string"
+			},
+			"Additional_MappingParam": {
+				"type": "string"
 			}
 		},
 		"folder": {
 			"name": "EDW_Discovery"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-04-27T05:48:52Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
