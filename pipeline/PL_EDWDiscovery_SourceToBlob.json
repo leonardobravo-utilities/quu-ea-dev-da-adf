@@ -98,7 +98,13 @@
 											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_CSVFile",
 											"type": "PipelineReference"
 										},
-										"waitOnCompletion": true
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@pipeline().parameters.SourceID",
+												"type": "Expression"
+											}
+										}
 									}
 								}
 							]
