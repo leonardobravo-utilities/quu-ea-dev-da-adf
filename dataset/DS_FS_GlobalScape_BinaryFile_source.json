@@ -1,0 +1,25 @@
+{
+	"name": "DS_FS_GlobalScape_BinaryFile_source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_FS_Globalscape",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"filefolder": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"folderPath": {
+					"value": "@dataset().filefolder",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}
