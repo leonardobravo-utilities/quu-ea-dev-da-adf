@@ -1,0 +1,373 @@
+{
+	"name": "PL_Framework_DM_SourcetoBlob_GlobalScape_ExcelFile",
+	"properties": {
+		"description": "Copy new or updated rows only from database using external control table",
+		"activities": [
+			{
+				"name": "FullCopyToBlob",
+				"description": "Full Copy from source table into blob storage",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "GetLastModifiedDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ExcelSource",
+						"storeSettings": {
+							"type": "FileServerReadSettings",
+							"recursive": false,
+							"wildcardFolderPath": {
+								"value": "@pipeline().parameters.SourceFolderLocation",
+								"type": "Expression"
+							},
+							"wildcardFileName": {
+								"value": "@concat(pipeline().parameters.Data_Source_Table_Name,'*.xlsx')",
+								"type": "Expression"
+							},
+							"enablePartitionDiscovery": false
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"dataIntegrationUnits": 0
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_GlobalScape_ExcelFile_Source",
+						"type": "DatasetReference",
+						"parameters": {
+							"Filefolder": {
+								"value": "@pipeline().parameters.SourceName",
+								"type": "Expression"
+							},
+							"SheetName": {
+								"value": "@pipeline().parameters.Data_Source_Table_Name",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ABLB_Datalanding",
+						"type": "DatasetReference",
+						"parameters": {
+							"FolderPath": {
+								"value": "@pipeline().parameters.Data_Destination_Folder_Path",
+								"type": "Expression"
+							},
+							"TargetFileName": {
+								"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1)\n,  concat(pipeline().parameters.Data_Destination_File_Name\n             ,'-'\n            , formatDateTime(convertFromUtc(activity('GetLastModifiedDate').output.lastModified,'E. Australia Standard Time'),'yyyyMMdd-HHmmss')\n             ,pipeline().parameters.File_Name_Ext)\n,\nconcat(\npipeline().parameters.Data_Destination_File_Name\n,pipeline().parameters.File_Name_Ext)\n)",
+								"type": "Expression"
+							},
+							"ColumnDelimiter": {
+								"value": "@pipeline().parameters.ColumnDelimiter",
+								"type": "Expression"
+							},
+							"QuoteCharacter": {
+								"value": "@pipeline().parameters.QuoteCharacter",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "SqlServerStoredProcedure2",
+				"description": "Stored procedure activity to store the new high-watermark value into external control table for delta data loading. ",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "FullCopyToBlob",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[ETL].[usp_update_incrementaldatevalue]",
+					"storedProcedureParameters": {
+						"TableID": {
+							"value": {
+								"value": "@pipeline().parameters.TableID",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWDiscovery",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "GetLastModifiedDate",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_GlobalScape_ExcelFile_Source",
+						"type": "DatasetReference",
+						"parameters": {
+							"Filefolder": {
+								"value": "@pipeline().parameters.SourceName",
+								"type": "Expression"
+							},
+							"SheetName": {
+								"value": "@pipeline().parameters.Data_Source_Table_Name",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"lastModified"
+					],
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"recursive": true
+					}
+				}
+			},
+			{
+				"name": "Copy to Archive",
+				"description": "Full Copy from source table into blob storage",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "SqlServerStoredProcedure2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "FileServerReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "FileServerWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"dataIntegrationUnits": 0
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_FS_GlobalScape_BinaryFile_source",
+						"type": "DatasetReference",
+						"parameters": {
+							"filefolder": {
+								"value": "@pipeline().parameters.SourceName",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_FS_GlobalScape_BinaryFile_Archive",
+						"type": "DatasetReference",
+						"parameters": {
+							"filefolder": {
+								"value": "@pipeline().parameters.SourceName",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Delete files from GlobalScape",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Copy to Archive",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_GlobalScape_ExcelFile_Source",
+						"type": "DatasetReference",
+						"parameters": {
+							"Filefolder": {
+								"value": "@pipeline().parameters.SourceName",
+								"type": "Expression"
+							},
+							"SheetName": {
+								"value": "@pipeline().parameters.Data_Source_Table_Name",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"recursive": false,
+						"wildcardFileName": {
+							"value": "@{concat(pipeline().parameters.Data_Source_Table_Name,'*.xlsx')}",
+							"type": "Expression"
+						},
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Data_Source_Table_Name": {
+				"type": "String",
+				"defaultValue": "dbo.MSF660"
+			},
+			"Data_Source_WaterMarkColumn": {
+				"type": "String",
+				"defaultValue": "CASE WHEN LAST_MOD_DATE <> '' AND LAST_MOD_TIME<>'' THEN (CAST(LAST_MOD_DATE AS DATETIME) + CAST(stuff(stuff(LAST_MOD_TIME ,3,0,':'),6,0,':') AS DATETIME)) END"
+			},
+			"Data_Destination_Folder_Path": {
+				"type": "String",
+				"defaultValue": "ellipse9-datalanding/MSF660"
+			},
+			"Control_Table_Table_Name": {
+				"type": "String",
+				"defaultValue": "ETL.SourceTableDetails"
+			},
+			"Control_Table_Column_Name": {
+				"type": "String",
+				"defaultValue": "IncrementalKeyDateColumnLastRefreshValue"
+			},
+			"TableID": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"Data_Destination_File_Name": {
+				"type": "string",
+				"defaultValue": "MSF660"
+			},
+			"SourceServerName": {
+				"type": "string",
+				"defaultValue": "NFUJDEV073"
+			},
+			"SourceDatabaseName": {
+				"type": "string",
+				"defaultValue": "Datamart"
+			},
+			"IncrementalLoadInd": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"File_Name_Ext": {
+				"type": "string",
+				"defaultValue": ".csv"
+			},
+			"File_Name_DateTime_Ind": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"Join_Condition": {
+				"type": "string",
+				"defaultValue": " "
+			},
+			"Source_Column_List": {
+				"type": "string",
+				"defaultValue": "*"
+			},
+			"ColumnDelimiter": {
+				"type": "string",
+				"defaultValue": ","
+			},
+			"QuoteCharacter": {
+				"type": "string",
+				"defaultValue": "¬"
+			},
+			"source_where_filter": {
+				"type": "string",
+				"defaultValue": " "
+			},
+			"UserName": {
+				"type": "string"
+			},
+			"SecretPasswordName": {
+				"type": "string"
+			},
+			"SourceFolderLocation": {
+				"type": "string"
+			},
+			"SourceFileName": {
+				"type": "string"
+			},
+			"SourceLandingContainer": {
+				"type": "string"
+			},
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "Ellipse9"
+			}
+		},
+		"folder": {
+			"name": "FrameWork"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-27T05:48:51Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
