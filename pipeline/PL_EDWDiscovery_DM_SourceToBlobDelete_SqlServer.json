@@ -27,7 +27,8 @@
 									"type": "Expression"
 								}
 							}
-						}
+						},
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",
@@ -64,7 +65,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@equals(item().CheckForDeletes,1)",
+									"value": "@and(equals(item().CheckForDeletes,'1'), equals(item().IncrementalLoadInd,'1'))",
 									"type": "Expression"
 								},
 								"ifTrueActivities": [
@@ -89,7 +90,7 @@
 													"value": "@item().Data_Source_WaterMarkColumn",
 													"type": "Expression"
 												},
-												"Data_Destination_Folder_Path": {
+												"Data_Destination_Folder_Path_DeleteProcess": {
 													"value": "@item().Data_Destination_Folder_Path_DeleteProcess",
 													"type": "Expression"
 												},
@@ -204,6 +205,30 @@
 												"databrickssecretname": {
 													"value": "@item().databrickssecretname",
 													"type": "Expression"
+												},
+												"SourceId": {
+													"value": "@pipeline().parameters.SourceID",
+													"type": "Expression"
+												},
+												"DeltaTargetTableName": {
+													"value": "@item().DeltaTargetTableName",
+													"type": "Expression"
+												},
+												"skipchangedset": {
+													"value": "@item().skipchangedset",
+													"type": "Expression"
+												},
+												"skipbottomrows": {
+													"value": "@item().skipbottomrows",
+													"type": "Expression"
+												},
+												"skipcsvrows": {
+													"value": "@item().skipcsvrows",
+													"type": "Expression"
+												},
+												"AzuresqlTempDeleteTableName": {
+													"value": "@item().AzuresqlTempDeleteTableName",
+													"type": "Expression"
 												}
 											}
 										}
@@ -224,7 +249,8 @@
 		"folder": {
 			"name": "EDW_Discovery"
 		},
-		"annotations": []
+		"annotations": [],
+		"lastPublishTime": "2020-03-17T06:54:20Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }
