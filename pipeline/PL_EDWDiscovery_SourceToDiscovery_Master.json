@@ -182,20 +182,108 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "Is Synchup Deleted Records Required - No Failure",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Is Blob to ASQL Required - No Failure",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@pipeline().parameters.SynchupDeletedRecords",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute_PL_TRFM_Synchup_Deleted_Records_No_Failure",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_SourceToBlob_Delete",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+										"type": "Expression"
+									},
+									"LoadTypeName": {
+										"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Is Synchup Deleted Records Required - Has Failure",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Is Blob to ASQL Required - Has Failure",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@pipeline().parameters.SynchupDeletedRecords",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute_PL_TRFM_Synchup_Deleted_Records_Has_Failure",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_SourceToBlob_Delete",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+										"type": "Expression"
+									},
+									"LoadTypeName": {
+										"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
 			}
 		],
 		"parameters": {
 			"SourceName": {
 				"type": "string",
-				"defaultValue": "Envizi"
-			},
-			"OnlyBlobtoASQL": {
-				"type": "bool",
-				"defaultValue": true
+				"defaultValue": "HiAffinity"
 			},
 			"OnlySourceToBlob": {
 				"type": "bool",
-				"defaultValue": true
+				"defaultValue": false
+			},
+			"OnlyBlobtoASQL": {
+				"type": "bool",
+				"defaultValue": false
 			},
 			"AllowPartialUpdateOfDiscovery": {
 				"type": "bool",
@@ -203,6 +291,10 @@
 			},
 			"Additional_MappingParam": {
 				"type": "string"
+			},
+			"SynchupDeletedRecords": {
+				"type": "bool",
+				"defaultValue": true
 			}
 		},
 		"variables": {
