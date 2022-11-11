@@ -5,16 +5,23 @@
 			{
 				"name": "SourceToBlob_CommandType",
 				"type": "Switch",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "fetchSwitchCommandType",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"on": {
-						"value": "@pipeline().parameters.LoadTypeName",
+						"value": "@activity('fetchSwitchCommandType').output.firstRow.ADFAction",
 						"type": "Expression"
 					},
 					"cases": [
 						{
-							"value": "Databricks Notebook",
+							"value": "DATABRICKS_NOTEBOOK",
 							"activities": [
 								{
 									"name": "Execute DM_SourcetoBlob_Databricks",
@@ -38,7 +45,7 @@
 							]
 						},
 						{
-							"value": "SQL Database",
+							"value": "DB_SQL",
 							"activities": [
 								{
 									"name": "Execute DM_SourcetoBlob_SQLDatabase",
@@ -62,16 +69,16 @@
 							]
 						},
 						{
-							"value": "Excel File",
+							"value": "BLOB_EXCEL_FILE",
 							"activities": [
 								{
-									"name": "Execute DM_SourcetoBlob_ExcelFile",
+									"name": "Execute DM_SourcetoBlob_Blob_ExcelFile",
 									"type": "ExecutePipeline",
 									"dependsOn": [],
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_ExcelFile",
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Blob_ExcelFile",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -86,16 +93,16 @@
 							]
 						},
 						{
-							"value": "CSV File",
+							"value": "GLOBALSCAPE_CSV_FILE",
 							"activities": [
 								{
-									"name": "Execute DM_SourcetoBlob_CSVFile",
+									"name": "Execute DM_SourcetoBlob_GlobalScape_CSVFile",
 									"type": "ExecutePipeline",
 									"dependsOn": [],
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_CSVFile",
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_GlobalScape_CSVFile",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -132,8 +139,60 @@
 									}
 								}
 							]
+						},
+						{
+							"value": "GLOBALSCAPE_EXCEL_FILE",
+							"activities": [
+								{
+									"name": "Execute DM_SourcetoBlob_GlobalScape_ExcelFile_copy1",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_GlobalScape_ExcelFile",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@pipeline().parameters.SourceID",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
 						}
 					]
+				}
+			},
+			{
+				"name": "fetchSwitchCommandType",
+				"description": "Based on SourceType and LoadType SQL procedure will fetch switch command type",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "EXEC etl.usp_get_switch_command_type '@{pipeline().parameters.SourceID}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
 				}
 			}
 		],
