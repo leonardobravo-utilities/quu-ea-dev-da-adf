@@ -146,570 +146,60 @@
 		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
+		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Field Service Edge Hourly_Refresh"
+		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "GIS_SQLServer_SDCM_SQL"
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "GIS_SQLServer_SDUV_SQL"
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "GIS_Oracle_SD_MANAGED"
+		},
+		"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Geospatial_File_Bulk_Load')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "lkp_getfilemetadata",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "SELECT t.TargetBlobFilePath\n            ,t.TargetBlobFileName + '-' + cast(convert(date,[dbo].[udf_getLocalDTM](),121) as  \n varchar(10)) +  t.targetBlobFileNameExt AS targetBlobFileName\n            ,t.TargetBlobContainer\n            ,t.ColumnDelimiter\n            ,t.QuoteCharacter\nFROM ETL.SourceSystem S  \nInner join ETL.SourceTableDetails T\n ON S.SourceID = T.SourceID\nWHERE S.SourceName =  '@{pipeline().parameters.sourcename}'\nand lower(SourceTableName)='geospatial_devices'",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					},
-					{
-						"name": "Copy_Geospatial_File_From_API_EndPoint",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "lkp_getfilemetadata",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "HttpReadSettings",
-									"requestMethod": "GET"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_Temetra_Geospatial_Meters_Source",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DS_ABLB_Temetra_Geospatial_Sink",
-								"type": "DatasetReference",
-								"parameters": {
-									"FolderPath": {
-										"value": "@activity('lkp_getfilemetadata').output.Firstrow['TargetBlobFilePath']",
-										"type": "Expression"
-									},
-									"TargetFileName": {
-										"value": "@activity('lkp_getfilemetadata').output.Firstrow['TargetBlobFileName']",
-										"type": "Expression"
-									},
-									"ColumnDelimiter": {
-										"value": "@activity('lkp_getfilemetadata').output.Firstrow['ColumnDelimiter']",
-										"type": "Expression"
-									},
-									"QuoteCharacter": {
-										"value": "@activity('lkp_getfilemetadata').output.Firstrow['QuoteCharacter']",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					},
-					{
-						"name": "PL_Temetra_BlobToASQL",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Copy_Geospatial_File_From_API_EndPoint",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_BlobToASQL",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"SourceName": {
-									"value": "@pipeline().parameters.sourcename",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "01_Temetra_GIS_Spatial_Linkage",
-						"type": "DatabricksNotebook",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_BlobToASQL",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/edw_discovery/Temetra/01_Temetra_GIS_Spatial_Linkage"
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_DBR_ADF_Job_Cluster",
-							"type": "LinkedServiceReference",
-							"parameters": {
-								"databricksclusterid": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databrickssecretname": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"sourcename": {
-						"type": "string",
-						"defaultValue": "TEMETRA-GEOSPATIAL-DEVICES"
-					},
-					"databricks_cluster_id": {
-						"type": "string",
-						"defaultValue": "1210-010752-knack200"
-					},
-					"databricks_secret_name": {
-						"type": "string",
-						"defaultValue": "databricks-token"
-					}
-				},
-				"folder": {
-					"name": "Temetra"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Main')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "PL_Temetra_DeviceList_Generate",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_DeviceList_Generate",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"databricks_cluster_id": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databricks_secret_name": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "PL_Temetra_devices",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_DeviceList_Generate",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_devices",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"SourceName": "TEMETRA-DEVICES"
-							}
-						}
-					},
-					{
-						"name": "PL_Temetra_API_Call",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_devices",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_API_Call",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"databricks_cluster_id": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databricks_secret_name": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								},
-								"param_load_type": "Incremental",
-								"param_startdate": {
-									"value": "@formatDateTime(subtractFromTime(convertTimeZone(utcnow(),'UTC','E. Australia Standard Time'),1,'Day'),'yyyyMMdd')",
-									"type": "Expression"
-								},
-								"param_enddate": {
-									"value": "@formatDateTime(convertTimeZone(utcnow(),'UTC','E. Australia Standard Time'),'yyyyMMdd')",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "PL_Temetra_BlobToASQL",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_API_Call",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_BlobToASQL",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"SourceName": "TEMETRA"
-							}
-						}
-					},
-					{
-						"name": "PL_Temetra_Hourly_Consumption",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_BlobToASQL",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_Hourly_Consumption",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"databricks_cluster_id": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databricks_secret_name": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								},
-								"Load_Type": "Full"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"databricks_cluster_id": {
-						"type": "string",
-						"defaultValue": "0417-051914-axons909"
-					},
-					"databricks_secret_name": {
-						"type": "string",
-						"defaultValue": "databricks-token"
-					}
-				},
-				"folder": {
-					"name": "Temetra"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Main_old')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Temetra Main Pipeline",
-				"activities": [
-					{
-						"name": "PL_Temetra_API_Response",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_API_Response",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"databricks_cluster_id": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databricks_secret_name": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "PL_Temetra_BlobToASQL",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_API_Response",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_BlobToASQL",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "PL_Temetra_Hourly_Consumption",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_BlobToASQL",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_Hourly_Consumption",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"databricks_cluster_id": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databricks_secret_name": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "PL_Temetra_Analysis_Service",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_24HR_STATS",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_Analysis_Service",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "PL_Temetra_Potential_Leaks",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_Hourly_Consumption",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_Potential_Leaks",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"databricks_cluster_id": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databricks_secret_name": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "PL_Temetra_24HR_STATS",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PL_Temetra_Potential_Leaks",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Temetra_24HR_STATS",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"databricks_cluster_id": {
-									"value": "@pipeline().parameters.databricks_cluster_id",
-									"type": "Expression"
-								},
-								"databricks_secret_name": {
-									"value": "@pipeline().parameters.databricks_secret_name",
-									"type": "Expression"
-								}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"databricks_cluster_id": {
-						"type": "string",
-						"defaultValue": "0417-051914-axons909"
-					},
-					"databricks_secret_name": {
-						"type": "string",
-						"defaultValue": "databricks-token"
-					}
-				},
-				"folder": {
-					"name": "Temetra/backup"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_WWI_Main')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -1091,385 +581,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_SourceToBlob')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "SourceToBlob_CommandType",
-						"type": "Switch",
-						"dependsOn": [
-							{
-								"activity": "fetchSwitchCommandType",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"on": {
-								"value": "@activity('fetchSwitchCommandType').output.firstRow.ADFAction",
-								"type": "Expression"
-							},
-							"cases": [
-								{
-									"value": "DATABRICKS_NOTEBOOK",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_Databricks",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Databricks",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "DB_SQL",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_SQLDatabase",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_SqlServer",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "BLOB_EXCEL_FILE",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_Blob_ExcelFile",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Blob_ExcelFile",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "GLOBALSCAPE_CSV_FILE",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_GlobalScape_CSVFile",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_GlobalScape_CSVFile",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "API",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_API",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_API",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "GLOBALSCAPE_EXCEL_FILE",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_GlobalScape_ExcelFile_copy1",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_GlobalScape_ExcelFile",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					{
-						"name": "fetchSwitchCommandType",
-						"description": "Based on SourceType and LoadType SQL procedure will fetch switch command type",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "EXEC etl.usp_get_switch_command_type '@{pipeline().parameters.SourceID}'",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceID": {
-						"type": "int"
-					},
-					"LoadTypeName": {
-						"type": "string"
-					},
-					"Additional_MappingParam": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "EDW_Discovery"
-				},
-				"annotations": [],
-				"lastPublishTime": "2022-04-27T05:48:52Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_SourceToBlob_Delete')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "SourceToBlob_CommandType",
-						"type": "Switch",
-						"dependsOn": [
-							{
-								"activity": "fetchSwitchCommandType",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"on": {
-								"value": "@activity('fetchSwitchCommandType').output.firstRow.ADFAction",
-								"type": "Expression"
-							},
-							"cases": [
-								{
-									"value": "DB_SQL",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_SQLDatabase_Delete",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlobDelete_SqlServer",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "DB_ORACLE",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_Oracle_Delete",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlobDelete_Oracle",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										},
-										{
-											"name": "Execute DM_SourcetoBlob_Oracle_Delete_copy1",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlobDelete_Oracle",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					{
-						"name": "fetchSwitchCommandType",
-						"description": "Based on SourceType and LoadType SQL procedure will fetch switch command type",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "EXEC etl.usp_get_switch_command_type '@{pipeline().parameters.SourceID}'",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceID": {
-						"type": "int"
-					},
-					"LoadTypeName": {
-						"type": "string"
-					}
-				},
-				"variables": {
-					"test": {
-						"type": "Boolean"
-					},
-					"Dummy1": {
-						"type": "Boolean"
-					},
-					"DummyFull": {
-						"type": "Boolean"
-					}
-				},
-				"folder": {
-					"name": "EDW_Discovery"
-				},
-				"annotations": [],
-				"lastPublishTime": "2022-04-27T05:48:52Z"
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/PL_EA_Ellipse9_DataModel_Main')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1546,6 +657,326 @@
 					"name": "Ellipse9"
 				},
 				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_SourceToDiscovery_Master')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Source ID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT\n  srcSys.SourceID\n, ldTyp.LoadTypeName AS SourceToBlobLoadTypeName\nFROM ETL.SourceSystem srcSys\nLEFT JOIN ETL.LoadType ldTyp ON ldTyp.LoadTypeId = srcSys.LoadTypeId\nWHERE srcSys.SourceName = '@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Is Source to Blob Load Required",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Get Source ID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlySourceToBlob",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_SourceToBlob",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"LoadTypeName": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+												"type": "Expression"
+											},
+											"Additional_MappingParam": {
+												"value": "@pipeline().parameters.Additional_MappingParam",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "Execute PL_Framework_TRFM_TransformSourceDate",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_TRFM_TransformSourceDate",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceName": {
+												"value": "@pipeline().parameters.SourceName",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Is Blob to ASQL Required - No Failure",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Source to Blob Load Required",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyBlobtoASQL",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_TRFM_BLOBToASQL",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Is Blob to ASQL Required - Has Failure",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Source to Blob Load Required",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@and(pipeline().parameters.OnlyBlobtoASQL, pipeline().parameters.AllowPartialUpdateOfDiscovery)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_TRFM_BLOBToASQL_copy1",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Is Synchup Deleted Records Required - No Failure",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Blob to ASQL Required - No Failure",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.SynchupDeletedRecords",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Execute_PL_TRFM_Synchup_Deleted_Records_No_Failure",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_SourceToBlob_Delete",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"LoadTypeName": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Is Synchup Deleted Records Required - Has Failure",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Blob to ASQL Required - Has Failure",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.SynchupDeletedRecords",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Execute_PL_TRFM_Synchup_Deleted_Records_Has_Failure",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_SourceToBlob_Delete",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"LoadTypeName": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "HiAffinity"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": false
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": false
+					},
+					"AllowPartialUpdateOfDiscovery": {
+						"type": "bool",
+						"defaultValue": false
+					},
+					"Additional_MappingParam": {
+						"type": "string"
+					},
+					"SynchupDeletedRecords": {
+						"type": "bool",
+						"defaultValue": true
+					}
+				},
+				"variables": {
+					"hasFailedFlag": {
+						"type": "Boolean",
+						"defaultValue": false
+					}
+				},
+				"folder": {
+					"name": "EDW_Discovery"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-09-06T05:55:01Z"
 			},
 			"dependsOn": []
 		},
@@ -1841,6 +1272,182 @@
 							],
 							"hours": [
 								0
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FSE_Hourly_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "FSE_Hourly_Trigger",
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_FSE_Source_To_ASQL",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-06-23T06:31:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								50
+							],
+							"hours": [
+								5,
+								6,
+								7,
+								8,
+								9,
+								10,
+								11,
+								12,
+								13,
+								14,
+								15,
+								16,
+								17,
+								18,
+								19,
+								4
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GIS_SDCM_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_GIS_Source_To_ASQL_SQLServer",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-01-20T19:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								19
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GIS_SDUV_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_GIS_Source_To_ASQL_SQLServer",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-01-20T22:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								22
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GIS_SD_MANAGED_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_GIS_Source_To_ASQL_Oracle",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-01-20T20:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								20
 							]
 						}
 					}

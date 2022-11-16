@@ -7,19 +7,19 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
-		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+		"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 			"type": "string",
-			"defaultValue": "Envizi"
+			"defaultValue": "Takadu-Reporting-API-Week"
 		},
-		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+		"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+		"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+		"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
 			"type": "bool",
 			"defaultValue": false
 		}
@@ -29,7 +29,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/Promaster_Monthly_Trigger')]",
+			"name": "[concat(parameters('factoryName'), '/Takadu_Weekly_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -42,26 +42,29 @@
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"SourceName": "[parameters('Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
-							"OnlyBlobtoASQL": "[parameters('Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
-							"OnlySourceToBlob": "[parameters('Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
-							"AllowPartialUpdateOfDiscovery": "[parameters('Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
+							"SourceName": "[parameters('Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlyBlobtoASQL": "[parameters('Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"OnlySourceToBlob": "[parameters('Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
 						}
 					}
 				],
 				"type": "ScheduleTrigger",
 				"typeProperties": {
 					"recurrence": {
-						"frequency": "Month",
+						"frequency": "Week",
 						"interval": 1,
-						"startTime": "2022-11-11T00:00:00",
+						"startTime": "2021-09-28T06:05:00",
 						"timeZone": "E. Australia Standard Time",
 						"schedule": {
-							"hours": [
-								7
+							"minutes": [
+								0
 							],
-							"monthDays": [
+							"hours": [
 								5
+							],
+							"weekDays": [
+								"Monday"
 							]
 						}
 					}
