@@ -1,0 +1,23 @@
+{
+	"name": "LS_FS_NFUJPRD202_GDrive",
+	"properties": {
+		"annotations": [],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "\\\\nfujprd202\\GDrive",
+			"userId": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ADF_LS_AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "svc-ebi-prdc04-agt"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHostedRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
