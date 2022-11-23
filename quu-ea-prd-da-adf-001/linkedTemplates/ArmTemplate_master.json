@@ -83,6 +83,14 @@
 			"type": "string",
 			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
+		"LS_FS_NFUJPRD202_GDrive_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\nfujprd202\\GDrive"
+		},
+		"LS_FS_NFUJPRD202_GDrive_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT"
+		},
 		"LS_FS_NFUJPRD301_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "\\\\NFUJPRD301\\EBI_PROD_LANDING"
@@ -712,6 +720,12 @@
 					"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
 						"value": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_userId')]"
 					},
+					"LS_FS_NFUJPRD202_GDrive_properties_typeProperties_host": {
+						"value": "[parameters('LS_FS_NFUJPRD202_GDrive_properties_typeProperties_host')]"
+					},
+					"LS_FS_NFUJPRD202_GDrive_properties_typeProperties_userId": {
+						"value": "[parameters('LS_FS_NFUJPRD202_GDrive_properties_typeProperties_userId')]"
+					},
 					"LS_FS_NFUJPRD301_properties_typeProperties_host": {
 						"value": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_host')]"
 					},
@@ -1022,24 +1036,6 @@
 					},
 					"GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL')]"
-					},
-					"GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName": {
-						"value": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName')]"
-					},
-					"GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob": {
-						"value": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob')]"
-					},
-					"GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL')]"
-					},
-					"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName": {
-						"value": "[parameters('GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName')]"
-					},
-					"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlySourceToBlob": {
-						"value": "[parameters('GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlySourceToBlob')]"
-					},
-					"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlyBlobtoASQL')]"
 					}
 				}
 			},
@@ -1060,6 +1056,24 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName": {
+						"value": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName')]"
+					},
+					"GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob": {
+						"value": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob')]"
+					},
+					"GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL')]"
+					},
+					"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName": {
+						"value": "[parameters('GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName')]"
+					},
+					"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlySourceToBlob": {
+						"value": "[parameters('GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlySourceToBlob')]"
+					},
+					"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlyBlobtoASQL')]"
 					},
 					"GIS_SD_REFERENCE_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName": {
 						"value": "[parameters('GIS_SD_REFERENCE_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName')]"
@@ -1213,6 +1227,26 @@
 					},
 					"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
 						"value": "[parameters('Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_9')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_11",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_11.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 						"value": "[parameters('SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
@@ -1234,26 +1268,6 @@
 					},
 					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
 						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_9')]"
-			]
-		},
-		{
-			"name": "quu-ea-prd-da-adf-001_ArmTemplate_11",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_11.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 						"value": "[parameters('Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
