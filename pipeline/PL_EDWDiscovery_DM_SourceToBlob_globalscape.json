@@ -1,5 +1,5 @@
 {
-	"name": "PL_EDWDiscover_DM_SourceToBlob_globalscape",
+	"name": "PL_EDWDiscovery_DM_SourceToBlob_globalscape",
 	"properties": {
 		"activities": [
 			{
@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select S.FileFolderName,T.SourceFileName,TargetBlobFilePath,\n File_Name_DateTime_Ind,TargetBlobFileName,TargetBlobFileNameExt\n,ColumnDelimiter,QuoteCharacter \nfrom [ETL].[SourceSystem] S INNER JOIN [ETL].[SourceTableDetails] T\nON S.sourceID = T.sourceID  \n where  S.sourceID=@{pipeline().parameters.sourceID} and  isactive=1",
+							"value": "select S.FileFolderName,T.SourceFileName,TargetBlobFilePath,\n File_Name_DateTime_Ind,TargetBlobFileName,TargetBlobFileNameExt\n,ColumnDelimiter,QuoteCharacter , skipcsvrows\nfrom [ETL].[SourceSystem] S INNER JOIN [ETL].[SourceTableDetails] T\nON S.sourceID = T.sourceID  \n where  S.sourceID=@{pipeline().parameters.sourceID} and  isactive=1",
 							"type": "Expression"
 						},
 						"partitionOption": "None"
@@ -93,22 +93,6 @@
 								"enableStaging": false,
 								"dataIntegrationUnits": 2
 							},
-							"inputs": [
-								{
-									"referenceName": "DS_FS_globalscape_urbanHQ",
-									"type": "DatasetReference",
-									"parameters": {
-										"FileFolder": {
-											"value": "@item().FileFolderName",
-											"type": "Expression"
-										},
-										"FileName": {
-											"value": "@item().SourceFileName",
-											"type": "Expression"
-										}
-									}
-								}
-							],
 							"outputs": [
 								{
 									"referenceName": "DS_ABLB_Datalanding",
@@ -177,39 +161,7 @@
 									}
 								},
 								"enableStaging": false
-							},
-							"inputs": [
-								{
-									"referenceName": "DS_FS_globalscape_urbanHQ",
-									"type": "DatasetReference",
-									"parameters": {
-										"FileFolder": {
-											"value": "@item().FileFolderName",
-											"type": "Expression"
-										},
-										"FileName": {
-											"value": "@item().SourceFileName",
-											"type": "Expression"
-										}
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "DS_FS_globalscape_urbanHQ",
-									"type": "DatasetReference",
-									"parameters": {
-										"FileFolder": {
-											"value": "@concat(item().FileFolderName,'/Archived')",
-											"type": "Expression"
-										},
-										"FileName": {
-											"value": "@if(equals(item().File_Name_DateTime_Ind,1),\nconcat(item().TargetBlobFileName,'-',\nactivity('lkp_getlocalstarttime2').output.firstrow.localstarttime2,item().TargetBlobFileNameExt),\nconcat(item().TargetBlobFileName,item().TargetBlobFileNameExt))",
-											"type": "Expression"
-										}
-									}
-								}
-							]
+							}
 						},
 						{
 							"name": "lkp_getlocalstarttime2",
@@ -248,7 +200,8 @@
 		"folder": {
 			"name": "UrbanHQ"
 		},
-		"annotations": []
+		"annotations": [],
+		"lastPublishTime": "2022-03-30T01:33:20Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }
