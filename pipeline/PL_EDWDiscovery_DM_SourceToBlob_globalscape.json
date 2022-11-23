@@ -93,6 +93,32 @@
 								"enableStaging": false,
 								"dataIntegrationUnits": 2
 							},
+							"inputs": [
+								{
+									"referenceName": "DS_Files_NFUJPRD202_GDrive",
+									"type": "DatasetReference",
+									"parameters": {
+										"TargetFilePath": {
+											"value": "@item().FileFolderName",
+											"type": "Expression"
+										},
+										"TargetFileName": {
+											"value": "@item().SourceFileName",
+											"type": "Expression"
+										},
+										"ColumnDelimiter": {
+											"value": "@item().ColumnDelimiter",
+											"type": "Expression"
+										},
+										"QuoteCharacter": {
+											"value": "@item().QuoteCharacter",
+											"type": "Expression"
+										},
+										"EscapeCharacter": "º",
+										"FirstRowHeader": 0
+									}
+								}
+							],
 							"outputs": [
 								{
 									"referenceName": "DS_ABLB_Datalanding",
@@ -161,7 +187,41 @@
 									}
 								},
 								"enableStaging": false
-							}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Files_NFUJPRD202_GDrive",
+									"type": "DatasetReference",
+									"parameters": {
+										"TargetFilePath": "@item().FileFolderName",
+										"TargetFileName": "@item().SourceFileName",
+										"ColumnDelimiter": "@item().ColumnDelimiter",
+										"QuoteCharacter": "@item().QuoteCharacter",
+										"EscapeCharacter": "º",
+										"FirstRowHeader": 0
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Files_NFUJPRD202_GDrive",
+									"type": "DatasetReference",
+									"parameters": {
+										"TargetFilePath": {
+											"value": "@concat(item().FileFolderName,'/Archived')",
+											"type": "Expression"
+										},
+										"TargetFileName": {
+											"value": "@if(equals(item().File_Name_DateTime_Ind,1),\nconcat(item().TargetBlobFileName,'-',\nactivity('lkp_getlocalstarttime2').output.firstrow.localstarttime2,item().TargetBlobFileNameExt),\nconcat(item().TargetBlobFileName,item().TargetBlobFileNameExt))",
+											"type": "Expression"
+										},
+										"ColumnDelimiter": "@item().ColumnDelimiter",
+										"QuoteCharacter": "@item().QuoteCharacter",
+										"EscapeCharacter": "º",
+										"FirstRowHeader": 0
+									}
+								}
+							]
 						},
 						{
 							"name": "lkp_getlocalstarttime2",
