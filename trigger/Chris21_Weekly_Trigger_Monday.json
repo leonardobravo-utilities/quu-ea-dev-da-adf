@@ -1,16 +1,43 @@
 {
 	"name": "Chris21_Weekly_Trigger_Monday",
 	"properties": {
+		"description": "Every Thursday loading Chris21 Payroll files.",
 		"annotations": [],
 		"runtimeState": "Stopped",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Chris21_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "CHRIS21",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true,
+					"EmailTo": "Analytics-Support@urbanutilities.com.au;DL-IS-Analytics-Data-Foundation@urbanutilities.com.au",
+					"LogicAppURL": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU",
+					"TriggerName": "Chris21_Weekly_Trigger_Monday"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Minute",
-				"interval": 15,
-				"startTime": "2022-11-26T11:56:00Z",
-				"timeZone": "UTC"
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2020-07-31T01:09:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						13
+					],
+					"weekDays": [
+						"Monday"
+					]
+				}
 			}
 		}
 	}
