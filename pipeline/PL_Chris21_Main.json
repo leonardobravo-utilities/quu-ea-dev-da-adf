@@ -69,6 +69,10 @@
 									"sourcename": {
 										"value": "@pipeline().parameters.SourceName",
 										"type": "Expression"
+									},
+									"TriggerName": {
+										"value": "@pipeline().parameters.TriggerName",
+										"type": "Expression"
 									}
 								}
 							}
@@ -108,6 +112,10 @@
 								"parameters": {
 									"SourceID": {
 										"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+										"type": "Expression"
+									},
+									"TriggerName": {
+										"value": "@pipeline().parameters.TriggerName",
 										"type": "Expression"
 									}
 								}
@@ -149,6 +157,10 @@
 						},
 						"LogicAppURL": {
 							"value": "@pipeline().parameters.LogicAppURL",
+							"type": "Expression"
+						},
+						"TriggerName": {
+							"value": "@pipeline().parameters.TriggerName",
 							"type": "Expression"
 						}
 					}
@@ -200,11 +212,16 @@
 			"LogicAppURL": {
 				"type": "string",
 				"defaultValue": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU"
+			},
+			"TriggerName": {
+				"type": "string"
 			}
 		},
 		"folder": {
 			"name": "Chris21"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2021-10-05T05:45:07Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
