@@ -167,17 +167,53 @@
 			"type": "string",
 			"defaultValue": "Evoqua-metadata"
 		},
-		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName": {
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "CHRIS21"
 		},
-		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlySourceToBlob": {
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_OnlySourceToBlob": {
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_EmailTo": {
+			"type": "string",
+			"defaultValue": "Analytics-Support@urbanutilities.com.au;DL-IS-Analytics-Data-Foundation@urbanutilities.com.au"
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_LogicAppURL": {
+			"type": "string",
+			"defaultValue": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU"
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "Chris21_Weekly_Trigger_Monday"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "CHRIS21"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_EmailTo": {
+			"type": "string",
+			"defaultValue": "Analytics-Support@urbanutilities.com.au;DL-IS-Analytics-Data-Foundation@urbanutilities.com.au"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_LogicAppURL": {
+			"type": "string",
+			"defaultValue": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "Chris21_Weekly_Trigger_Thursday"
 		},
 		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 			"type": "string",
@@ -2597,7 +2633,7 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderQuery": {
-									"value": "Select  \n\n     FileFolderName \n\t ,SourceFileName\n    ,ArchiveFileFolderName =FileFolderName  + '\\Archive\\' + convert(varchar(20),dbo.udf_getLocalDTM(),112)\n\t,CheckpointColumn\n\t,CheckpointColumnValue\n\t,AzuresqlTargetTableName\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d ON s.sourceid = d.sourceid \nLEFT OUTER JOIN ETL.SourceFileLoad SFL on replace(SFL.FileName,'.csv','') = d.SourceTableName\nwhere sourcename = '@{pipeline().parameters.SourceName}'  and d.isactive = 1",
+									"value": "Select  \n\n     FileFolderName \n\t ,SourceFileName\n    ,ArchiveFileFolderName =FileFolderName  + '\\Archive\\' + convert(varchar(20),dbo.udf_getLocalDTM(),112)\n\t,CheckpointColumn\n\t,CheckpointColumnValue\n\t,AzuresqlTargetTableName\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d ON s.sourceid = d.sourceid \nLEFT OUTER JOIN ETL.SourceFileLoad SFL on replace(SFL.FileName,'.csv','') = d.SourceTableName\nwhere sourcename = '@{pipeline().parameters.SourceName}'  and d.isactive = 1\nand d.TriggerName like concat('%','@{pipeline().parameters.TriggerName}','%')",
 									"type": "Expression"
 								},
 								"partitionOption": "None"
@@ -2855,6 +2891,9 @@
 					},
 					"LogicAppURL": {
 						"type": "string"
+					},
+					"TriggerName": {
+						"type": "string"
 					}
 				},
 				"variables": {
@@ -2871,7 +2910,8 @@
 				"folder": {
 					"name": "Chris21"
 				},
-				"annotations": []
+				"annotations": [],
+				"lastPublishTime": "2022-04-14T05:51:52Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
@@ -2903,7 +2943,7 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderQuery": {
-									"value": "Select  FileFolderName,SourceFileName,TargetBlobFilePath,TargetBlobFileName = lower(TargetBlobFileName + '_' + convert(varchar(20),dbo.udf_getLocalDTM(),112) + targetBlobFileNameExt )\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d\nON s.sourceid = d.sourceid \nand d.isactive = 1\nwhere sourcename = '@{pipeline().parameters.sourcename}'\n",
+									"value": "Select  FileFolderName,SourceFileName,TargetBlobFilePath,TargetBlobFileName = lower(TargetBlobFileName + '_' + convert(varchar(20),dbo.udf_getLocalDTM(),112) + targetBlobFileNameExt )\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d\nON s.sourceid = d.sourceid \nand d.isactive = 1\nwhere sourcename = '@{pipeline().parameters.sourcename}'\nand d.TriggerName like concat('%','@{pipeline().parameters.TriggerName}','%')\n",
 									"type": "Expression"
 								},
 								"partitionOption": "None"
@@ -3020,6 +3060,9 @@
 					"sourcename": {
 						"type": "string",
 						"defaultValue": "CHRIS21"
+					},
+					"TriggerName": {
+						"type": "string"
 					}
 				},
 				"variables": {
@@ -3034,7 +3077,8 @@
 				"folder": {
 					"name": "Chris21"
 				},
-				"annotations": []
+				"annotations": [],
+				"lastPublishTime": "2020-07-15T02:00:52Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
@@ -3116,6 +3160,10 @@
 											"sourcename": {
 												"value": "@pipeline().parameters.SourceName",
 												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
 											}
 										}
 									}
@@ -3155,6 +3203,10 @@
 										"parameters": {
 											"SourceID": {
 												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
 												"type": "Expression"
 											}
 										}
@@ -3196,6 +3248,10 @@
 								},
 								"LogicAppURL": {
 									"value": "@pipeline().parameters.LogicAppURL",
+									"type": "Expression"
+								},
+								"TriggerName": {
+									"value": "@pipeline().parameters.TriggerName",
 									"type": "Expression"
 								}
 							}
@@ -3251,12 +3307,16 @@
 					"LogicAppURL": {
 						"type": "string",
 						"defaultValue": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU"
+					},
+					"TriggerName": {
+						"type": "string"
 					}
 				},
 				"folder": {
 					"name": "Chris21"
 				},
-				"annotations": []
+				"annotations": [],
+				"lastPublishTime": "2021-10-05T05:45:07Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
@@ -7883,6 +7943,13 @@
 											"value": "@pipeline().parameters.SourceID",
 											"type": "Expression"
 										}
+									},
+									"TriggerName": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.TriggerName",
+											"type": "Expression"
+										}
 									}
 								},
 								"partitionOption": "None"
@@ -7914,7 +7981,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
-							"batchCount": 10,
+							"batchCount": 20,
 							"activities": [
 								{
 									"name": "execute_databricks_merge_pipeline",
@@ -8056,12 +8123,16 @@
 					"SourceID": {
 						"type": "int",
 						"defaultValue": 1
+					},
+					"TriggerName": {
+						"type": "string"
 					}
 				},
 				"folder": {
 					"name": "EDW_Discovery"
 				},
-				"annotations": []
+				"annotations": [],
+				"lastPublishTime": "2022-01-21T06:37:38Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
@@ -30228,7 +30299,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Chris21_Daily_Trigger')]",
+			"name": "[concat(parameters('factoryName'), '/Chris21_Weekly_Trigger_Monday')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -30242,9 +30313,12 @@
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"SourceName": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL')]"
+							"SourceName": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL')]",
+							"EmailTo": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_EmailTo')]",
+							"LogicAppURL": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_LogicAppURL')]",
+							"TriggerName": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_TriggerName')]"
 						}
 					}
 				],
@@ -30253,17 +30327,66 @@
 					"recurrence": {
 						"frequency": "Week",
 						"interval": 1,
-						"startTime": "2020-07-31T01:09:00Z",
-						"timeZone": "UTC",
+						"startTime": "2020-07-31T01:09:00",
+						"timeZone": "E. Australia Standard Time",
 						"schedule": {
 							"minutes": [
 								0
 							],
 							"hours": [
-								22
+								13
 							],
 							"weekDays": [
-								"Wednesday"
+								"Monday"
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Chris21_Main')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Chris21_Weekly_Trigger_Thursday')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Every Thursday loading Chris21 Payroll files.",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Chris21_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL')]",
+							"EmailTo": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_EmailTo')]",
+							"LogicAppURL": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_LogicAppURL')]",
+							"TriggerName": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_TriggerName')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Week",
+						"interval": 1,
+						"startTime": "2020-07-31T01:09:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								8
+							],
+							"weekDays": [
+								"Thursday"
 							]
 						}
 					}
@@ -30572,7 +30695,7 @@
 			"properties": {
 				"description": "FSE_Hourly_Trigger",
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -31353,7 +31476,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {

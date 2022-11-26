@@ -7,17 +7,53 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
-		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName": {
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "CHRIS21"
 		},
-		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlySourceToBlob": {
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_OnlySourceToBlob": {
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_EmailTo": {
+			"type": "string",
+			"defaultValue": "Analytics-Support@urbanutilities.com.au;DL-IS-Analytics-Data-Foundation@urbanutilities.com.au"
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_LogicAppURL": {
+			"type": "string",
+			"defaultValue": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU"
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "Chris21_Weekly_Trigger_Monday"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "CHRIS21"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_EmailTo": {
+			"type": "string",
+			"defaultValue": "Analytics-Support@urbanutilities.com.au;DL-IS-Analytics-Data-Foundation@urbanutilities.com.au"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_LogicAppURL": {
+			"type": "string",
+			"defaultValue": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "Chris21_Weekly_Trigger_Thursday"
 		},
 		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_SourceName": {
 			"type": "string",
@@ -156,18 +192,6 @@
 			"defaultValue": true
 		},
 		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "GIS_SQLServer_SDCM_SQL"
-		},
-		"GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
 		}
@@ -668,7 +692,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Chris21_Daily_Trigger')]",
+			"name": "[concat(parameters('factoryName'), '/Chris21_Weekly_Trigger_Monday')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -682,9 +706,12 @@
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"SourceName": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('Chris21_Daily_Trigger_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL')]"
+							"SourceName": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL')]",
+							"EmailTo": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_EmailTo')]",
+							"LogicAppURL": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_LogicAppURL')]",
+							"TriggerName": "[parameters('Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_TriggerName')]"
 						}
 					}
 				],
@@ -693,17 +720,64 @@
 					"recurrence": {
 						"frequency": "Week",
 						"interval": 1,
-						"startTime": "2020-07-31T01:09:00Z",
-						"timeZone": "UTC",
+						"startTime": "2020-07-31T01:09:00",
+						"timeZone": "E. Australia Standard Time",
 						"schedule": {
 							"minutes": [
 								0
 							],
 							"hours": [
-								22
+								13
 							],
 							"weekDays": [
-								"Wednesday"
+								"Monday"
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Chris21_Weekly_Trigger_Thursday')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Every Thursday loading Chris21 Payroll files.",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Chris21_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL')]",
+							"EmailTo": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_EmailTo')]",
+							"LogicAppURL": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_LogicAppURL')]",
+							"TriggerName": "[parameters('Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_TriggerName')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Week",
+						"interval": 1,
+						"startTime": "2020-07-31T01:09:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								8
+							],
+							"weekDays": [
+								"Thursday"
 							]
 						}
 					}
@@ -1613,7 +1687,7 @@
 			"properties": {
 				"description": "FSE_Hourly_Trigger",
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -1655,46 +1729,6 @@
 								18,
 								19,
 								4
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/GIS_SDCM_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_GIS_Source_To_ASQL_SQLServer",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2021-01-20T19:00:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								19
 							]
 						}
 					}

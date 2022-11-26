@@ -7,6 +7,22 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Envizi"
+		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
 		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "SUMS"
@@ -57,12 +73,53 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/Promaster_Monthly_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlyBlobtoASQL": "[parameters('Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"OnlySourceToBlob": "[parameters('Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Month",
+						"interval": 1,
+						"startTime": "2022-11-11T00:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"hours": [
+								7
+							],
+							"monthDays": [
+								5
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SUMS_Hourly_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
