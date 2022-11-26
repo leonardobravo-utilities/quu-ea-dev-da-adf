@@ -19,7 +19,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "Select  \n\n     FileFolderName \n\t ,SourceFileName\n    ,ArchiveFileFolderName =FileFolderName  + '\\Archive\\' + convert(varchar(20),dbo.udf_getLocalDTM(),112)\n\t,CheckpointColumn\n\t,CheckpointColumnValue\n\t,AzuresqlTargetTableName\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d ON s.sourceid = d.sourceid \nLEFT OUTER JOIN ETL.SourceFileLoad SFL on replace(SFL.FileName,'.csv','') = d.SourceTableName\nwhere sourcename = '@{pipeline().parameters.SourceName}'  and d.isactive = 1",
+							"value": "Select  \n\n     FileFolderName \n\t ,SourceFileName\n    ,ArchiveFileFolderName =FileFolderName  + '\\Archive\\' + convert(varchar(20),dbo.udf_getLocalDTM(),112)\n\t,CheckpointColumn\n\t,CheckpointColumnValue\n\t,AzuresqlTargetTableName\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d ON s.sourceid = d.sourceid \nLEFT OUTER JOIN ETL.SourceFileLoad SFL on replace(SFL.FileName,'.csv','') = d.SourceTableName\nwhere sourcename = '@{pipeline().parameters.SourceName}'  and d.isactive = 1\nand d.TriggerName like concat('%','@{pipeline().parameters.TriggerName}','%')",
 							"type": "Expression"
 						},
 						"partitionOption": "None"
@@ -271,6 +271,9 @@
 			},
 			"LogicAppURL": {
 				"type": "string"
+			},
+			"TriggerName": {
+				"type": "string"
 			}
 		},
 		"variables": {
@@ -287,7 +290,8 @@
 		"folder": {
 			"name": "Chris21"
 		},
-		"annotations": []
+		"annotations": [],
+		"lastPublishTime": "2022-04-14T05:51:52Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }
