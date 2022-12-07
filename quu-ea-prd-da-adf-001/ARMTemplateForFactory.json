@@ -13,31 +13,38 @@
 		},
 		"LS_ASQL_EDWDiscovery_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery'"
+			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=quu-ea-prd-da-sqlserver-001.database.windows.net;Initial Catalog=edw_discovery"
 		},
 		"LS_ASQL_EDWDiscovery_Dev_Test_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery_Dev_Test'"
+			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery_Dev_Test'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=quu-ea-tst-da-sqlserver-001.database.windows.net;Initial Catalog=edw_discovery;User ID=QuutstdaAdmin"
 		},
 		"LS_ASQL_EDWMart_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWMart'"
+			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWMart'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=quu-ea-prd-da-sqlserver-001.database.windows.net;Initial Catalog=edw_mart"
 		},
 		"LS_ASQL_EDWTactical_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWTactical'"
+			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWTactical'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=quu-ea-prd-da-sqlserver-001.database.windows.net;Initial Catalog=edw_tactical"
 		},
 		"LS_MySQL_NetAppManagement_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_MySQL_NetAppManagement'"
+			"metadata": "Secure string for 'connectionString' of 'LS_MySQL_NetAppManagement'",
+			"defaultValue": "Server=@{linkedService().Servername};Port=3306;Database=@{linkedService().Databasename};User=@{linkedService().Username};SSLMode=1;UseSystemTrustStore=0"
 		},
 		"LS_ORAC_Framework_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ORAC_Framework'"
+			"metadata": "Secure string for 'connectionString' of 'LS_ORAC_Framework'",
+			"defaultValue": "host=@{linkedService().HostName};port=@{linkedService().PortNo};sid=@{linkedService().SID};user id=@{linkedService().UserName}"
 		},
 		"LS_SQL_Framework_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'"
+			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'",
+			"defaultValue": "Integrated Security=True;Data Source=@{linkedService().Servername};Initial Catalog=@{linkedService().Databasename}"
 		},
 		"ADF_LS_AKV_properties_typeProperties_baseUrl": {
 			"type": "string",
@@ -31716,7 +31723,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -31759,7 +31766,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {

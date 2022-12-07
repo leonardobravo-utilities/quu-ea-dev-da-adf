@@ -9,15 +9,18 @@
 		},
 		"LS_MySQL_NetAppManagement_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_MySQL_NetAppManagement'"
+			"metadata": "Secure string for 'connectionString' of 'LS_MySQL_NetAppManagement'",
+			"defaultValue": "Server=@{linkedService().Servername};Port=3306;Database=@{linkedService().Databasename};User=@{linkedService().Username};SSLMode=1;UseSystemTrustStore=0"
 		},
 		"LS_ORAC_Framework_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ORAC_Framework'"
+			"metadata": "Secure string for 'connectionString' of 'LS_ORAC_Framework'",
+			"defaultValue": "host=@{linkedService().HostName};port=@{linkedService().PortNo};sid=@{linkedService().SID};user id=@{linkedService().UserName}"
 		},
 		"LS_SQL_Framework_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'"
+			"metadata": "Secure string for 'connectionString' of 'LS_SQL_Framework'",
+			"defaultValue": "Integrated Security=True;Data Source=@{linkedService().Servername};Initial Catalog=@{linkedService().Databasename}"
 		},
 		"LS_FS_Globalscape_properties_typeProperties_host": {
 			"type": "string",
