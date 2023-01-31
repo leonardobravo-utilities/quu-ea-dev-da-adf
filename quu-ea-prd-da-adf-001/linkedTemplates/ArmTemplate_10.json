@@ -19,6 +19,18 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "GIS_SQLServer_SDPROC_SQL"
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"GIS_SDUV_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "GIS_SQLServer_SDUV_SQL"
@@ -214,22 +226,6 @@
 		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
-		},
-		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "Envizi"
-		},
-		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
-			"type": "bool",
-			"defaultValue": false
 		}
 	},
 	"variables": {
@@ -269,6 +265,49 @@
 							],
 							"hours": [
 								19
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GIS_SDPROC_Weekly_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_GIS_Source_To_ASQL_SQLServer",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('GIS_SDPROC_Weekly_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('GIS_SDPROC_Weekly_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('GIS_SDPROC_Weekly_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Week",
+						"interval": 1,
+						"startTime": "2023-01-31T19:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								1
+							],
+							"weekDays": [
+								"Tuesday"
 							]
 						}
 					}
@@ -975,47 +1014,6 @@
 							],
 							"hours": [
 								2
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Envizi_Monthly_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
-							"OnlyBlobtoASQL": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
-							"OnlySourceToBlob": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
-							"AllowPartialUpdateOfDiscovery": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Month",
-						"interval": 1,
-						"startTime": "2022-10-21T00:00:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"hours": [
-								5
-							],
-							"monthDays": [
-								1
 							]
 						}
 					}
