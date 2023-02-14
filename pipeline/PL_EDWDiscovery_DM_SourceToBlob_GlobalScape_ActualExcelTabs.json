@@ -1,9 +1,9 @@
 {
-	"name": "PL_EDWDiscovery_DM_SourceToBlob_GlobalScape_ExcelFile",
+	"name": "PL_EDWDiscovery_DM_SourceToBlob_GlobalScape_ActualExcelTabs",
 	"properties": {
 		"activities": [
 			{
-				"name": "GetIncrementalLoadTableList",
+				"name": "GetExcelWorkbookTableList",
 				"description": "Lookup activity to retrieve the list of partitions stored in the external control table.",
 				"type": "Lookup",
 				"dependsOn": [],
@@ -18,8 +18,15 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderStoredProcedureName": "[ETL].[usp_get_tablelist_by_sourceid]",
+						"sqlReaderStoredProcedureName": "[ETL].[usp_get_tablelist_by_sourceid_sourcefilename]",
 						"storedProcedureParameters": {
+							"SourceFileName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.ExcelConfigWorkbookName",
+									"type": "Expression"
+								}
+							},
 							"sourceid": {
 								"type": "Int32",
 								"value": {
@@ -43,7 +50,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "GetIncrementalLoadTableList",
+						"activity": "GetExcelWorkbookTableList",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -52,11 +59,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('GetIncrementalLoadTableList').output.value\n\n",
+						"value": "@activity('GetExcelWorkbookTableList').output.value\n\n",
 						"type": "Expression"
 					},
-					"isSequential": false,
-					"batchCount": 10,
+					"isSequential": true,
 					"activities": [
 						{
 							"name": "Framework_CopyFiletoBlob_Pipeline",
@@ -66,7 +72,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "PL_Framework_DM_SourcetoBlob_GlobalScape_ExcelFile",
+									"referenceName": "PL_Framework_DM_SourcetoBlob_GlobalScape_ActualExcelTab",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
@@ -96,7 +102,7 @@
 										"type": "Expression"
 									},
 									"Data_Destination_File_Name": {
-										"value": "@item().Data_Destination_File_Name",
+										"value": "@split(pipeline().parameters.ExcelActualWorkbookName,'.')[0]",
 										"type": "Expression"
 									},
 									"SourceServerName": {
@@ -152,15 +158,15 @@
 										"type": "Expression"
 									},
 									"SourceFileName": {
-										"value": "@item().SourceFileName",
+										"value": "@pipeline().parameters.ExcelActualWorkbookName",
 										"type": "Expression"
 									},
 									"SourceLandingContainer": {
 										"value": "@item().SourceLandingContainer",
 										"type": "Expression"
 									},
-									"SourceName": {
-										"value": "@item().SourceName",
+									"SourceFileFolderName": {
+										"value": "@item().FileFolderName",
 										"type": "Expression"
 									}
 								}
@@ -174,6 +180,14 @@
 			"SourceID": {
 				"type": "string",
 				"defaultValue": "3"
+			},
+			"ExcelConfigWorkbookName": {
+				"type": "string",
+				"defaultValue": "Bank_Details_Check*.xlsx"
+			},
+			"ExcelActualWorkbookName": {
+				"type": "string",
+				"defaultValue": "Bank_Details_Check_2023_02_08.xlsx"
 			}
 		},
 		"folder": {
