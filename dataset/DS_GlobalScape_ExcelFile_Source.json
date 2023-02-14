@@ -8,11 +8,15 @@
 		"parameters": {
 			"Filefolder": {
 				"type": "string",
-				"defaultValue": "Promaster"
+				"defaultValue": "NOPV"
 			},
 			"SheetName": {
 				"type": "string",
-				"defaultValue": "transactions_by_user"
+				"defaultValue": "Bank_Details_Check"
+			},
+			"FileName": {
+				"type": "string",
+				"defaultValue": "Bank_Details_Check_2023_02_08.xlsx"
 			}
 		},
 		"annotations": [],
@@ -24,6 +28,10 @@
 			},
 			"location": {
 				"type": "FileServerLocation",
+				"fileName": {
+					"value": "@dataset().FileName",
+					"type": "Expression"
+				},
 				"folderPath": {
 					"value": "@dataset().Filefolder",
 					"type": "Expression"

@@ -1,0 +1,55 @@
+{
+	"name": "Kantar_Monthly_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "Kantar",
+					"OnlyBlobtoASQL": true,
+					"OnlySourceToBlob": true,
+					"AllowPartialUpdateOfDiscovery": false,
+					"SynchupDeletedRecords": false
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2022-11-11T09:00:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						6
+					],
+					"monthDays": [
+						26,
+						27,
+						28,
+						29,
+						30,
+						31,
+						-1,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7
+					]
+				}
+			}
+		}
+	}
+}

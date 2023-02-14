@@ -1,0 +1,42 @@
+{
+	"name": "DS_ABLB_FS_Srclanding_Binary_File",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueaprddasrclanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"blobcontainer": {
+				"type": "string",
+				"defaultValue": "sharepoint-datalanding"
+			},
+			"blobfolderpath": {
+				"type": "string",
+				"defaultValue": "kantar-datalanding"
+			},
+			"blobfilename": {
+				"type": "string",
+				"defaultValue": "KANTAR Data File Example 250123.xlsx"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().blobfilename",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().blobfolderpath",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().blobcontainer",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}

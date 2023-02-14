@@ -1,0 +1,34 @@
+{
+	"name": "DS_ABLB_FS_GlobalScape_Binary_File",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_FS_Globalscape",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"GSfolderpath": {
+				"type": "string",
+				"defaultValue": "NOPV\\pre-prod"
+			},
+			"GSfilename": {
+				"type": "string",
+				"defaultValue": "Bank_Details_Check_2023_02_08.xlsx"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"fileName": {
+					"value": "@dataset().GSfilename",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().GSfolderpath",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}

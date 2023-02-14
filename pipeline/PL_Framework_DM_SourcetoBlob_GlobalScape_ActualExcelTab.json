@@ -1,5 +1,5 @@
 {
-	"name": "PL_Framework_DM_SourcetoBlob_Blob_ExcelFile",
+	"name": "PL_Framework_DM_SourcetoBlob_GlobalScape_ActualExcelTab",
 	"properties": {
 		"description": "Copy new or updated rows only from database using external control table",
 		"activities": [
@@ -24,9 +24,18 @@
 				"typeProperties": {
 					"source": {
 						"type": "ExcelSource",
+						"additionalColumns": [
+							{
+								"name": "Source_File_Name",
+								"value": {
+									"value": "@pipeline().parameters.SourceFileName",
+									"type": "Expression"
+								}
+							}
+						],
 						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true,
+							"type": "FileServerReadSettings",
+							"recursive": false,
 							"enablePartitionDiscovery": false
 						}
 					},
@@ -46,23 +55,19 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "DS_ExcelFile_Source",
+						"referenceName": "DS_GlobalScape_ExcelFile_Source",
 						"type": "DatasetReference",
 						"parameters": {
-							"DirectoryName": {
-								"value": "@pipeline().parameters.SourceFolderLocation",
-								"type": "Expression"
-							},
-							"FileName": {
-								"value": "@pipeline().parameters.SourceFileName",
+							"Filefolder": {
+								"value": "@pipeline().parameters.SourceFileFolderName",
 								"type": "Expression"
 							},
 							"SheetName": {
 								"value": "@pipeline().parameters.Data_Source_Table_Name",
 								"type": "Expression"
 							},
-							"ContainerName": {
-								"value": "@pipeline().parameters.SourceLandingContainer",
+							"FileName": {
+								"value": "@pipeline().parameters.SourceFileName",
 								"type": "Expression"
 							}
 						}
@@ -78,7 +83,7 @@
 								"type": "Expression"
 							},
 							"TargetFileName": {
-								"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1)\n,  concat(pipeline().parameters.Data_Destination_File_Name\n             ,'-'\n            , formatDateTime(convertFromUtc(activity('GetLastModifiedDate').output.lastModified,'E. Australia Standard Time'),'yyyyMMdd-HHmmss')\n             ,pipeline().parameters.File_Name_Ext)\n,\nconcat(\npipeline().parameters.Data_Destination_File_Name\n,pipeline().parameters.File_Name_Ext)\n)",
+								"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1)\n,  concat(pipeline().parameters.Data_Destination_File_Name, '_', pipeline().parameters.Data_Source_Table_Name\n             ,'-'\n            , formatDateTime(convertFromUtc(activity('GetLastModifiedDate').output.lastModified,'E. Australia Standard Time'),'yyyyMMdd-HHmmss')\n             ,pipeline().parameters.File_Name_Ext)\n,\nconcat(\npipeline().parameters.Data_Destination_File_Name, '_', pipeline().parameters.Data_Source_Table_Name\n,pipeline().parameters.File_Name_Ext)\n)",
 								"type": "Expression"
 							},
 							"ColumnDelimiter": {
@@ -142,23 +147,19 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "DS_ExcelFile_Source",
+						"referenceName": "DS_GlobalScape_ExcelFile_Source",
 						"type": "DatasetReference",
 						"parameters": {
-							"DirectoryName": {
-								"value": "@pipeline().parameters.SourceFolderLocation",
-								"type": "Expression"
-							},
-							"FileName": {
-								"value": "@pipeline().parameters.SourceFileName",
+							"Filefolder": {
+								"value": "@pipeline().parameters.SourceFileFolderName",
 								"type": "Expression"
 							},
 							"SheetName": {
 								"value": "@pipeline().parameters.Data_Source_Table_Name",
 								"type": "Expression"
 							},
-							"ContainerName": {
-								"value": "@pipeline().parameters.SourceLandingContainer",
+							"FileName": {
+								"value": "@pipeline().parameters.SourceFileName",
 								"type": "Expression"
 							}
 						}
@@ -167,7 +168,7 @@
 						"lastModified"
 					],
 					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
+						"type": "FileServerReadSettings",
 						"recursive": true
 					}
 				}
@@ -256,12 +257,17 @@
 			},
 			"SourceLandingContainer": {
 				"type": "string"
+			},
+			"SourceFileFolderName": {
+				"type": "string",
+				"defaultValue": "Ellipse9"
 			}
 		},
 		"folder": {
 			"name": "FrameWork"
 		},
-		"annotations": []
+		"annotations": [],
+		"lastPublishTime": "2022-04-27T05:48:51Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }
