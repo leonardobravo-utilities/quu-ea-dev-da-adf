@@ -136,6 +136,10 @@
 									"SourceID": {
 										"value": "@activity('Get Source ID').output.firstRow['SourceID']",
 										"type": "Expression"
+									},
+									"TriggerName": {
+										"value": "@if(equals(pipeline().parameters.TriggerName, ''), pipeline().TriggerName, pipeline().parameters.TriggerName)",
+										"type": "Expression"
 									}
 								}
 							}
@@ -275,15 +279,15 @@
 		"parameters": {
 			"SourceName": {
 				"type": "string",
-				"defaultValue": "HiAffinity"
+				"defaultValue": "Kantar"
 			},
 			"OnlySourceToBlob": {
 				"type": "bool",
-				"defaultValue": false
+				"defaultValue": true
 			},
 			"OnlyBlobtoASQL": {
 				"type": "bool",
-				"defaultValue": false
+				"defaultValue": true
 			},
 			"AllowPartialUpdateOfDiscovery": {
 				"type": "bool",
@@ -294,7 +298,11 @@
 			},
 			"SynchupDeletedRecords": {
 				"type": "bool",
-				"defaultValue": true
+				"defaultValue": false
+			},
+			"TriggerName": {
+				"type": "string",
+				"defaultValue": "Kantar_Monthly_Trigger"
 			}
 		},
 		"variables": {
