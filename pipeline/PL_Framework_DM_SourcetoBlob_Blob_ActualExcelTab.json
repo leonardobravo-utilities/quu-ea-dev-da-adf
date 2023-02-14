@@ -152,7 +152,25 @@
 				"typeProperties": {
 					"dataset": {
 						"referenceName": "DS_Blob_ExcelFile_Source",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"DirectoryName": {
+								"value": "@pipeline().parameters.SourceFileFolderName",
+								"type": "Expression"
+							},
+							"FileName": {
+								"value": "@pipeline().parameters.SourceFileName",
+								"type": "Expression"
+							},
+							"SheetName": {
+								"value": "@pipeline().parameters.Data_Source_Table_Name",
+								"type": "Expression"
+							},
+							"ContainerName": {
+								"value": "@pipeline().parameters.SourceLandingContainer",
+								"type": "Expression"
+							}
+						}
 					},
 					"fieldList": [
 						"lastModified"
