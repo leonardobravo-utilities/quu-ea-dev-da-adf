@@ -1,0 +1,513 @@
+{
+	"name": "PL_EDWDiscovery_DM_SourceToBlob_Blob_ActualExcelWorkbooks",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEachTable",
+				"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "lkp_Sort_srcLanding_Collection",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('lkp_Sort_srcLanding_Collection').output.value\n",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Excel File",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Set ActualExcelFileName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@and(startswith(toLower(item().FileName),toLower(\n    replace(pipeline().parameters.ConfigSourceFileName, '*', '')\n    ))\n,endswith(toLower(item().FileName),toLower(pipeline().parameters.ConfigSourceFileNameExt)))",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "Copy to Archive_Empty",
+										"description": "Full Copy from source table into blob storage",
+										"type": "Copy",
+										"dependsOn": [
+											{
+												"activity": "lkp_getlocaltime_Empty",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "BinarySource",
+												"storeSettings": {
+													"type": "AzureBlobStorageReadSettings",
+													"recursive": false,
+													"deleteFilesAfterCompletion": false
+												},
+												"formatSettings": {
+													"type": "BinaryReadSettings"
+												}
+											},
+											"sink": {
+												"type": "BinarySink",
+												"storeSettings": {
+													"type": "AzureBlobStorageWriteSettings"
+												}
+											},
+											"enableStaging": false,
+											"dataIntegrationUnits": 0
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_ABLB_FS_Srclanding_Binary_File",
+												"type": "DatasetReference",
+												"parameters": {
+													"blobcontainer": {
+														"value": "@pipeline().parameters.SourceLandingContainer",
+														"type": "Expression"
+													},
+													"blobfolderpath": {
+														"value": "@pipeline().parameters.FileFolderName",
+														"type": "Expression"
+													},
+													"blobfilename": {
+														"value": "@item().FileName",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_ABLB_FS_Srclanding_Binary_File",
+												"type": "DatasetReference",
+												"parameters": {
+													"blobcontainer": {
+														"value": "@pipeline().parameters.SourceLandingContainer",
+														"type": "Expression"
+													},
+													"blobfolderpath": {
+														"value": "@concat(pipeline().parameters.FileFolderName, '/Archived')",
+														"type": "Expression"
+													},
+													"blobfilename": {
+														"value": "@concat(variables('ActualExcelFileNameWithoutExt') \n    ,'-'\n            ,activity('lkp_getlocaltime_Empty').output.firstRow.localstarttime, '.'\n             ,pipeline().parameters.ConfigSourceFileNameExt)",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "Delete files from Blob_Empty",
+										"type": "Delete",
+										"dependsOn": [
+											{
+												"activity": "Copy to Archive_Empty",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"dataset": {
+												"referenceName": "DS_ABLB_FS_Srclanding_Binary_File",
+												"type": "DatasetReference",
+												"parameters": {
+													"blobcontainer": {
+														"value": "@pipeline().parameters.SourceLandingContainer",
+														"type": "Expression"
+													},
+													"blobfolderpath": {
+														"value": "@pipeline().parameters.FileFolderName",
+														"type": "Expression"
+													},
+													"blobfilename": {
+														"value": "@item().FileName",
+														"type": "Expression"
+													}
+												}
+											},
+											"enableLogging": false,
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": false,
+												"enablePartitionDiscovery": false
+											}
+										}
+									},
+									{
+										"name": "lkp_getlocaltime_Empty",
+										"type": "Lookup",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "SqlMISource",
+												"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime",
+												"partitionOption": "None"
+											},
+											"dataset": {
+												"referenceName": "DS_ASQL_EDWDiscovery",
+												"type": "DatasetReference"
+											}
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "Execute DM_SourcetoBlob_Blob_ActualExcelWorkTabs",
+										"description": "Execute copy file to blob storage pipeline",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"waitOnCompletion": true,
+											"parameters": {
+												"SourceID": {
+													"value": "@pipeline().parameters.SourceID",
+													"type": "Expression"
+												},
+												"ExcelConfigWorkbookName": {
+													"value": "@pipeline().parameters.ConfigSourceFileNameWithExt",
+													"type": "Expression"
+												},
+												"ExcelActualWorkbookName": {
+													"value": "@item().FileName",
+													"type": "Expression"
+												}
+											}
+										}
+									},
+									{
+										"name": "Copy to Archive",
+										"description": "Full Copy from source table into blob storage",
+										"type": "Copy",
+										"dependsOn": [
+											{
+												"activity": "lkp_getlocaltime",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "BinarySource",
+												"storeSettings": {
+													"type": "AzureBlobStorageReadSettings",
+													"recursive": false,
+													"deleteFilesAfterCompletion": false
+												},
+												"formatSettings": {
+													"type": "BinaryReadSettings"
+												}
+											},
+											"sink": {
+												"type": "BinarySink",
+												"storeSettings": {
+													"type": "AzureBlobStorageWriteSettings"
+												}
+											},
+											"enableStaging": false,
+											"dataIntegrationUnits": 0
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_ABLB_FS_Srclanding_Binary_File",
+												"type": "DatasetReference",
+												"parameters": {
+													"blobcontainer": {
+														"value": "@pipeline().parameters.SourceLandingContainer",
+														"type": "Expression"
+													},
+													"blobfolderpath": {
+														"value": "@pipeline().parameters.FileFolderName",
+														"type": "Expression"
+													},
+													"blobfilename": {
+														"value": "@item().FileName",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_ABLB_FS_Srclanding_Binary_File",
+												"type": "DatasetReference",
+												"parameters": {
+													"blobcontainer": {
+														"value": "@pipeline().parameters.SourceLandingContainer",
+														"type": "Expression"
+													},
+													"blobfolderpath": {
+														"value": "@concat(pipeline().parameters.FileFolderName, '/Archived')",
+														"type": "Expression"
+													},
+													"blobfilename": {
+														"value": "@concat(variables('ActualExcelFileNameWithoutExt') \n    ,'-'\n            ,activity('lkp_getlocaltime').output.firstRow.localstarttime, '.'\n             ,pipeline().parameters.ConfigSourceFileNameExt)",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "Delete files from Blob",
+										"type": "Delete",
+										"dependsOn": [
+											{
+												"activity": "Copy to Archive",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"dataset": {
+												"referenceName": "DS_ABLB_FS_Srclanding_Binary_File",
+												"type": "DatasetReference",
+												"parameters": {
+													"blobcontainer": {
+														"value": "@pipeline().parameters.SourceLandingContainer",
+														"type": "Expression"
+													},
+													"blobfolderpath": {
+														"value": "@pipeline().parameters.FileFolderName",
+														"type": "Expression"
+													},
+													"blobfilename": {
+														"value": "@item().FileName",
+														"type": "Expression"
+													}
+												}
+											},
+											"enableLogging": false,
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": false,
+												"enablePartitionDiscovery": false
+											}
+										}
+									},
+									{
+										"name": "lkp_getlocaltime",
+										"type": "Lookup",
+										"dependsOn": [
+											{
+												"activity": "Execute DM_SourcetoBlob_Blob_ActualExcelWorkTabs",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "SqlMISource",
+												"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime",
+												"partitionOption": "None"
+											},
+											"dataset": {
+												"referenceName": "DS_ASQL_EDWDiscovery",
+												"type": "DatasetReference"
+											}
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "Set ActualExcelFileName",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ActualExcelFileNameWithoutExt",
+								"value": {
+									"value": "@split(item().FileName,'.')[0]",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "GetActualExcelWorkbooksList",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_FS_ABLB_srcLanding_Binary_FileExists",
+						"type": "DatasetReference",
+						"parameters": {
+							"blobcontainer": {
+								"value": "@pipeline().parameters.SourceLandingContainer",
+								"type": "Expression"
+							},
+							"blobfolderpath": {
+								"value": "@pipeline().parameters.FileFolderName",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "lkp_Sort_srcLanding_Collection",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "GetActualExcelWorkbooksList",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[ETL].[usp_sort_blob_file_name]",
+						"storedProcedureParameters": {
+							"json": {
+								"type": "String",
+								"value": {
+									"value": "@string(activity('GetActualExcelWorkbooksList').output)",
+									"type": "Expression"
+								}
+							}
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"parameters": {
+			"SourceID": {
+				"type": "string",
+				"defaultValue": "3"
+			},
+			"ConfigSourceFileName": {
+				"type": "string"
+			},
+			"ConfigSourceFileNameExt": {
+				"type": "string"
+			},
+			"SourceName": {
+				"type": "string"
+			},
+			"ConfigSourceFileNameWithExt": {
+				"type": "string"
+			},
+			"SourceLandingContainer": {
+				"type": "string"
+			},
+			"FileFolderName": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"ActualExcelFileNameWithoutExt": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "EDW_Discovery"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-27T05:48:52Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
