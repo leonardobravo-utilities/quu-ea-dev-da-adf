@@ -53,6 +53,30 @@
 					"enableStaging": false,
 					"dataIntegrationUnits": 0
 				},
+				"inputs": [
+					{
+						"referenceName": "DS_Blob_ExcelFile_Source",
+						"type": "DatasetReference",
+						"parameters": {
+							"DirectoryName": {
+								"value": "@pipeline().parameters.SourceFileFolderName",
+								"type": "Expression"
+							},
+							"FileName": {
+								"value": "@pipeline().parameters.SourceFileName",
+								"type": "Expression"
+							},
+							"SheetName": {
+								"value": "@pipeline().parameters.Data_Source_Table_Name",
+								"type": "Expression"
+							},
+							"ContainerName": {
+								"value": "@pipeline().parameters.SourceLandingContainer",
+								"type": "Expression"
+							}
+						}
+					}
+				],
 				"outputs": [
 					{
 						"referenceName": "DS_ABLB_Datalanding",
@@ -126,6 +150,28 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Blob_ExcelFile_Source",
+						"type": "DatasetReference",
+						"parameters": {
+							"DirectoryName": {
+								"value": "@pipeline().parameters.SourceFileFolderName",
+								"type": "Expression"
+							},
+							"FileName": {
+								"value": "@pipeline().parameters.SourceFileName",
+								"type": "Expression"
+							},
+							"SheetName": {
+								"value": "@pipeline().parameters.Data_Source_Table_Name",
+								"type": "Expression"
+							},
+							"ContainerName": {
+								"value": "@pipeline().parameters.SourceLandingContainer",
+								"type": "Expression"
+							}
+						}
+					},
 					"fieldList": [
 						"lastModified"
 					],
