@@ -378,6 +378,26 @@
 			"type": "string",
 			"defaultValue": "ICN"
 		},
+		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Kantar"
+		},
+		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords": {
+			"type": "bool",
+			"defaultValue": false
+		},
 		"LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name": {
 			"type": "string",
 			"defaultValue": "LIMS"
@@ -742,17 +762,11 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"LS_ASQL_EDWDiscovery_Dev_Test_connectionString": {
-						"value": "[parameters('LS_ASQL_EDWDiscovery_Dev_Test_connectionString')]"
-					},
 					"LS_API_properties_typeProperties_url": {
 						"value": "[parameters('LS_API_properties_typeProperties_url')]"
 					},
 					"LS_API_properties_typeProperties_userName": {
 						"value": "[parameters('LS_API_properties_typeProperties_userName')]"
-					},
-					"LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId": {
-						"value": "[parameters('LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId')]"
 					}
 				}
 			},
@@ -774,6 +788,9 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"LS_ASQL_EDWDiscovery_Dev_Test_connectionString": {
+						"value": "[parameters('LS_ASQL_EDWDiscovery_Dev_Test_connectionString')]"
+					},
 					"LS_MySQL_NetAppManagement_connectionString": {
 						"value": "[parameters('LS_MySQL_NetAppManagement_connectionString')]"
 					},
@@ -782,6 +799,9 @@
 					},
 					"LS_SQL_Framework_connectionString": {
 						"value": "[parameters('LS_SQL_Framework_connectionString')]"
+					},
+					"LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId": {
+						"value": "[parameters('LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId')]"
 					},
 					"LS_FS_Globalscape_properties_typeProperties_host": {
 						"value": "[parameters('LS_FS_Globalscape_properties_typeProperties_host')]"
@@ -873,9 +893,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"Liwis_DataModel_Daily_Trigger_properties_PL_EDW_Mart_LIWIS_parameters_sourcename": {
-						"value": "[parameters('Liwis_DataModel_Daily_Trigger_properties_PL_EDW_Mart_LIWIS_parameters_sourcename')]"
 					}
 				}
 			},
@@ -896,6 +913,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"Liwis_DataModel_Daily_Trigger_properties_PL_EDW_Mart_LIWIS_parameters_sourcename": {
+						"value": "[parameters('Liwis_DataModel_Daily_Trigger_properties_PL_EDW_Mart_LIWIS_parameters_sourcename')]"
 					}
 				}
 			},
@@ -942,12 +962,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName": {
-						"value": "[parameters('ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName')]"
-					},
-					"QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_globalscape_parameters_FileExportName": {
-						"value": "[parameters('QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_globalscape_parameters_FileExportName')]"
 					}
 				}
 			},
@@ -968,6 +982,12 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName": {
+						"value": "[parameters('ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName')]"
+					},
+					"QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_globalscape_parameters_FileExportName": {
+						"value": "[parameters('QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_globalscape_parameters_FileExportName')]"
 					}
 				}
 			},
@@ -1090,6 +1110,26 @@
 					},
 					"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname": {
 						"value": "[parameters('Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_8')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_10",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_10.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"Chloroclam_Daily_Trigger_properties_PL_Evoqua_Main_parameters_SourceName": {
 						"value": "[parameters('Chloroclam_Daily_Trigger_properties_PL_Evoqua_Main_parameters_SourceName')]"
@@ -1129,26 +1169,6 @@
 					},
 					"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_8')]"
-			]
-		},
-		{
-			"name": "quu-ea-prd-da-adf-001_ArmTemplate_10",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_10.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName": {
 						"value": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_SQLServer_parameters_SourceName')]"
@@ -1266,6 +1286,26 @@
 					},
 					"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_9')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_11",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_11.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
 						"value": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName')]"
@@ -1294,6 +1334,15 @@
 					"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
 					},
+					"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_SourceName": {
+						"value": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_SourceName')]"
+					},
+					"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlySourceToBlob": {
+						"value": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlySourceToBlob')]"
+					},
+					"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL')]"
+					},
 					"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 						"value": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
 					},
@@ -1306,35 +1355,6 @@
 					"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
 						"value": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
 					},
-					"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_SourceName": {
-						"value": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_SourceName')]"
-					},
-					"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlySourceToBlob": {
-						"value": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlySourceToBlob')]"
-					},
-					"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_9')]"
-			]
-		},
-		{
-			"name": "quu-ea-prd-da-adf-001_ArmTemplate_11",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_11.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
-					},
 					"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 						"value": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
 					},
@@ -1346,6 +1366,21 @@
 					},
 					"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
 						"value": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords')]"
 					},
 					"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 						"value": "[parameters('NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
