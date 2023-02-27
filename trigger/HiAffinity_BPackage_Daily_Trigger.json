@@ -1,0 +1,43 @@
+{
+	"name": "HiAffinity_BPackage_Daily_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EDWDiscovery_DM_SourceToASQL_HiAffinity",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"TargetServerName": "PRDC04-SQL",
+					"TargetDatabaseName": "EDW_Discovery",
+					"TargetUserName": "urbanutilities\\svc-EBI_PRDC04_AGT",
+					"TargetSecretPasswordName": "SVC-EBI-PRDC04-AGT",
+					"SourceHostName": "hcxdbprdmir.corporate.urbanutilities.internal",
+					"SourcePortNo": "1901",
+					"SourceSID": "HCXPRD",
+					"SourceUserName": "ebi_hiaffinity_user",
+					"SourceSecretPasswordName": "Hiaffinity-PRD-Password"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-11-11T09:00:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						5
+					]
+				}
+			}
+		}
+	}
+}
