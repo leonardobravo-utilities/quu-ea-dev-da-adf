@@ -374,6 +374,42 @@
 			"type": "bool",
 			"defaultValue": true
 		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetServerName": {
+			"type": "string",
+			"defaultValue": "PRDC04-SQL"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetDatabaseName": {
+			"type": "string",
+			"defaultValue": "EDW_Discovery"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetUserName": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetSecretPasswordName": {
+			"type": "string",
+			"defaultValue": "SVC-EBI-PRDC04-AGT"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceHostName": {
+			"type": "string",
+			"defaultValue": "hcxdbprdmir.corporate.urbanutilities.internal"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourcePortNo": {
+			"type": "string",
+			"defaultValue": "1901"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceSID": {
+			"type": "string",
+			"defaultValue": "HCXPRD"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceUserName": {
+			"type": "string",
+			"defaultValue": "ebi_hiaffinity_user"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceSecretPasswordName": {
+			"type": "string",
+			"defaultValue": "Hiaffinity-PRD-Password"
+		},
 		"ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName": {
 			"type": "string",
 			"defaultValue": "ICN"
@@ -3891,6 +3927,245 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_DM_SourcetoBlob_File')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_DM_SourceToASQL_HiAffinity')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CopyEachTableData",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetTableLists",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetTableLists').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "CopyHAData",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"additionalColumns": [
+												{
+													"name": "ROW_CREATED_DTM",
+													"value": {
+														"value": "@formatDateTime(convertTimeZone(pipeline().TriggerTime,'UTC','E. Australia Standard Time'), 'yyyy-MMM-dd hh:mm:ss tt')",
+														"type": "Expression"
+													}
+												}
+											],
+											"oracleReaderQuery": {
+												"value": "@{concat('select * from ', item().SourceSchemaName, '.', item().TableName)}",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"convertDecimalToInteger": false,
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "SqlServerSink",
+											"writeBatchTimeout": "15:00:00",
+											"preCopyScript": {
+												"value": "@{concat('truncate table ', item().TargetSchemaName, '.', item().TableName)}",
+												"type": "Expression"
+											},
+											"writeBehavior": "insert",
+											"sqlWriterUseTableLock": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Oracle_OnPrem",
+											"type": "DatasetReference",
+											"parameters": {
+												"HostName": {
+													"value": "@pipeline().parameters.SourceHostName",
+													"type": "Expression"
+												},
+												"PortNo": {
+													"value": "@pipeline().parameters.SourcePortNo",
+													"type": "Expression"
+												},
+												"SID": {
+													"value": "@pipeline().parameters.SourceSID",
+													"type": "Expression"
+												},
+												"UserName": {
+													"value": "@pipeline().parameters.SourceUserName",
+													"type": "Expression"
+												},
+												"SecretPasswordName": {
+													"value": "@pipeline().parameters.SourceSecretPasswordName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_SQL_EDWDiscovery_OnPrem_Table",
+											"type": "DatasetReference",
+											"parameters": {
+												"ServerName": {
+													"value": "@pipeline().parameters.TargetServerName",
+													"type": "Expression"
+												},
+												"DatabaseName": {
+													"value": "@pipeline().parameters.TargetDatabaseName",
+													"type": "Expression"
+												},
+												"UserName": {
+													"value": "@pipeline().parameters.TargetUserName",
+													"type": "Expression"
+												},
+												"SecretPasswordName": {
+													"value": "@pipeline().parameters.TargetSecretPasswordName",
+													"type": "Expression"
+												},
+												"SchemaName": {
+													"value": "@item().TargetSchemaName",
+													"type": "Expression"
+												},
+												"TableName": {
+													"value": "@item().TableName",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "GetTableLists",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT 'custima' AS SourceSchemaName, 'BPACKAGE' AS TableName, 'HiAffinity' AS TargetSchemaName",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_SQL_EDWDiscovery_OnPrem",
+								"type": "DatasetReference",
+								"parameters": {
+									"ServerName": {
+										"value": "@pipeline().parameters.TargetServerName",
+										"type": "Expression"
+									},
+									"DatabaseName": {
+										"value": "@pipeline().parameters.TargetDatabaseName",
+										"type": "Expression"
+									},
+									"UserName": {
+										"value": "@pipeline().parameters.TargetUserName",
+										"type": "Expression"
+									},
+									"SecretPasswordName": {
+										"value": "@pipeline().parameters.TargetSecretPasswordName",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"TargetServerName": {
+						"type": "string",
+						"defaultValue": "NFUJDEV052"
+					},
+					"TargetDatabaseName": {
+						"type": "string",
+						"defaultValue": "EDW_Discovery"
+					},
+					"TargetUserName": {
+						"type": "string",
+						"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
+					},
+					"TargetSecretPasswordName": {
+						"type": "string",
+						"defaultValue": "SVC-EBI-PRDC04-AGT"
+					},
+					"SourceHostName": {
+						"type": "string",
+						"defaultValue": "hcxdbprdmir.corporate.urbanutilities.internal"
+					},
+					"SourcePortNo": {
+						"type": "string",
+						"defaultValue": "1901"
+					},
+					"SourceSID": {
+						"type": "string",
+						"defaultValue": "HCXPRD"
+					},
+					"SourceUserName": {
+						"type": "string",
+						"defaultValue": "ebi_hiaffinity_user"
+					},
+					"SourceSecretPasswordName": {
+						"type": "string",
+						"defaultValue": "Hiaffinity-PRD-Password"
+					}
+				},
+				"folder": {
+					"name": "EDW_Discovery"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_EDWDiscovery_OnPrem')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Oracle_OnPrem')]",
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_EDWDiscovery_OnPrem_Table')]"
 			]
 		},
 		{
@@ -30863,6 +31138,80 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_EDWDiscovery_OnPrem_Table')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQL_Framework",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"Servername": {
+							"value": "@dataset().ServerName",
+							"type": "Expression"
+						},
+						"Databasename": {
+							"value": "@dataset().DatabaseName",
+							"type": "Expression"
+						},
+						"SecretPasswordName": {
+							"value": "@dataset().SecretPasswordName",
+							"type": "Expression"
+						},
+						"UserName": {
+							"value": "@dataset().UserName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"ServerName": {
+						"type": "string",
+						"defaultValue": "NFUJDEV052"
+					},
+					"DatabaseName": {
+						"type": "string",
+						"defaultValue": "EDW_Discovery"
+					},
+					"UserName": {
+						"type": "string",
+						"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
+					},
+					"SecretPasswordName": {
+						"type": "string",
+						"defaultValue": "SVC-EBI-PRDC04-AGT"
+					},
+					"SchemaName": {
+						"type": "string",
+						"defaultValue": "HiAffinity"
+					},
+					"TableName": {
+						"type": "string",
+						"defaultValue": "BPACKAGE"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().SchemaName",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_SQL_Framework')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_SQL_ELLIPSE_ANALYTICS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -32458,6 +32807,54 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_GIS_Source_To_ASQL_Oracle')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/HiAffinity_BPackage_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_DM_SourceToASQL_HiAffinity",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"TargetServerName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetServerName')]",
+							"TargetDatabaseName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetDatabaseName')]",
+							"TargetUserName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetUserName')]",
+							"TargetSecretPasswordName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetSecretPasswordName')]",
+							"SourceHostName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceHostName')]",
+							"SourcePortNo": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourcePortNo')]",
+							"SourceSID": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceSID')]",
+							"SourceUserName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceUserName')]",
+							"SourceSecretPasswordName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceSecretPasswordName')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-11-11T09:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								5
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToASQL_HiAffinity')]"
 			]
 		},
 		{
