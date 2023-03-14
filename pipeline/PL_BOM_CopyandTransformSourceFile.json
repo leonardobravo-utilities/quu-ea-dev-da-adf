@@ -42,7 +42,15 @@
 							"fileExtension": ".csv"
 						}
 					},
-					"enableStaging": false
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
 				},
 				"inputs": [
 					{
@@ -62,13 +70,10 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DS_ABLB_FS_Dataloading",
+						"referenceName": "DS_ABLB_FS_SUMS",
 						"type": "DatasetReference",
 						"parameters": {
-							"targetblobfoldername": {
-								"value": "@concat('bom-datalanding/',pipeline().parameters.STATION_POINT_NAME)",
-								"type": "Expression"
-							}
+							"targetblobfoldername": "@concat('bom-datalanding/',pipeline().parameters.STATION_POINT_NAME)"
 						}
 					}
 				]
