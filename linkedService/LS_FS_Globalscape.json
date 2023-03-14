@@ -1,10 +1,16 @@
 {
 	"name": "LS_FS_Globalscape",
 	"properties": {
+		"parameters": {
+			"p_ServerPath": {
+				"type": "string",
+				"defaultValue": "\\\\Nfujprd310\\ebi_prod_landing"
+			}
+		},
 		"annotations": [],
 		"type": "FileServer",
 		"typeProperties": {
-			"host": "\\\\nfujprd310\\EBI_PROD_LANDING",
+			"host": "@{linkedService().p_ServerPath}",
 			"userId": "urbanutilities\\SVC-EBI_PRDC04_AGT",
 			"password": {
 				"type": "AzureKeyVaultSecret",
