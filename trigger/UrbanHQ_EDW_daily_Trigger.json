@@ -1,18 +1,21 @@
 {
-	"name": "UrbanHQ_daily_Trigger",
+	"name": "UrbanHQ_EDW_daily_Trigger",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "PL_UrbanHQ_Main",
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
 					"type": "PipelineReference"
 				},
 				"parameters": {
 					"SourceName": "UrbanHQ",
 					"OnlySourceToBlob": true,
-					"OnlyBlobtoASQL": true
+					"OnlyBlobtoASQL": true,
+					"AllowPartialUpdateOfDiscovery": false,
+					"SynchupDeletedRecords": true,
+					"TriggerName": "UrbanHQ_Daily_Trigger"
 				}
 			}
 		],
@@ -21,11 +24,14 @@
 			"recurrence": {
 				"frequency": "Day",
 				"interval": 1,
-				"startTime": "2021-06-05T06:00:00",
+				"startTime": "2023-02-08T00:53:00",
 				"timeZone": "E. Australia Standard Time",
 				"schedule": {
+					"minutes": [
+						0
+					],
 					"hours": [
-						2
+						23
 					]
 				}
 			}

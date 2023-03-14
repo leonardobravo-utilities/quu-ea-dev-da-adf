@@ -22,7 +22,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"p_FileFolder": {
-								"value": "@pipeline().parameters.SourceFolderLocation",
+								"value": "@pipeline().parameters.FileFolderName",
 								"type": "Expression"
 							},
 							"p_FileName": {
@@ -84,6 +84,12 @@
 									"dependencyConditions": [
 										"Succeeded"
 									]
+								},
+								{
+									"activity": "lkp_getlocalstarttime",
+									"dependencyConditions": [
+										"Succeeded"
+									]
 								}
 							],
 							"userProperties": [],
@@ -128,7 +134,15 @@
 													"fileExtension": ".csv"
 												}
 											},
-											"enableStaging": false
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
 										},
 										"inputs": [
 											{
@@ -136,7 +150,7 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"filefolder": {
-														"value": "@pipeline().parameters.SourceFolderLocation",
+														"value": "@pipeline().parameters.FileFolderName",
 														"type": "Expression"
 													},
 													"filename": {
@@ -152,53 +166,12 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"filefolder": {
-														"value": "@{concat(pipeline().parameters.SourceFolderLocation, '\\Archive')}",
+														"value": "@{concat(pipeline().parameters.FileFolderName, '\\Archive')}",
 														"type": "Expression"
 													}
 												}
 											}
 										]
-									},
-									{
-										"name": "DeleteSourceFile_Empty",
-										"type": "Delete",
-										"dependsOn": [
-											{
-												"activity": "CopyFileToArchive_Empty",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"dataset": {
-												"referenceName": "DS_FS_GlobalScape_SUMS_Source",
-												"type": "DatasetReference",
-												"parameters": {
-													"filefolder": {
-														"value": "@pipeline().parameters.SourceFolderLocation",
-														"type": "Expression"
-													},
-													"filename": {
-														"value": "@variables('FileName')",
-														"type": "Expression"
-													}
-												}
-											},
-											"enableLogging": false,
-											"storeSettings": {
-												"type": "FileServerReadSettings",
-												"recursive": false
-											}
-										}
 									}
 								],
 								"ifTrueActivities": [
@@ -238,7 +211,15 @@
 												}
 											},
 											"enableStaging": false,
-											"dataIntegrationUnits": 2
+											"dataIntegrationUnits": 2,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
 										},
 										"inputs": [
 											{
@@ -246,7 +227,7 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"filefolder": {
-														"value": "@pipeline().parameters.SourceFolderLocation",
+														"value": "@pipeline().parameters.FileFolderName",
 														"type": "Expression"
 													},
 													"filename": {
@@ -258,19 +239,17 @@
 										],
 										"outputs": [
 											{
-												"referenceName": "DS_ABLB_FS_SUMS",
+												"referenceName": "DS_ABLB_FS_Dataloading",
 												"type": "DatasetReference",
 												"parameters": {
-													"targetblobfoldername": {
-														"value": "@replace(pipeline().parameters.Data_Destination_Folder_Path, 'ETL_READY/', '')",
-														"type": "Expression"
-													}
+													"targetblobfoldername": "@replace(pipeline().parameters.Data_Destination_Folder_Path, 'ETL_READY/', '')"
 												}
 											}
 										]
 									},
 									{
 										"name": "Archive_Data",
+										"description": "The archive activity file should take the particular instance of the file and copy it to an archive folder, adding a timestamp if required/configured in metadata.",
 										"type": "Copy",
 										"dependsOn": [
 											{
@@ -311,7 +290,15 @@
 													"fileExtension": ".csv"
 												}
 											},
-											"enableStaging": false
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
 										},
 										"inputs": [
 											{
@@ -319,7 +306,7 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"filefolder": {
-														"value": "@pipeline().parameters.SourceFolderLocation",
+														"value": "@pipeline().parameters.FileFolderName",
 														"type": "Expression"
 													},
 													"filename": {
@@ -335,53 +322,12 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"filefolder": {
-														"value": "@{concat(pipeline().parameters.SourceFolderLocation, '\\Archive')}",
+														"value": "@{concat(pipeline().parameters.FileFolderName, '\\Archive')}",
 														"type": "Expression"
 													}
 												}
 											}
 										]
-									},
-									{
-										"name": "Delete_Old_From_GS",
-										"type": "Delete",
-										"dependsOn": [
-											{
-												"activity": "Archive_Data",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"dataset": {
-												"referenceName": "DS_FS_GlobalScape_SUMS_Source",
-												"type": "DatasetReference",
-												"parameters": {
-													"filefolder": {
-														"value": "@pipeline().parameters.SourceFolderLocation",
-														"type": "Expression"
-													},
-													"filename": {
-														"value": "@variables('FileName')",
-														"type": "Expression"
-													}
-												}
-											},
-											"enableLogging": false,
-											"storeSettings": {
-												"type": "FileServerReadSettings",
-												"recursive": false
-											}
-										}
 									}
 								]
 							}
@@ -402,7 +348,7 @@
 							"typeProperties": {
 								"variableName": "processfile",
 								"value": {
-									"value": "@if(AND(greater(variables('FileSize'),'0'), contains(variables('FileName'),'.csv') ),true,false)",
+									"value": "@if(AND(greater(variables('FileSize'),'0'), contains(variables('FileName'),pipeline().parameters.File_Name_Ext) ),true,false)",
 									"type": "Expression"
 								}
 							}
@@ -432,7 +378,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"filefolder": {
-											"value": "@pipeline().parameters.SourceFolderLocation",
+											"value": "@pipeline().parameters.FileFolderName",
 											"type": "Expression"
 										},
 										"filename": {
@@ -471,6 +417,119 @@
 								"value": {
 									"value": "@string(activity('RetrieveFileSize').output.size)",
 									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Delete_After_Archiving",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "lkp_Delete_After_Archiving",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Copy_dataTocsvFile",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(activity('lkp_Delete_After_Archiving').output.firstRow.ParameterValue,'1')",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Delete_Old_From_GS",
+										"type": "Delete",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"dataset": {
+												"referenceName": "DS_FS_GlobalScape_SUMS_Source",
+												"type": "DatasetReference",
+												"parameters": {
+													"filefolder": {
+														"value": "@pipeline().parameters.FileFolderName",
+														"type": "Expression"
+													},
+													"filename": {
+														"value": "@variables('FileName')",
+														"type": "Expression"
+													}
+												}
+											},
+											"enableLogging": false,
+											"storeSettings": {
+												"type": "FileServerReadSettings",
+												"recursive": false
+											}
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "lkp_Delete_After_Archiving",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT ISNULL(\n(Select [ParameterValue]\nFROM [ETL].SourceTableParameter\t\nWHERE [TableID] =    '@{pipeline().parameters.TableID}'        \nAND [ParameterName] ='Delete_After_Archiving'), 1)\nas ParameterValue\n",
+										"type": "Expression"
+									},
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_ASQL_EDWDiscovery",
+									"type": "DatasetReference"
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "lkp_getlocalstarttime",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlMISource",
+									"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_ASQL_EDWDiscovery",
+									"type": "DatasetReference"
 								}
 							}
 						}
@@ -672,7 +731,7 @@
 		"parameters": {
 			"Data_Source_Table_Name": {
 				"type": "String",
-				"defaultValue": "dbo.MSF660"
+				"defaultValue": "UrbanHQ.reference_month_year_sort"
 			},
 			"Data_Source_WaterMarkColumn": {
 				"type": "String",
@@ -692,7 +751,7 @@
 			},
 			"TableID": {
 				"type": "string",
-				"defaultValue": "1"
+				"defaultValue": "6641"
 			},
 			"Data_Destination_File_Name": {
 				"type": "string",
@@ -745,16 +804,19 @@
 				"type": "string"
 			},
 			"SourceFolderLocation": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "\\\\NFUJPRD202\\GDrive"
 			},
 			"SourceFileName": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "UU EDW Reference Month Year Sort*.csv"
 			},
 			"SourceLandingContainer": {
 				"type": "string"
 			},
 			"SourceName": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "\"UrbanHQ\""
 			},
 			"DatabricksClusterId": {
 				"type": "string"
@@ -763,10 +825,15 @@
 				"type": "string"
 			},
 			"SourceTableName": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "reference_month_year_sort.csv"
 			},
 			"IsInitialLoad": {
 				"type": "string"
+			},
+			"FileFolderName": {
+				"type": "string",
+				"defaultValue": "HRIS_WorkDay_Reports"
 			}
 		},
 		"variables": {

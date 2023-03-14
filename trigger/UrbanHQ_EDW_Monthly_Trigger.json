@@ -1,0 +1,44 @@
+{
+	"name": "UrbanHQ_EDW_Monthly_Trigger",
+	"properties": {
+		"description": "History Tables",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "UrbanHQ",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true,
+					"AllowPartialUpdateOfDiscovery": false,
+					"SynchupDeletedRecords": false,
+					"TriggerName": "UrbanHQ_Monthly_Trigger"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2023-01-30T22:57:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						6
+					],
+					"monthDays": [
+						-1
+					]
+				}
+			}
+		}
+	}
+}
