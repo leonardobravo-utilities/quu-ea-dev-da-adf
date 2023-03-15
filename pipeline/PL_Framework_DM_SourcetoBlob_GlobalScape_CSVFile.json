@@ -329,6 +329,14 @@
 													"filefolder": {
 														"value": "@{concat(pipeline().parameters.FileFolderName, '\\Archive')}",
 														"type": "Expression"
+													},
+													"server": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
+													},
+													"filename": {
+														"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1),\nconcat(replace(variables('FileName'),pipeline().parameters.File_Name_Ext, ''),'-',\nactivity('lkp_getlocalstarttime').output.firstRow.localstarttime2,pipeline().parameters.File_Name_Ext),\nvariables('FileName'))",
+														"type": "Expression"
 													}
 												}
 											}
