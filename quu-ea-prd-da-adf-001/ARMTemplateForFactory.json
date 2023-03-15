@@ -14224,7 +14224,8 @@
 												"file": {
 													"value": "@item().TargetFileName",
 													"type": "Expression"
-												}
+												},
+												"server": "\\\\Nfujprd310\\ebi_prod_landing"
 											}
 										},
 										"fieldList": [
@@ -14329,7 +14330,8 @@
 															"file": {
 																"value": "@variables('FileName')",
 																"type": "Expression"
-															}
+															},
+															"server": "\\\\Nfujprd310\\ebi_prod_landing"
 														}
 													},
 													"fieldList": [
@@ -14396,7 +14398,8 @@
 															"file": {
 																"value": "@variables('FileName')",
 																"type": "Expression"
-															}
+															},
+															"server": "\\\\Nfujprd310\\ebi_prod_landing"
 														}
 													},
 													"fieldList": [
@@ -17925,6 +17928,10 @@
 									"p_FileName": {
 										"value": "@pipeline().parameters.SourceFileName",
 										"type": "Expression"
+									},
+									"p_ServerName": {
+										"value": "@pipeline().parameters.SourceFolderLocation",
+										"type": "Expression"
 									}
 								}
 							},
@@ -18306,6 +18313,10 @@
 												},
 												"filename": {
 													"value": "@variables('FileName')",
+													"type": "Expression"
+												},
+												"folderlocation": {
+													"value": "@pipeline().parameters.SourceFolderLocation",
 													"type": "Expression"
 												}
 											}
@@ -30090,7 +30101,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"p_FileFolder": {
@@ -30437,7 +30451,10 @@
 					"referenceName": "LS_FS_Globalscape",
 					"type": "LinkedServiceReference",
 					"parameters": {
-						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+						"p_ServerPath": {
+							"value": "@dataset().p_ServerName",
+							"type": "Expression"
+						}
 					}
 				},
 				"parameters": {
@@ -30445,6 +30462,9 @@
 						"type": "string"
 					},
 					"p_FileName": {
+						"type": "string"
+					},
+					"p_ServerName": {
 						"type": "string"
 					}
 				},
@@ -30480,7 +30500,10 @@
 					"referenceName": "LS_FS_Globalscape",
 					"type": "LinkedServiceReference",
 					"parameters": {
-						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+						"p_ServerPath": {
+							"value": "@dataset().server",
+							"type": "Expression"
+						}
 					}
 				},
 				"parameters": {
@@ -30488,6 +30511,9 @@
 						"type": "string"
 					},
 					"file": {
+						"type": "string"
+					},
+					"server": {
 						"type": "string"
 					}
 				},
@@ -30525,7 +30551,10 @@
 					"referenceName": "LS_FS_Globalscape",
 					"type": "LinkedServiceReference",
 					"parameters": {
-						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+						"p_ServerPath": {
+							"value": "@dataset().server",
+							"type": "Expression"
+						}
 					}
 				},
 				"parameters": {
@@ -30549,6 +30578,10 @@
 				"typeProperties": {
 					"location": {
 						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
 						"folderPath": {
 							"value": "@dataset().filefolder",
 							"type": "Expression"

@@ -331,6 +331,10 @@
 									"p_FileName": {
 										"value": "@pipeline().parameters.SourceFileName",
 										"type": "Expression"
+									},
+									"p_ServerName": {
+										"value": "@pipeline().parameters.SourceFolderLocation",
+										"type": "Expression"
 									}
 								}
 							},
@@ -712,6 +716,10 @@
 												},
 												"filename": {
 													"value": "@variables('FileName')",
+													"type": "Expression"
+												},
+												"folderlocation": {
+													"value": "@pipeline().parameters.SourceFolderLocation",
 													"type": "Expression"
 												}
 											}
