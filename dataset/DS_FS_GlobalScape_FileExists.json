@@ -5,7 +5,10 @@
 			"referenceName": "LS_FS_Globalscape",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+				"p_ServerPath": {
+					"value": "@dataset().p_ServerName",
+					"type": "Expression"
+				}
 			}
 		},
 		"parameters": {
@@ -13,6 +16,9 @@
 				"type": "string"
 			},
 			"p_FileName": {
+				"type": "string"
+			},
+			"p_ServerName": {
 				"type": "string"
 			}
 		},
