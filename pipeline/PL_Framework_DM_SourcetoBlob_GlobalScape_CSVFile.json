@@ -156,7 +156,8 @@
 													"filename": {
 														"value": "@variables('FileName')",
 														"type": "Expression"
-													}
+													},
+													"folderlocation": "\\\\Nfujprd310\\ebi_prod_landing"
 												}
 											}
 										],
@@ -168,7 +169,12 @@
 													"filefolder": {
 														"value": "@{concat(pipeline().parameters.FileFolderName, '\\Archive')}",
 														"type": "Expression"
-													}
+													},
+													"server": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
+													},
+													"filename": "@variables('FileName')"
 												}
 											}
 										]
