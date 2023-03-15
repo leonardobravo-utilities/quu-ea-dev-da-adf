@@ -76,7 +76,7 @@
 		},
 		"LS_FS_Globalscape_properties_typeProperties_host": {
 			"type": "string",
-			"defaultValue": "\\\\nfujprd310\\EBI_PROD_LANDING"
+			"defaultValue": "@{linkedService().p_ServerPath}"
 		},
 		"LS_FS_Globalscape_properties_typeProperties_userId": {
 			"type": "string",
@@ -657,6 +657,54 @@
 		"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_secret_name": {
 			"type": "string",
 			"defaultValue": "databricks-token"
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "UrbanHQ"
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "UrbanHQ_Monthly_Trigger"
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "UrbanHQ"
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "UrbanHQ_Daily_Trigger"
 		},
 		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName": {
 			"type": "string",
@@ -1625,7 +1673,15 @@
 									"fileExtension": ".csv"
 								}
 							},
-							"enableStaging": false
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
 						},
 						"inputs": [
 							{
@@ -1645,13 +1701,10 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "DS_ABLB_FS_Dataloading",
+								"referenceName": "DS_ABLB_FS_SUMS",
 								"type": "DatasetReference",
 								"parameters": {
-									"targetblobfoldername": {
-										"value": "@concat('bom-datalanding/',pipeline().parameters.STATION_POINT_NAME)",
-										"type": "Expression"
-									}
+									"targetblobfoldername": "@concat('bom-datalanding/',pipeline().parameters.STATION_POINT_NAME)"
 								}
 							}
 						]
@@ -1804,7 +1857,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_FS_FTP')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ABLB_FS_Dataloading')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ABLB_FS_SUMS')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_BOM_TRFM_BlobFile')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]"
 			]
@@ -6727,6 +6780,12 @@
 											"value": "@pipeline().parameters.SourceID",
 											"type": "Expression"
 										}
+									},
+									"TriggerName": {
+										"value": {
+											"value": "@pipeline().parameters.TriggerName",
+											"type": "Expression"
+										}
 									}
 								},
 								"partitionOption": "None"
@@ -6898,6 +6957,10 @@
 														"IsInitialLoad": {
 															"value": "@item().IsInitialLoad",
 															"type": "Expression"
+														},
+														"FileFolderName": {
+															"value": "@item().FileFolderName",
+															"type": "Expression"
 														}
 													}
 												}
@@ -6930,6 +6993,13 @@
 																"type": "Int32",
 																"value": {
 																	"value": "@item().TableID",
+																	"type": "Expression"
+																}
+															},
+															"TriggerName": {
+																"type": "String",
+																"value": {
+																	"value": "@pipeline().parameters.TriggerName",
 																	"type": "Expression"
 																}
 															}
@@ -7073,6 +7143,10 @@
 														"IsInitialLoad": {
 															"value": "@item().IsInitialLoad",
 															"type": "Expression"
+														},
+														"FileFolderName": {
+															"value": "@item().FileFolderName",
+															"type": "Expression"
 														}
 													}
 												}
@@ -7107,6 +7181,13 @@
 																	"value": "@item().TableID",
 																	"type": "Expression"
 																}
+															},
+															"TriggerName": {
+																"type": "String",
+																"value": {
+																	"value": "@pipeline().parameters.TriggerName",
+																	"type": "Expression"
+																}
 															}
 														},
 														"queryTimeout": "02:00:00",
@@ -7132,8 +7213,10 @@
 				},
 				"parameters": {
 					"SourceID": {
-						"type": "string",
-						"defaultValue": "3"
+						"type": "string"
+					},
+					"TriggerName": {
+						"type": "string"
 					}
 				},
 				"folder": {
@@ -8977,6 +9060,10 @@
 													"SourceID": {
 														"value": "@pipeline().parameters.SourceID",
 														"type": "Expression"
+													},
+													"TriggerName": {
+														"value": "@pipeline().parameters.TriggerName",
+														"type": "Expression"
 													}
 												}
 											}
@@ -9076,6 +9163,9 @@
 						"type": "string"
 					},
 					"Additional_MappingParam": {
+						"type": "string"
+					},
+					"TriggerName": {
 						"type": "string"
 					}
 				},
@@ -9329,6 +9419,10 @@
 											"Additional_MappingParam": {
 												"value": "@pipeline().parameters.Additional_MappingParam",
 												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
 											}
 										}
 									}
@@ -9564,8 +9658,7 @@
 						"defaultValue": false
 					},
 					"TriggerName": {
-						"type": "string",
-						"defaultValue": "Kantar_Monthly_Trigger"
+						"type": "string"
 					}
 				},
 				"variables": {
@@ -17826,7 +17919,7 @@
 								"type": "DatasetReference",
 								"parameters": {
 									"p_FileFolder": {
-										"value": "@pipeline().parameters.SourceFolderLocation",
+										"value": "@pipeline().parameters.FileFolderName",
 										"type": "Expression"
 									},
 									"p_FileName": {
@@ -17888,6 +17981,12 @@
 											"dependencyConditions": [
 												"Succeeded"
 											]
+										},
+										{
+											"activity": "lkp_getlocalstarttime",
+											"dependencyConditions": [
+												"Succeeded"
+											]
 										}
 									],
 									"userProperties": [],
@@ -17932,7 +18031,15 @@
 															"fileExtension": ".csv"
 														}
 													},
-													"enableStaging": false
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
 												},
 												"inputs": [
 													{
@@ -17940,11 +18047,15 @@
 														"type": "DatasetReference",
 														"parameters": {
 															"filefolder": {
-																"value": "@pipeline().parameters.SourceFolderLocation",
+																"value": "@pipeline().parameters.FileFolderName",
 																"type": "Expression"
 															},
 															"filename": {
 																"value": "@variables('FileName')",
+																"type": "Expression"
+															},
+															"folderlocation": {
+																"value": "@pipeline().parameters.SourceFolderLocation",
 																"type": "Expression"
 															}
 														}
@@ -17956,53 +18067,17 @@
 														"type": "DatasetReference",
 														"parameters": {
 															"filefolder": {
-																"value": "@{concat(pipeline().parameters.SourceFolderLocation, '\\Archive')}",
+																"value": "@{concat(pipeline().parameters.FileFolderName, '\\Archive')}",
 																"type": "Expression"
-															}
-														}
-													}
-												]
-											},
-											{
-												"name": "DeleteSourceFile_Empty",
-												"type": "Delete",
-												"dependsOn": [
-													{
-														"activity": "CopyFileToArchive_Empty",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"dataset": {
-														"referenceName": "DS_FS_GlobalScape_SUMS_Source",
-														"type": "DatasetReference",
-														"parameters": {
-															"filefolder": {
+															},
+															"server": {
 																"value": "@pipeline().parameters.SourceFolderLocation",
 																"type": "Expression"
 															},
-															"filename": {
-																"value": "@variables('FileName')",
-																"type": "Expression"
-															}
+															"filename": "@variables('FileName')"
 														}
-													},
-													"enableLogging": false,
-													"storeSettings": {
-														"type": "FileServerReadSettings",
-														"recursive": false
 													}
-												}
+												]
 											}
 										],
 										"ifTrueActivities": [
@@ -18042,7 +18117,15 @@
 														}
 													},
 													"enableStaging": false,
-													"dataIntegrationUnits": 2
+													"dataIntegrationUnits": 2,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
 												},
 												"inputs": [
 													{
@@ -18050,11 +18133,15 @@
 														"type": "DatasetReference",
 														"parameters": {
 															"filefolder": {
-																"value": "@pipeline().parameters.SourceFolderLocation",
+																"value": "@pipeline().parameters.FileFolderName",
 																"type": "Expression"
 															},
 															"filename": {
 																"value": "@variables('FileName')",
+																"type": "Expression"
+															},
+															"folderlocation": {
+																"value": "@pipeline().parameters.SourceFolderLocation",
 																"type": "Expression"
 															}
 														}
@@ -18062,19 +18149,18 @@
 												],
 												"outputs": [
 													{
-														"referenceName": "DS_ABLB_FS_SUMS",
+														"referenceName": "DS_ABLB_FS_Dataloading",
 														"type": "DatasetReference",
 														"parameters": {
-															"targetblobfoldername": {
-																"value": "@replace(pipeline().parameters.Data_Destination_Folder_Path, 'ETL_READY/', '')",
-																"type": "Expression"
-															}
+															"targetblobfoldername": "@replace(pipeline().parameters.Data_Destination_Folder_Path, 'ETL_READY/', '')",
+															"targetFileName": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1), concat(replace(variables('FileName'),pipeline().parameters.File_Name_Ext, ''),'-', activity('lkp_getlocalstarttime').output.firstRow.localstarttime2,pipeline().parameters.File_Name_Ext), variables('FileName'))"
 														}
 													}
 												]
 											},
 											{
 												"name": "Archive_Data",
+												"description": "The archive activity file should take the particular instance of the file and copy it to an archive folder, adding a timestamp if required/configured in metadata.",
 												"type": "Copy",
 												"dependsOn": [
 													{
@@ -18115,7 +18201,15 @@
 															"fileExtension": ".csv"
 														}
 													},
-													"enableStaging": false
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
 												},
 												"inputs": [
 													{
@@ -18123,11 +18217,15 @@
 														"type": "DatasetReference",
 														"parameters": {
 															"filefolder": {
-																"value": "@pipeline().parameters.SourceFolderLocation",
+																"value": "@pipeline().parameters.FileFolderName",
 																"type": "Expression"
 															},
 															"filename": {
 																"value": "@variables('FileName')",
+																"type": "Expression"
+															},
+															"folderlocation": {
+																"value": "@pipeline().parameters.SourceFolderLocation",
 																"type": "Expression"
 															}
 														}
@@ -18139,53 +18237,20 @@
 														"type": "DatasetReference",
 														"parameters": {
 															"filefolder": {
-																"value": "@{concat(pipeline().parameters.SourceFolderLocation, '\\Archive')}",
+																"value": "@{concat(pipeline().parameters.FileFolderName, '\\Archive')}",
+																"type": "Expression"
+															},
+															"server": {
+																"value": "@pipeline().parameters.SourceFolderLocation",
+																"type": "Expression"
+															},
+															"filename": {
+																"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1),\nconcat(replace(variables('FileName'),pipeline().parameters.File_Name_Ext, ''),'-',\nactivity('lkp_getlocalstarttime').output.firstRow.localstarttime2,pipeline().parameters.File_Name_Ext),\nvariables('FileName'))",
 																"type": "Expression"
 															}
 														}
 													}
 												]
-											},
-											{
-												"name": "Delete_Old_From_GS",
-												"type": "Delete",
-												"dependsOn": [
-													{
-														"activity": "Archive_Data",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"dataset": {
-														"referenceName": "DS_FS_GlobalScape_SUMS_Source",
-														"type": "DatasetReference",
-														"parameters": {
-															"filefolder": {
-																"value": "@pipeline().parameters.SourceFolderLocation",
-																"type": "Expression"
-															},
-															"filename": {
-																"value": "@variables('FileName')",
-																"type": "Expression"
-															}
-														}
-													},
-													"enableLogging": false,
-													"storeSettings": {
-														"type": "FileServerReadSettings",
-														"recursive": false
-													}
-												}
 											}
 										]
 									}
@@ -18206,7 +18271,7 @@
 									"typeProperties": {
 										"variableName": "processfile",
 										"value": {
-											"value": "@if(AND(greater(variables('FileSize'),'0'), contains(variables('FileName'),'.csv') ),true,false)",
+											"value": "@if(AND(greater(variables('FileSize'),'0'), contains(variables('FileName'),pipeline().parameters.File_Name_Ext) ),true,false)",
 											"type": "Expression"
 										}
 									}
@@ -18236,7 +18301,7 @@
 											"type": "DatasetReference",
 											"parameters": {
 												"filefolder": {
-													"value": "@pipeline().parameters.SourceFolderLocation",
+													"value": "@pipeline().parameters.FileFolderName",
 													"type": "Expression"
 												},
 												"filename": {
@@ -18275,6 +18340,121 @@
 										"value": {
 											"value": "@string(activity('RetrieveFileSize').output.size)",
 											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Delete_After_Archiving",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "lkp_Delete_After_Archiving",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "Copy_dataTocsvFile",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(activity('lkp_Delete_After_Archiving').output.firstRow.ParameterValue,'1')",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Delete_Old_From_GS",
+												"type": "Delete",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataset": {
+														"referenceName": "DS_FS_GlobalScape_SUMS_Source",
+														"type": "DatasetReference",
+														"parameters": {
+															"filefolder": {
+																"value": "@pipeline().parameters.FileFolderName",
+																"type": "Expression"
+															},
+															"filename": {
+																"value": "@variables('FileName')",
+																"type": "Expression"
+															}
+														}
+													},
+													"enableLogging": false,
+													"storeSettings": {
+														"type": "FileServerReadSettings",
+														"recursive": false
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "lkp_Delete_After_Archiving",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "SELECT ISNULL(\n(Select [ParameterValue]\nFROM [ETL].SourceTableParameter\t\nWHERE [TableID] =    '@{pipeline().parameters.TableID}'        \nAND [ParameterName] ='Delete_After_Archiving'), 1)\nas ParameterValue\n",
+												"type": "Expression"
+											},
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_ASQL_EDWDiscovery",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"firstRowOnly": true
+									}
+								},
+								{
+									"name": "lkp_getlocalstarttime",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlMISource",
+											"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_ASQL_EDWDiscovery",
+											"type": "DatasetReference",
+											"parameters": {}
 										}
 									}
 								}
@@ -18482,7 +18662,7 @@
 				"parameters": {
 					"Data_Source_Table_Name": {
 						"type": "String",
-						"defaultValue": "dbo.MSF660"
+						"defaultValue": "UrbanHQ.reference_month_year_sort"
 					},
 					"Data_Source_WaterMarkColumn": {
 						"type": "String",
@@ -18502,7 +18682,7 @@
 					},
 					"TableID": {
 						"type": "string",
-						"defaultValue": "1"
+						"defaultValue": "6641"
 					},
 					"Data_Destination_File_Name": {
 						"type": "string",
@@ -18555,16 +18735,19 @@
 						"type": "string"
 					},
 					"SourceFolderLocation": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "\\\\NFUJPRD202\\GDrive"
 					},
 					"SourceFileName": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "UU EDW Reference Month Year Sort*.csv"
 					},
 					"SourceLandingContainer": {
 						"type": "string"
 					},
 					"SourceName": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "\"UrbanHQ\""
 					},
 					"DatabricksClusterId": {
 						"type": "string"
@@ -18573,10 +18756,15 @@
 						"type": "string"
 					},
 					"SourceTableName": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "reference_month_year_sort.csv"
 					},
 					"IsInitialLoad": {
 						"type": "string"
+					},
+					"FileFolderName": {
+						"type": "string",
+						"defaultValue": "HRIS_WorkDay_Reports"
 					}
 				},
 				"variables": {
@@ -18601,7 +18789,8 @@
 				"[concat(variables('factoryId'), '/datasets/DS_ABLB_FS_SUMS')]",
 				"[concat(variables('factoryId'), '/datasets/DS_FS_GlobalScape_SUMS_Source')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_DBR_ADF_Job_Cluster')]",
-				"[concat(variables('factoryId'), '/datasets/DS_FS_GlobalScape_SUMS')]"
+				"[concat(variables('factoryId'), '/datasets/DS_FS_GlobalScape_SUMS')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ABLB_FS_Dataloading')]"
 			]
 		},
 		{
@@ -29361,6 +29550,9 @@
 				"parameters": {
 					"targetblobfoldername": {
 						"type": "string"
+					},
+					"targetFileName": {
+						"type": "string"
 					}
 				},
 				"annotations": [],
@@ -29368,6 +29560,10 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().targetFileName",
+							"type": "Expression"
+						},
 						"container": {
 							"value": "@dataset().targetblobfoldername",
 							"type": "Expression"
@@ -29391,7 +29587,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"GSfolderpath": {
@@ -30067,7 +30266,10 @@
 				"description": "Archive folder in GlobalScape",
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"filefolder": {
@@ -30119,7 +30321,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"filefolder": {
@@ -30149,7 +30354,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"filefolder": {
@@ -30179,7 +30387,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"filefolder": {
@@ -30224,7 +30435,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"p_FileFolder": {
@@ -30264,7 +30478,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"filefolder": {
@@ -30306,12 +30523,22 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"filefolder": {
 						"type": "string",
-						"defaultValue": "\\\\Nfujprd200\\EBI_PROD_LANDING\\SUMS"
+						"defaultValue": "SUMS"
+					},
+					"server": {
+						"type": "string",
+						"defaultValue": "\\\\Nfujprd200\\EBI_PROD_LANDING"
+					},
+					"filename": {
+						"type": "string"
 					}
 				},
 				"folder": {
@@ -30364,7 +30591,13 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": {
+							"value": "@dataset().folderlocation",
+							"type": "Expression"
+						}
+					}
 				},
 				"parameters": {
 					"filefolder": {
@@ -30372,6 +30605,10 @@
 					},
 					"filename": {
 						"type": "string"
+					},
+					"folderlocation": {
+						"type": "string",
+						"defaultValue": "\\\\Nfujprd310\\ebi_prod_landing"
 					}
 				},
 				"folder": {
@@ -30409,7 +30646,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"p_FileFolder": {
@@ -30447,7 +30687,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"filefolder": {
@@ -30485,7 +30728,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"filefolder": {
@@ -30693,7 +30939,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"DirectoryName": {
@@ -30740,7 +30989,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"TargetFilePath": {
@@ -30878,7 +31130,10 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_FS_Globalscape",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
 				},
 				"parameters": {
 					"Filefolder": {
@@ -31490,6 +31745,12 @@
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"parameters": {
+					"p_ServerPath": {
+						"type": "string",
+						"defaultValue": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
 				"annotations": [],
 				"type": "FileServer",
 				"typeProperties": {
@@ -33834,12 +34095,106 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/UrbanHQ_daily_Trigger')]",
+			"name": "[concat(parameters('factoryName'), '/UrbanHQ_EDW_Monthly_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "History Tables",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"SynchupDeletedRecords": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords')]",
+							"TriggerName": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Month",
+						"interval": 1,
+						"startTime": "2023-01-30T22:57:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								6
+							],
+							"monthDays": [
+								-1
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/UrbanHQ_EDW_daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
 				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"SynchupDeletedRecords": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords')]",
+							"TriggerName": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-02-08T00:53:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								23
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/UrbanHQ_daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {

@@ -202,6 +202,9 @@
 				"parameters": {
 					"targetblobfoldername": {
 						"type": "string"
+					},
+					"targetFileName": {
+						"type": "string"
 					}
 				},
 				"annotations": [],
@@ -209,6 +212,10 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().targetFileName",
+							"type": "Expression"
+						},
 						"container": {
 							"value": "@dataset().targetblobfoldername",
 							"type": "Expression"

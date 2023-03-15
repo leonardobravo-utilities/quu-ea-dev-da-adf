@@ -33,7 +33,7 @@
 		},
 		"LS_FS_Globalscape_properties_typeProperties_host": {
 			"type": "string",
-			"defaultValue": "\\\\nfujprd310\\EBI_PROD_LANDING"
+			"defaultValue": "@{linkedService().p_ServerPath}"
 		},
 		"LS_FS_Globalscape_properties_typeProperties_userId": {
 			"type": "string",
@@ -166,6 +166,12 @@
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"parameters": {
+					"p_ServerPath": {
+						"type": "string",
+						"defaultValue": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
 				"annotations": [],
 				"type": "FileServer",
 				"typeProperties": {

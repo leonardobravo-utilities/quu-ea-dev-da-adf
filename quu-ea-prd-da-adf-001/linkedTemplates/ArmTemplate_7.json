@@ -1474,6 +1474,12 @@
 											"value": "@pipeline().parameters.SourceID",
 											"type": "Expression"
 										}
+									},
+									"TriggerName": {
+										"value": {
+											"value": "@pipeline().parameters.TriggerName",
+											"type": "Expression"
+										}
 									}
 								},
 								"partitionOption": "None"
@@ -1645,6 +1651,10 @@
 														"IsInitialLoad": {
 															"value": "@item().IsInitialLoad",
 															"type": "Expression"
+														},
+														"FileFolderName": {
+															"value": "@item().FileFolderName",
+															"type": "Expression"
 														}
 													}
 												}
@@ -1677,6 +1687,13 @@
 																"type": "Int32",
 																"value": {
 																	"value": "@item().TableID",
+																	"type": "Expression"
+																}
+															},
+															"TriggerName": {
+																"type": "String",
+																"value": {
+																	"value": "@pipeline().parameters.TriggerName",
 																	"type": "Expression"
 																}
 															}
@@ -1820,6 +1837,10 @@
 														"IsInitialLoad": {
 															"value": "@item().IsInitialLoad",
 															"type": "Expression"
+														},
+														"FileFolderName": {
+															"value": "@item().FileFolderName",
+															"type": "Expression"
 														}
 													}
 												}
@@ -1854,6 +1875,13 @@
 																	"value": "@item().TableID",
 																	"type": "Expression"
 																}
+															},
+															"TriggerName": {
+																"type": "String",
+																"value": {
+																	"value": "@pipeline().parameters.TriggerName",
+																	"type": "Expression"
+																}
 															}
 														},
 														"queryTimeout": "02:00:00",
@@ -1879,8 +1907,10 @@
 				},
 				"parameters": {
 					"SourceID": {
-						"type": "string",
-						"defaultValue": "3"
+						"type": "string"
+					},
+					"TriggerName": {
+						"type": "string"
 					}
 				},
 				"folder": {

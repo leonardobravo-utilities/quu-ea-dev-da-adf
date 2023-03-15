@@ -76,7 +76,7 @@
 		},
 		"LS_FS_Globalscape_properties_typeProperties_host": {
 			"type": "string",
-			"defaultValue": "\\\\nfujprd310\\EBI_PROD_LANDING"
+			"defaultValue": "@{linkedService().p_ServerPath}"
 		},
 		"LS_FS_Globalscape_properties_typeProperties_userId": {
 			"type": "string",
@@ -657,6 +657,54 @@
 		"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_secret_name": {
 			"type": "string",
 			"defaultValue": "databricks-token"
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "UrbanHQ"
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "UrbanHQ_Monthly_Trigger"
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "UrbanHQ"
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "UrbanHQ_Daily_Trigger"
 		},
 		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName": {
 			"type": "string",
@@ -1511,6 +1559,42 @@
 					},
 					"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
 						"value": "[parameters('Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
+					},
+					"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+						"value": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
+					},
+					"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+						"value": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]"
+					},
+					"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]"
+					},
+					"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+						"value": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
+					},
+					"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords": {
+						"value": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords')]"
+					},
+					"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+						"value": "[parameters('UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
+					},
+					"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+						"value": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
+					},
+					"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+						"value": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]"
+					},
+					"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]"
+					},
+					"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+						"value": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
+					},
+					"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords": {
+						"value": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SynchupDeletedRecords')]"
+					},
+					"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+						"value": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
 					}
 				}
 			},
