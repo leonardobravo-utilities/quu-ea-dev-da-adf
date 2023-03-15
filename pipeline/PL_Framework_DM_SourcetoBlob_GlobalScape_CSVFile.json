@@ -156,6 +156,10 @@
 													"filename": {
 														"value": "@variables('FileName')",
 														"type": "Expression"
+													},
+													"folderlocation": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
 													}
 												}
 											}
@@ -168,7 +172,12 @@
 													"filefolder": {
 														"value": "@{concat(pipeline().parameters.FileFolderName, '\\Archive')}",
 														"type": "Expression"
-													}
+													},
+													"server": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
+													},
+													"filename": "@variables('FileName')"
 												}
 											}
 										]
@@ -233,6 +242,10 @@
 													"filename": {
 														"value": "@variables('FileName')",
 														"type": "Expression"
+													},
+													"folderlocation": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
 													}
 												}
 											}
@@ -242,7 +255,8 @@
 												"referenceName": "DS_ABLB_FS_Dataloading",
 												"type": "DatasetReference",
 												"parameters": {
-													"targetblobfoldername": "@replace(pipeline().parameters.Data_Destination_Folder_Path, 'ETL_READY/', '')"
+													"targetblobfoldername": "@replace(pipeline().parameters.Data_Destination_Folder_Path, 'ETL_READY/', '')",
+													"targetFileName": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1), concat(replace(variables('FileName'),pipeline().parameters.File_Name_Ext, ''),'-', activity('lkp_getlocalstarttime').output.firstRow.localstarttime2,pipeline().parameters.File_Name_Ext), variables('FileName'))"
 												}
 											}
 										]
@@ -312,6 +326,10 @@
 													"filename": {
 														"value": "@variables('FileName')",
 														"type": "Expression"
+													},
+													"folderlocation": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
 													}
 												}
 											}
@@ -323,6 +341,14 @@
 												"parameters": {
 													"filefolder": {
 														"value": "@{concat(pipeline().parameters.FileFolderName, '\\Archive')}",
+														"type": "Expression"
+													},
+													"server": {
+														"value": "@pipeline().parameters.SourceFolderLocation",
+														"type": "Expression"
+													},
+													"filename": {
+														"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1),\nconcat(replace(variables('FileName'),pipeline().parameters.File_Name_Ext, ''),'-',\nactivity('lkp_getlocalstarttime').output.firstRow.localstarttime2,pipeline().parameters.File_Name_Ext),\nvariables('FileName'))",
 														"type": "Expression"
 													}
 												}
