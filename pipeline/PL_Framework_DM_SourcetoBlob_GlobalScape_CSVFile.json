@@ -242,7 +242,8 @@
 												"referenceName": "DS_ABLB_FS_Dataloading",
 												"type": "DatasetReference",
 												"parameters": {
-													"targetblobfoldername": "@replace(pipeline().parameters.Data_Destination_Folder_Path, 'ETL_READY/', '')"
+													"targetblobfoldername": "@replace(pipeline().parameters.Data_Destination_Folder_Path, 'ETL_READY/', '')",
+													"targetFileName": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1), concat(replace(variables('FileName'),pipeline().parameters.File_Name_Ext, ''),'-', activity('lkp_getlocalstarttime').output.firstRow.localstarttime2,pipeline().parameters.File_Name_Ext), variables('FileName'))"
 												}
 											}
 										]
