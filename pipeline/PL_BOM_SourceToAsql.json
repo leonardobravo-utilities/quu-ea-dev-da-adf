@@ -54,10 +54,6 @@
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"pipeline": {
-									"referenceName": "PL_BOM_DM_SourcetoBlob",
-									"type": "PipelineReference"
-								},
 								"waitOnCompletion": true,
 								"parameters": {
 									"SourceID": {
@@ -77,7 +73,7 @@
 					{
 						"activity": "CheckExecutionStatusForSourceToBlob",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
