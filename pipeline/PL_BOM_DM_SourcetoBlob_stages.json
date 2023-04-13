@@ -1,0 +1,72 @@
+{
+	"name": "PL_BOM_DM_SourcetoBlob_stages",
+	"properties": {
+		"activities": [
+			{
+				"name": "Exc copy Stage",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_BOM_DM_SourcetoBlob_stageCopy",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceID": {
+							"value": "@pipeline().parameters.SourceID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Exc transform Stage",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Exc copy Stage",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_BOM_DM_SourcetoBlob_stageTransform",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"parameters": {
+			"SourceID": {
+				"type": "string",
+				"defaultValue": "38"
+			}
+		},
+		"variables": {
+			"Fileserverlocation": {
+				"type": "String"
+			},
+			"FileFolderPath": {
+				"type": "String"
+			},
+			"STATION_POINT_NAME": {
+				"type": "String"
+			},
+			"TableID": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "BOM"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-03-26T00:04:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,140 @@
+{
+	"name": "PL_BOM_TransformSourceFile",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_BOM_TRFM_BlobFile",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "getlistofblobfile",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_BOM_TRFM_BlobFile",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"blobcontainer": {
+							"value": "@activity('getlistofblobfile').output.firstrow.TargetBlobContainer",
+							"type": "Expression"
+						},
+						"blobfolderpath": {
+							"value": "@pipeline().parameters.STATION_POINT_NAME",
+							"type": "Expression"
+						},
+						"storageaccount": {
+							"value": "@activity('getlistofblobfile').output.firstrow.StorageAccount",
+							"type": "Expression"
+						},
+						"blobfilename": {
+							"value": "@concat(activity('getlistofblobfile').output.firstrow.TargetBlobContainer,'/',pipeline().parameters.STATION_POINT_NAME)",
+							"type": "Expression"
+						},
+						"columnlist": {
+							"value": "@activity('getlistofblobfile').output.firstrow.ColumnSchemaList",
+							"type": "Expression"
+						},
+						"QuoteCharacter": {
+							"value": "@activity('getlistofblobfile').output.firstrow.QuoteCharacter",
+							"type": "Expression"
+						},
+						"STATION_POINT_NAME": {
+							"value": "@pipeline().parameters.STATION_POINT_NAME",
+							"type": "Expression"
+						},
+						"ColumnDelimiter": {
+							"value": "@activity('getlistofblobfile').output.firstrow.ColumnDelimiter",
+							"type": "Expression"
+						},
+						"databrickssecretname": {
+							"value": "@activity('getlistofblobfile').output.firstrow.databrickssecretname",
+							"type": "Expression"
+						},
+						"databricksclusterid": {
+							"value": "@activity('getlistofblobfile').output.firstrow.databricksclusterid",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "getlistofblobfile",
+				"description": "Lookup activity to retrieve the list blob csv file need to be processed from the metadata table.",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "ETL.usp_get_tablelist_by_sourceid_and_tableid",
+						"storedProcedureParameters": {
+							"sourceid": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.SourceID",
+									"type": "Expression"
+								}
+							},
+							"TableID": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.TableID",
+									"type": "Expression"
+								}
+							}
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
+			}
+		],
+		"parameters": {
+			"Fileserverlocation": {
+				"type": "string"
+			},
+			"FileFolderPath": {
+				"type": "string"
+			},
+			"STATION_POINT_NAME": {
+				"type": "string"
+			},
+			"TableID": {
+				"type": "string"
+			},
+			"yesterdayyear": {
+				"type": "string"
+			},
+			"yesterdaymonth": {
+				"type": "string"
+			},
+			"SourceID": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "BOM"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-03-26T00:04:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

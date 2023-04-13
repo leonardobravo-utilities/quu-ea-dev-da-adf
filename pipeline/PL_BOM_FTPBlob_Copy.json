@@ -1,0 +1,165 @@
+{
+	"name": "PL_BOM_FTPBlob_Copy",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy BOM file to Blob",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Lkp_Station_no",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "station_no",
+								"value": {
+									"value": "@activity('Lkp_Station_no').output.firstRow.Station_Number",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "FtpReadSettings",
+							"recursive": false,
+							"wildcardFileName": {
+								"value": "@{concat(pipeline().parameters.STATION_POINT_NAME,'-',pipeline().parameters.yesterdayyear,pipeline().parameters.yesterdaymonth,'.csv')}",
+								"type": "Expression"
+							},
+							"useBinaryTransfer": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_FS_FTP",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileFolderPath": {
+								"value": "@pipeline().parameters.FileFolderPath",
+								"type": "Expression"
+							},
+							"FileFolderName": {
+								"value": "@pipeline().parameters.STATION_POINT_NAME",
+								"type": "Expression"
+							},
+							"FileServer": {
+								"value": "@pipeline().parameters.Fileserverlocation",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ABLB_FS_SUMS",
+						"type": "DatasetReference",
+						"parameters": {
+							"targetblobfoldername": {
+								"value": "@concat('bom-datalanding/',pipeline().parameters.STATION_POINT_NAME)",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Lkp_Station_no",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select Station_Number from  [ETL].[SourceTableDetails] STD join  ETL.SourceSystem ss on STD.sourceid = ss.sourceid join bom.station on TargetBlobFileName = station.BOM_Folder_Name\nwhere TableID = '@{pipeline().parameters.TableID}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
+			}
+		],
+		"parameters": {
+			"Fileserverlocation": {
+				"type": "string"
+			},
+			"FileFolderPath": {
+				"type": "string"
+			},
+			"STATION_POINT_NAME": {
+				"type": "string"
+			},
+			"TableID": {
+				"type": "string"
+			},
+			"yesterdayyear": {
+				"type": "string"
+			},
+			"yesterdaymonth": {
+				"type": "string"
+			},
+			"SourceID": {
+				"type": "string"
+			},
+			"skip_row": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "BOM"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-03-26T00:04:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
