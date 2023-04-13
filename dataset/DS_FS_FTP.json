@@ -5,16 +5,23 @@
 			"referenceName": "LS_FS_FTP",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"Host": "ftp://ftp.bom.gov.au/"
+				"Host": {
+					"value": "@dataset().FileServer",
+					"type": "Expression"
+				}
 			}
 		},
 		"parameters": {
 			"FileFolderPath": {
 				"type": "string",
-				"defaultValue": "anon/gen/clim_data/IDCKWCDEA0/tables/qld/ brisbane"
+				"defaultValue": "anon/gen/clim_data/IDCKWCDEA0/tables/qld/brisbane"
 			},
 			"FileFolderName": {
 				"type": "string"
+			},
+			"FileServer": {
+				"type": "string",
+				"defaultValue": "ftp://ftp.bom.gov.au/"
 			}
 		},
 		"annotations": [],
@@ -33,5 +40,6 @@
 			"quoteChar": "\""
 		},
 		"schema": []
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }
