@@ -38,7 +38,13 @@
 						"referenceName": "PL_BOM_DM_SourcetoBlob_stageTransform",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceID": {
+							"value": "@pipeline().parameters.SourceID",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],
