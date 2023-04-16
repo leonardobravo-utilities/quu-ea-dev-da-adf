@@ -13,6 +13,52 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_Chris21_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Chris21"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_FileExists')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -954,78 +1000,6 @@
 				"type": "SqlServerTable",
 				"schema": [],
 				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_SQL_EDWDiscovery_OnPrem_Table')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_SQL_Framework",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"Servername": {
-							"value": "@dataset().ServerName",
-							"type": "Expression"
-						},
-						"Databasename": {
-							"value": "@dataset().DatabaseName",
-							"type": "Expression"
-						},
-						"SecretPasswordName": {
-							"value": "@dataset().SecretPasswordName",
-							"type": "Expression"
-						},
-						"UserName": {
-							"value": "@dataset().UserName",
-							"type": "Expression"
-						}
-					}
-				},
-				"parameters": {
-					"ServerName": {
-						"type": "string",
-						"defaultValue": "NFUJDEV052"
-					},
-					"DatabaseName": {
-						"type": "string",
-						"defaultValue": "EDW_Discovery"
-					},
-					"UserName": {
-						"type": "string",
-						"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
-					},
-					"SecretPasswordName": {
-						"type": "string",
-						"defaultValue": "SVC-EBI-PRDC04-AGT"
-					},
-					"SchemaName": {
-						"type": "string",
-						"defaultValue": "HiAffinity"
-					},
-					"TableName": {
-						"type": "string",
-						"defaultValue": "BPACKAGE"
-					}
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().SchemaName",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().TableName",
-						"type": "Expression"
-					}
-				}
 			},
 			"dependsOn": []
 		}
