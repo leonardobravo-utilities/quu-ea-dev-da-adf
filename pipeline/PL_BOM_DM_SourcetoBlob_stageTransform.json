@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lkp_FTPFolderDetails",
+				"name": "Lkp_TableStationsDetails",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -17,9 +17,22 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": {
-							"value": "Select \n\t\tss.*, STD.TableID,STD.skipcsvrows,  TargetBlobFileName as STATION_POINT_NAME,   cyear, cmonth, cday\nFrom \n (\t\n select substring(dbo.udf_covert_utc_to_local_Datetime(getdate()), 1,4)  as  cyear\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(getdate()),6,2)  as  cmonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(getdate()),9,2)  as  cday\nunion\nselect\n\tsubstring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())), 1,4)  as  yesterdayyear\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(month,-1,getdate())),6,2)  as  yesterdaymonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())),9,2)  as  yesterdaydayofmonth\n\t\n) as ft  cross apply ETL.SourceSystem SS \n\njoin  [ETL].[SourceTableDetails] STD on STD.sourceid = ss.sourceid\nand isActive =1\nwhere STD.sourceid =   @{pipeline().parameters.SourceID}\n",
-							"type": "Expression"
+						"sqlReaderStoredProcedureName": "[ETL].[usp_get_tablelist_by_sourceid]",
+						"storedProcedureParameters": {
+							"sourceid": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.SourceID",
+									"type": "Expression"
+								}
+							},
+							"TriggerName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.TriggerName",
+									"type": "Expression"
+								}
+							}
 						},
 						"partitionOption": "None"
 					},
@@ -35,7 +48,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Lkp_FTPFolderDetails",
+						"activity": "Lkp_TableStationsDetails",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -44,7 +57,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Lkp_FTPFolderDetails').output.value",
+						"value": "@activity('Lkp_TableStationsDetails').output.value",
 						"type": "Expression"
 					},
 					"isSequential": false,
@@ -61,28 +74,12 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"Fileserverlocation": {
-										"value": "@item().Fileserverlocation",
-										"type": "Expression"
-									},
-									"FileFolderPath": {
-										"value": "@item().FileFolderPath",
-										"type": "Expression"
-									},
 									"STATION_POINT_NAME": {
-										"value": "@item().STATION_POINT_NAME",
+										"value": "@item().Data_Destination_File_Name\n",
 										"type": "Expression"
 									},
 									"TableID": {
 										"value": "@item().TableID",
-										"type": "Expression"
-									},
-									"yesterdayyear": {
-										"value": "@item().cyear",
-										"type": "Expression"
-									},
-									"yesterdaymonth": {
-										"value": "@item().cmonth",
 										"type": "Expression"
 									},
 									"SourceID": {
@@ -98,8 +95,11 @@
 		],
 		"parameters": {
 			"SourceID": {
+				"type": "int"
+			},
+			"TriggerName": {
 				"type": "string",
-				"defaultValue": "38"
+				"defaultValue": "Null"
 			}
 		},
 		"variables": {
