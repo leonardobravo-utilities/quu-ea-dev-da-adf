@@ -17,6 +17,61 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_EDWDiscovery_OnPrem')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQL_Framework",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"Servername": {
+							"value": "@dataset().ServerName",
+							"type": "Expression"
+						},
+						"Databasename": {
+							"value": "@dataset().DatabaseName",
+							"type": "Expression"
+						},
+						"SecretPasswordName": {
+							"value": "@dataset().SecretPasswordName",
+							"type": "Expression"
+						},
+						"UserName": {
+							"value": "@dataset().UserName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"ServerName": {
+						"type": "string",
+						"defaultValue": "PRDC04-SQL"
+					},
+					"DatabaseName": {
+						"type": "string",
+						"defaultValue": "EDW_Discovery"
+					},
+					"UserName": {
+						"type": "string",
+						"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
+					},
+					"SecretPasswordName": {
+						"type": "string",
+						"defaultValue": "SVC-EBI-PRDC04-AGT"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_SQL_EDWDiscovery_OnPrem_Table')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -956,22 +1011,10 @@
 					"cancelAfter": {}
 				},
 				"parameters": {
-					"Fileserverlocation": {
-						"type": "string"
-					},
-					"FileFolderPath": {
-						"type": "string"
-					},
 					"STATION_POINT_NAME": {
 						"type": "string"
 					},
 					"TableID": {
-						"type": "string"
-					},
-					"yesterdayyear": {
-						"type": "string"
-					},
-					"yesterdaymonth": {
 						"type": "string"
 					},
 					"SourceID": {
@@ -1687,6 +1730,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_EDWDiscovery_OnPrem')]",
 				"[concat(variables('factoryId'), '/datasets/DS_SQL_EDWDiscovery_OnPrem_Table')]"
 			]
 		},
@@ -4106,260 +4150,6 @@
 					"name": "FrameWork"
 				},
 				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Framework_DM_SourcetoBlob_API')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Copy new or updated rows only from database using external control table",
-				"activities": [
-					{
-						"name": "Copy Data from API to Blob",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "GetSchemaMapping",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							},
-							{
-								"activity": "lkp_getlocattime",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "RestSource",
-								"httpRequestTimeout": "00:05:00",
-								"requestInterval": "00.00:00:00.010",
-								"requestMethod": "GET",
-								"paginationRules": {
-									"supportRFC5988": "true"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"value": "@json(activity('GetSchemaMapping').output.firstrow.json_output)",
-								"type": "Expression"
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_API",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DS_ABLB_Datalanding",
-								"type": "DatasetReference",
-								"parameters": {
-									"FolderPath": {
-										"value": "@pipeline().parameters.Data_Destination_Folder_Path",
-										"type": "Expression"
-									},
-									"TargetFileName": {
-										"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1)\n,  concat(pipeline().parameters.Data_Destination_File_Name\n             ,'-'\n            ,activity('lkp_getlocattime').output.firstrow.localstarttime\n             ,pipeline().parameters.File_Name_Ext)\n,\nconcat(\npipeline().parameters.Data_Destination_File_Name\n,pipeline().parameters.File_Name_Ext)\n)\n\n",
-										"type": "Expression"
-									},
-									"ColumnDelimiter": {
-										"value": "@pipeline().parameters.ColumnDelimiter",
-										"type": "Expression"
-									},
-									"QuoteCharacter": {
-										"value": "@pipeline().parameters.QuoteCharacter",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					},
-					{
-						"name": "GetSchemaMapping",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderStoredProcedureName": "[[ETL].[usp_getColumnMapping_json_to_csv]",
-								"storedProcedureParameters": {
-									"additional_param": {
-										"type": "String",
-										"value": {
-											"value": "@pipeline().parameters.Additional_MappingParam",
-											"type": "Expression"
-										}
-									},
-									"TableID": {
-										"type": "Int32",
-										"value": {
-											"value": "@pipeline().parameters.tableID",
-											"type": "Expression"
-										}
-									}
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					},
-					{
-						"name": "lkp_getlocattime",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SqlMISource",
-								"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"Data_Source_Table_Name": {
-						"type": "String",
-						"defaultValue": "Envizi.monthlydatasummaryallmeasures"
-					},
-					"Data_Source_WaterMarkColumn": {
-						"type": "String"
-					},
-					"Data_Destination_Folder_Path": {
-						"type": "String",
-						"defaultValue": "envizi-datalanding/envizi/monthlydatasummaryallmeasures"
-					},
-					"Control_Table_Table_Name": {
-						"type": "String",
-						"defaultValue": "ETL.SourceTableDetails"
-					},
-					"Control_Table_Column_Name": {
-						"type": "String"
-					},
-					"TableID": {
-						"type": "string",
-						"defaultValue": "5822"
-					},
-					"Data_Destination_File_Name": {
-						"type": "string",
-						"defaultValue": "monthlydatasummaryallmeasures"
-					},
-					"SourceServerName": {
-						"type": "string",
-						"defaultValue": "https://auapi.envizi.com/api/data"
-					},
-					"SourceDatabaseName": {
-						"type": "string"
-					},
-					"IncrementalLoadInd": {
-						"type": "int",
-						"defaultValue": 0
-					},
-					"File_Name_Ext": {
-						"type": "string",
-						"defaultValue": ".csv"
-					},
-					"File_Name_DateTime_Ind": {
-						"type": "int",
-						"defaultValue": 1
-					},
-					"Join_Condition": {
-						"type": "string"
-					},
-					"Source_Column_List": {
-						"type": "string",
-						"defaultValue": "[[Associate_Id],[Start_Period],[End_Period],[Associate],[Level_1_Group],[Level_2_Group],[Level_3_Group],[Location],[Category],[Data_Type],[Account_Style_Component],[Item_Number],[Account_Ref_Meter_Name],[Supplier],[Reader_Notes],[Opened_On],[Replaced_On],[Occurred_On],[Account_Style_Field],[Measure],[Measure_Type],[Units],[Actual_Data],[Estimated_Data],[Accrued_Data],[Total_Data],[Actual_Days],[Estimated_Days],[Accrued_Days],[Total_Days],[Actual_Percent],[Estimated_Percent],[Accrued_Percent],[Use],[Use_Percent],[Total_Reporting_Amount]"
-					},
-					"ColumnDelimiter": {
-						"type": "string",
-						"defaultValue": ","
-					},
-					"QuoteCharacter": {
-						"type": "string",
-						"defaultValue": "¬"
-					},
-					"source_where_filter": {
-						"type": "string"
-					},
-					"UserName": {
-						"type": "string"
-					},
-					"SecretPasswordName": {
-						"type": "string"
-					},
-					"SourceName": {
-						"type": "string"
-					},
-					"DeltaTargetTableName": {
-						"type": "string"
-					},
-					"Additional_MappingParam": {
-						"type": "string"
-					},
-					"APIBaseURL": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "FrameWork"
-				},
-				"annotations": [],
-				"lastPublishTime": "2020-06-09T01:21:23Z"
 			},
 			"dependsOn": []
 		}

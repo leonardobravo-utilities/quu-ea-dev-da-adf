@@ -1640,6 +1640,169 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_BOM_BulkCopyBlobToASQL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Files",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_ABLB_DataLanding_FileExists",
+								"type": "DatasetReference",
+								"parameters": {
+									"blobcontainer": {
+										"value": "@pipeline().parameters.SourceContainer",
+										"type": "Expression"
+									},
+									"blobfolderpath": {
+										"value": "@pipeline().parameters.SourceDirectory",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEachFile",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Files').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "CopyFiles",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings",
+												"skipLineCount": 1
+											}
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"tableOption": "autoCreate"
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_ABLB_DataLanding_FizeSize",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.SourceContainer",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@pipeline().parameters.SourceDirectory",
+													"type": "Expression"
+												},
+												"file": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ASQL_EDWDiscovery_Table",
+											"type": "DatasetReference",
+											"parameters": {
+												"TableName": {
+													"value": "@concat('bom_',replace(item().name,'.CSV','' ))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceContainer": {
+						"type": "string",
+						"defaultValue": "bom-datalanding"
+					},
+					"SourceDirectory": {
+						"type": "string",
+						"defaultValue": "evapotranspiration"
+					}
+				},
+				"folder": {
+					"name": "BOM"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ABLB_DataLanding_FileExists')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ABLB_DataLanding_FizeSize')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery_Table')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_BOM_CopyandTransformSourceFile')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -2194,7 +2357,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Lkp_FTPFolderDetails",
+						"name": "Lkp_TableStationsDetails",
 						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
@@ -2208,9 +2371,22 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "Select \n\t\tss.*, STD.TableID,STD.skipcsvrows,  TargetBlobFileName as STATION_POINT_NAME,   cyear, cmonth, cday\nFrom \n (\t\n select substring(dbo.udf_covert_utc_to_local_Datetime(getdate()), 1,4)  as  cyear\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(getdate()),6,2)  as  cmonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(getdate()),9,2)  as  cday\nunion\nselect\n\tsubstring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())), 1,4)  as  yesterdayyear\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(month,-1,getdate())),6,2)  as  yesterdaymonth\n\t,substring(dbo.udf_covert_utc_to_local_Datetime(dateadd(DAY,-1,getdate())),9,2)  as  yesterdaydayofmonth\n\t\n) as ft  cross apply ETL.SourceSystem SS \n\njoin  [ETL].[SourceTableDetails] STD on STD.sourceid = ss.sourceid\nand isActive =1\nwhere STD.sourceid =   @{pipeline().parameters.SourceID}\n",
-									"type": "Expression"
+								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_tablelist_by_sourceid]",
+								"storedProcedureParameters": {
+									"sourceid": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.SourceID",
+											"type": "Expression"
+										}
+									},
+									"TriggerName": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.TriggerName",
+											"type": "Expression"
+										}
+									}
 								},
 								"partitionOption": "None"
 							},
@@ -2227,7 +2403,7 @@
 						"type": "ForEach",
 						"dependsOn": [
 							{
-								"activity": "Lkp_FTPFolderDetails",
+								"activity": "Lkp_TableStationsDetails",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -2236,7 +2412,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"items": {
-								"value": "@activity('Lkp_FTPFolderDetails').output.value",
+								"value": "@activity('Lkp_TableStationsDetails').output.value",
 								"type": "Expression"
 							},
 							"isSequential": false,
@@ -2253,28 +2429,12 @@
 										},
 										"waitOnCompletion": true,
 										"parameters": {
-											"Fileserverlocation": {
-												"value": "@item().Fileserverlocation",
-												"type": "Expression"
-											},
-											"FileFolderPath": {
-												"value": "@item().FileFolderPath",
-												"type": "Expression"
-											},
 											"STATION_POINT_NAME": {
-												"value": "@item().STATION_POINT_NAME",
+												"value": "@item().Data_Destination_File_Name\n",
 												"type": "Expression"
 											},
 											"TableID": {
 												"value": "@item().TableID",
-												"type": "Expression"
-											},
-											"yesterdayyear": {
-												"value": "@item().cyear",
-												"type": "Expression"
-											},
-											"yesterdaymonth": {
-												"value": "@item().cmonth",
 												"type": "Expression"
 											},
 											"SourceID": {
@@ -2294,8 +2454,11 @@
 				},
 				"parameters": {
 					"SourceID": {
+						"type": "int"
+					},
+					"TriggerName": {
 						"type": "string",
-						"defaultValue": "38"
+						"defaultValue": "Null"
 					}
 				},
 				"variables": {
@@ -3436,22 +3599,10 @@
 					"cancelAfter": {}
 				},
 				"parameters": {
-					"Fileserverlocation": {
-						"type": "string"
-					},
-					"FileFolderPath": {
-						"type": "string"
-					},
 					"STATION_POINT_NAME": {
 						"type": "string"
 					},
 					"TableID": {
-						"type": "string"
-					},
-					"yesterdayyear": {
-						"type": "string"
-					},
-					"yesterdaymonth": {
 						"type": "string"
 					},
 					"SourceID": {
