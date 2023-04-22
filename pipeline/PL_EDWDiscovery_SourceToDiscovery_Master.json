@@ -74,6 +74,10 @@
 									"TriggerName": {
 										"value": "@pipeline().parameters.TriggerName",
 										"type": "Expression"
+									},
+									"ProcessType": {
+										"value": "SourceToBlob",
+										"type": "Expression"
 									}
 								}
 							}
@@ -112,9 +116,9 @@
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "Is Source to Blob Load Required",
+						"activity": "Is Source To Blob Delete Required - No Failure",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
@@ -126,7 +130,7 @@
 					},
 					"ifTrueActivities": [
 						{
-							"name": "ExecutePL_TRFM_BLOBToASQL",
+							"name": "ExecutePL_TRFM_BLOBToASQL - No Failure",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
@@ -144,6 +148,10 @@
 									"TriggerName": {
 										"value": "@if(equals(pipeline().parameters.TriggerName, ''), pipeline().TriggerName, pipeline().parameters.TriggerName)",
 										"type": "Expression"
+									},
+									"ProcessType": {
+										"value": "BlobToASQL",
+										"type": "Expression"
 									}
 								}
 							}
@@ -156,9 +164,9 @@
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "Is Source to Blob Load Required",
+						"activity": "Is Source To Blob Delete Required - Has Failure",
 						"dependencyConditions": [
-							"Failed"
+							"Completed"
 						]
 					}
 				],
@@ -170,7 +178,7 @@
 					},
 					"ifTrueActivities": [
 						{
-							"name": "ExecutePL_TRFM_BLOBToASQL_copy1",
+							"name": "ExecutePL_TRFM_BLOBToASQL - Has Failure",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
@@ -184,6 +192,14 @@
 									"SourceID": {
 										"value": "@activity('Get Source ID').output.firstRow['SourceID']",
 										"type": "Expression"
+									},
+									"TriggerName": {
+										"value": "@pipeline().parameters.TriggerName",
+										"type": "Expression"
+									},
+									"ProcessType": {
+										"value": "BlobToASQL",
+										"type": "Expression"
 									}
 								}
 							}
@@ -192,7 +208,119 @@
 				}
 			},
 			{
-				"name": "Is Synchup Deleted Records Required - No Failure",
+				"name": "Is Source To Blob Delete Required - No Failure",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Is Source to Blob Load Required",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@pipeline().parameters.OnlyExtractDeletedRecordsFromSourceToBlob",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Extract Deleted Records from SourceToBlob - No Failure",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_SourceToBlob",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+										"type": "Expression"
+									},
+									"LoadTypeName": {
+										"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+										"type": "Expression"
+									},
+									"Additional_MappingParam": {
+										"value": "@pipeline().parameters.Additional_MappingParam",
+										"type": "Expression"
+									},
+									"TriggerName": {
+										"value": "@pipeline().parameters.TriggerName",
+										"type": "Expression"
+									},
+									"ProcessType": {
+										"value": "SourceToBlobDelete",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Is Source To Blob Delete Required - Has Failure",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Is Source to Blob Load Required",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@and(pipeline().parameters.OnlyExtractDeletedRecordsFromSourceToBlob, pipeline().parameters.AllowPartialUpdateOfDiscovery)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Extract Deleted Records from SourceToBlob - Has Failure",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_SourceToBlob",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+										"type": "Expression"
+									},
+									"LoadTypeName": {
+										"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+										"type": "Expression"
+									},
+									"Additional_MappingParam": {
+										"value": "@pipeline().parameters.Additional_MappingParam",
+										"type": "Expression"
+									},
+									"TriggerName": {
+										"value": "@pipeline().parameters.TriggerName",
+										"type": "Expression"
+									},
+									"ProcessType": {
+										"value": "SourceToBlobDelete",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Is Blob To ASQL Delete Required - No Failure",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -205,18 +333,18 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@pipeline().parameters.SynchupDeletedRecords",
+						"value": "@pipeline().parameters.OnlyDeleteRecordsFromBlobToASQL",
 						"type": "Expression"
 					},
 					"ifTrueActivities": [
 						{
-							"name": "Execute_PL_TRFM_Synchup_Deleted_Records_No_Failure",
+							"name": "Delete Records from Delta and ASQL - No Failure",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "PL_EDWDiscovery_SourceToBlob_Delete",
+									"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
@@ -225,8 +353,12 @@
 										"value": "@activity('Get Source ID').output.firstRow['SourceID']",
 										"type": "Expression"
 									},
-									"LoadTypeName": {
-										"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+									"TriggerName": {
+										"value": "@pipeline().parameters.TriggerName",
+										"type": "Expression"
+									},
+									"ProcessType": {
+										"value": "BlobToASQLDelete",
 										"type": "Expression"
 									}
 								}
@@ -236,7 +368,7 @@
 				}
 			},
 			{
-				"name": "Is Synchup Deleted Records Required - Has Failure",
+				"name": "Is Blob To ASQL Delete Required - Has Failure",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -249,18 +381,18 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@pipeline().parameters.SynchupDeletedRecords",
+						"value": "@and(pipeline().parameters.OnlyDeleteRecordsFromBlobToASQL, pipeline().parameters.AllowPartialUpdateOfDiscovery)",
 						"type": "Expression"
 					},
 					"ifTrueActivities": [
 						{
-							"name": "Execute_PL_TRFM_Synchup_Deleted_Records_Has_Failure",
+							"name": "Delete Records from Delta and ASQL - Has Failure",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "PL_EDWDiscovery_SourceToBlob_Delete",
+									"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
@@ -269,8 +401,12 @@
 										"value": "@activity('Get Source ID').output.firstRow['SourceID']",
 										"type": "Expression"
 									},
-									"LoadTypeName": {
-										"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+									"TriggerName": {
+										"value": "@pipeline().parameters.TriggerName",
+										"type": "Expression"
+									},
+									"ProcessType": {
+										"value": "BlobToASQLDelete",
 										"type": "Expression"
 									}
 								}
@@ -283,7 +419,7 @@
 		"parameters": {
 			"SourceName": {
 				"type": "string",
-				"defaultValue": "Kantar"
+				"defaultValue": "Ellipse9"
 			},
 			"OnlySourceToBlob": {
 				"type": "bool",
@@ -300,12 +436,17 @@
 			"Additional_MappingParam": {
 				"type": "string"
 			},
-			"SynchupDeletedRecords": {
+			"OnlyExtractDeletedRecordsFromSourceToBlob": {
 				"type": "bool",
-				"defaultValue": false
+				"defaultValue": true
+			},
+			"OnlyDeleteRecordsFromBlobToASQL": {
+				"type": "bool",
+				"defaultValue": true
 			},
 			"TriggerName": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "Ellipse9_Daily_Trigger"
 			}
 		},
 		"variables": {

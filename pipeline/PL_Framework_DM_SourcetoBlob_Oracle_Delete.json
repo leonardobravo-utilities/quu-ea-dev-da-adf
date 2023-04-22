@@ -1,0 +1,511 @@
+{
+	"name": "PL_Framework_DM_SourcetoBlob_Oracle_Delete",
+	"properties": {
+		"description": "Copy new or updated rows only from database using external control table",
+		"activities": [
+			{
+				"name": "lkp_getlocaltime",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Set DIU and DCP variables for Intial Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlMISource",
+						"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Extract Source To Blob Delete",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "Set Blob File Type",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@if(equals(pipeline().parameters.CheckForDeletes, '1'), concat(toLower(variables('BlobFileType')), '_full'), '')",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "parquet_full",
+							"activities": [
+								{
+									"name": "ParquetFullCopyToBlob",
+									"description": "Full Copy from source table into blob storage",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "select @{replace(replace(pipeline().parameters.BusinessKeyList,'[','TO_CHAR('),']',')')}\nfrom @{pipeline().parameters.Data_Source_Table_Name} \n@{pipeline().parameters.Join_Condition}\n@{pipeline().parameters.source_where_filter}",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"convertDecimalToInteger": false
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"parallelCopies": {
+											"value": "@variables('MaxCopyDCP')",
+											"type": "Expression"
+										},
+										"dataIntegrationUnits": {
+											"value": "@variables('MaxCopyDIU')",
+											"type": "Expression"
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Oracle_Framework",
+											"type": "DatasetReference",
+											"parameters": {
+												"HostName": {
+													"value": "@pipeline().parameters.Host_Name",
+													"type": "Expression"
+												},
+												"PortNo": {
+													"value": "@pipeline().parameters.Port_No",
+													"type": "Expression"
+												},
+												"SID": {
+													"value": "@pipeline().parameters.SID",
+													"type": "Expression"
+												},
+												"UserName": {
+													"value": "@pipeline().parameters.UserName",
+													"type": "Expression"
+												},
+												"SecretPasswordName": {
+													"value": "@pipeline().parameters.SecretPasswordName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ABLB_EDWDiscovery_Delta_Parquet_Sink",
+											"type": "DatasetReference",
+											"parameters": {
+												"FolderPath": {
+													"value": "@pipeline().parameters.Data_Destination_Folder_Path_DeleteProcess",
+													"type": "Expression"
+												},
+												"TargetFileName": {
+													"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1)\n,  concat(pipeline().parameters.Data_Destination_File_Name, '_source'\n             ,'-'\n            ,activity('lkp_getlocaltime').output.firstRow.localstarttime\n             ,pipeline().parameters.File_Name_Ext)\n,\nconcat(\npipeline().parameters.Data_Destination_File_Name, '_source'\n,pipeline().parameters.File_Name_Ext)\n)\n\n\n\n",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						},
+						{
+							"value": "csv_full",
+							"activities": [
+								{
+									"name": "CSVFullCopyToBlob",
+									"description": "Full Copy from source table into blob storage",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "select @{replace(replace(pipeline().parameters.BusinessKeyList,'[','TO_CHAR('),']',')')}\nfrom @{pipeline().parameters.Data_Source_Table_Name} \n@{pipeline().parameters.Join_Condition}\n@{pipeline().parameters.source_where_filter}",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"convertDecimalToInteger": false
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".csv"
+											}
+										},
+										"enableStaging": false,
+										"parallelCopies": {
+											"value": "@variables('MaxCopyDCP')",
+											"type": "Expression"
+										},
+										"dataIntegrationUnits": {
+											"value": "@variables('MaxCopyDIU')",
+											"type": "Expression"
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Oracle_OnPrem",
+											"type": "DatasetReference",
+											"parameters": {
+												"HostName": {
+													"value": "@pipeline().parameters.Host_Name",
+													"type": "Expression"
+												},
+												"PortNo": {
+													"value": "@pipeline().parameters.Port_No",
+													"type": "Expression"
+												},
+												"SID": {
+													"value": "@pipeline().parameters.SID",
+													"type": "Expression"
+												},
+												"UserName": {
+													"value": "@pipeline().parameters.UserName",
+													"type": "Expression"
+												},
+												"SecretPasswordName": {
+													"value": "@pipeline().parameters.SecretPasswordName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ABLB_Datalanding",
+											"type": "DatasetReference",
+											"parameters": {
+												"FolderPath": {
+													"value": "@pipeline().parameters.Data_Destination_Folder_Path_DeleteProcess",
+													"type": "Expression"
+												},
+												"TargetFileName": {
+													"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1)\n,  concat(pipeline().parameters.Data_Destination_File_Name, '_source'\n             ,'-'\n            ,activity('lkp_getlocaltime').output.firstRow.localstarttime\n             ,pipeline().parameters.File_Name_Ext)\n,\nconcat(\npipeline().parameters.Data_Destination_File_Name, '_source'\n,pipeline().parameters.File_Name_Ext)\n)\n",
+													"type": "Expression"
+												},
+												"ColumnDelimiter": {
+													"value": "@pipeline().parameters.ColumnDelimiter",
+													"type": "Expression"
+												},
+												"QuoteCharacter": {
+													"value": "@pipeline().parameters.QuoteCharacter",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "Set Blob File Type",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "lkp_getlocaltime",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "BlobFileType",
+					"value": {
+						"value": "@split(pipeline().parameters.File_Name_Ext, '.')[1]",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set DIU and DCP variables for Intial Load",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@if(equals(pipeline().parameters.IsInitialLoad, '1'), true, false)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Set Max DIU - Daily Load",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "MaxCopyDIU",
+								"value": {
+									"value": "@pipeline().parameters.MaxDailyLoadDataIntegrationUnit",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Max DCP - Daily Load",
+							"description": "",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set Max DIU - Daily Load",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "MaxCopyDCP",
+								"value": {
+									"value": "@pipeline().parameters.MaxDailyLoadDegreeOfCopyParallelism",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Set Max DIU - Initial Load",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "MaxCopyDIU",
+								"value": {
+									"value": "@pipeline().parameters.MaxInitialLoadDataIntegrationUnit",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Max DCP - Initial Load",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set Max DIU - Initial Load",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "MaxCopyDCP",
+								"value": {
+									"value": "@pipeline().parameters.MaxInitialLoadDegreeOfCopyParallelism",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Data_Source_Table_Name": {
+				"type": "String",
+				"defaultValue": "dbo.MSF660"
+			},
+			"Data_Source_WaterMarkColumn": {
+				"type": "String",
+				"defaultValue": "CASE WHEN LAST_MOD_DATE <> '' AND LAST_MOD_TIME<>'' THEN (CAST(LAST_MOD_DATE AS DATETIME) + CAST(stuff(stuff(LAST_MOD_TIME ,3,0,':'),6,0,':') AS DATETIME)) END"
+			},
+			"Data_Destination_Folder_Path": {
+				"type": "String",
+				"defaultValue": "ellipse9-datalanding/MSF660"
+			},
+			"TableID": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"Data_Destination_File_Name": {
+				"type": "string",
+				"defaultValue": "MSF660"
+			},
+			"SourceServerName": {
+				"type": "string",
+				"defaultValue": "NFUJDEV073"
+			},
+			"SourceDatabaseName": {
+				"type": "string",
+				"defaultValue": "Datamart"
+			},
+			"File_Name_Ext": {
+				"type": "string",
+				"defaultValue": ".csv"
+			},
+			"Join_Condition": {
+				"type": "string",
+				"defaultValue": " "
+			},
+			"Source_Column_List": {
+				"type": "string",
+				"defaultValue": "*"
+			},
+			"ColumnDelimiter": {
+				"type": "string",
+				"defaultValue": ","
+			},
+			"QuoteCharacter": {
+				"type": "string",
+				"defaultValue": "¬"
+			},
+			"source_where_filter": {
+				"type": "string",
+				"defaultValue": " "
+			},
+			"UserName": {
+				"type": "string"
+			},
+			"SecretPasswordName": {
+				"type": "string"
+			},
+			"BlobContainer": {
+				"type": "string"
+			},
+			"BusinessKeyList": {
+				"type": "string"
+			},
+			"DeltaTargetDbName": {
+				"type": "string"
+			},
+			"StorageAccount": {
+				"type": "string"
+			},
+			"RowSource": {
+				"type": "string"
+			},
+			"DbHostName": {
+				"type": "string"
+			},
+			"AzureTargetTableName": {
+				"type": "string"
+			},
+			"DeltaStagingTableParquetFilePath": {
+				"type": "string"
+			},
+			"DeleteProcessCompletionDTM": {
+				"type": "string"
+			},
+			"DeltaStagingDbName": {
+				"type": "string"
+			},
+			"DeltaStageTableName": {
+				"type": "string"
+			},
+			"AzureSqlTempDeleteTableName": {
+				"type": "string"
+			},
+			"Host_Name": {
+				"type": "string"
+			},
+			"Port_No": {
+				"type": "string"
+			},
+			"SID": {
+				"type": "string"
+			},
+			"databricksclustername": {
+				"type": "string"
+			},
+			"databricksclusterid": {
+				"type": "string"
+			},
+			"databrickssecretname": {
+				"type": "string"
+			},
+			"CheckForDeletes": {
+				"type": "string"
+			},
+			"File_Name_DateTime_Ind": {
+				"type": "string"
+			},
+			"Data_Destination_Folder_Path_DeleteProcess": {
+				"type": "string"
+			},
+			"SourceId": {
+				"type": "string"
+			},
+			"IsInitialLoad": {
+				"type": "int"
+			},
+			"MaxInitialLoadDataIntegrationUnit": {
+				"type": "string"
+			},
+			"MaxInitialLoadDegreeOfCopyParallelism": {
+				"type": "string"
+			},
+			"MaxDailyLoadDataIntegrationUnit": {
+				"type": "string"
+			},
+			"MaxDailyLoadDegreeOfCopyParallelism": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"BlobFileType": {
+				"type": "String"
+			},
+			"MaxCopyDIU": {
+				"type": "String"
+			},
+			"MaxCopyDCP": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "FrameWork"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-03-25T05:00:23Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

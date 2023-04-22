@@ -167,6 +167,38 @@
 									}
 								}
 							]
+						},
+						{
+							"value": "DB_ORACLE",
+							"activities": [
+								{
+									"name": "Execute DM_SourcetoBlob_OracleDatabase",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Oracle",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@pipeline().parameters.SourceID",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
+											},
+											"ProcessType": {
+												"value": "@pipeline().parameters.ProcessType",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
 						}
 					]
 				}
@@ -212,6 +244,10 @@
 			},
 			"TriggerName": {
 				"type": "string"
+			},
+			"ProcessType": {
+				"type": "string",
+				"defaultValue": "SourceToBlob"
 			}
 		},
 		"folder": {

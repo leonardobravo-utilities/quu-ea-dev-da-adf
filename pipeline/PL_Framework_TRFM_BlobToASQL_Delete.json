@@ -1,7 +1,6 @@
 {
-	"name": "PL_Framework_DM_SourcetoBlob_Delete_Oracle",
+	"name": "PL_Framework_TRFM_BlobToASQL_Delete",
 	"properties": {
-		"description": "Copy new or updated rows only from database using external control table",
 		"activities": [
 			{
 				"name": "lkp_getlocalstarttime2",
@@ -18,7 +17,8 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlMISource",
-						"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2"
+						"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2",
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",

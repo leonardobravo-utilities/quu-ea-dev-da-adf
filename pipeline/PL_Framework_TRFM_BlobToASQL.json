@@ -547,7 +547,7 @@
 							"typeProperties": {
 								"variableName": "processfile",
 								"value": {
-									"value": "@if(AND(greater(variables('FileSize'),'0'), contains(variables('FileName'),'.csv') ),true,false)\n\n",
+									"value": "@if(and(greater(variables('FileSize'),'0'), or(contains(variables('FileName'),'.csv'),contains(variables('FileName'),'.parquet') )),true,false)",
 									"type": "Expression"
 								}
 							}
@@ -657,7 +657,8 @@
 									"type": "Expression"
 								}
 							}
-						}
+						},
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",
@@ -785,7 +786,8 @@
 		"folder": {
 			"name": "FrameWork"
 		},
-		"annotations": []
+		"annotations": [],
+		"lastPublishTime": "2021-07-08T01:08:29Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }
