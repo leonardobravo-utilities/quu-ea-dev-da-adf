@@ -14,56 +14,63 @@
 		"SUMS_Mart_Daily_Trigger_properties_PL_SUMS_Daily_Consumption_And_Analysis_parameters_Load_Type": {
 			"type": "string",
 			"defaultValue": "Incremental"
-		},
-		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetServerName": {
-			"type": "string",
-			"defaultValue": "PRDC04-SQL"
-		},
-		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetDatabaseName": {
-			"type": "string",
-			"defaultValue": "EDW_Discovery"
-		},
-		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetUserName": {
-			"type": "string",
-			"defaultValue": "urbanutilities\\svc-EBI_PRDC04_AGT"
-		},
-		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetSecretPasswordName": {
-			"type": "string",
-			"defaultValue": "SVC-EBI-PRDC04-AGT"
-		},
-		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceHostName": {
-			"type": "string",
-			"defaultValue": "hcxdbprdmir.corporate.urbanutilities.internal"
-		},
-		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourcePortNo": {
-			"type": "string",
-			"defaultValue": "1901"
-		},
-		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceSID": {
-			"type": "string",
-			"defaultValue": "HCXPRD"
-		},
-		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceUserName": {
-			"type": "string",
-			"defaultValue": "ebi_hiaffinity_user"
-		},
-		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceSecretPasswordName": {
-			"type": "string",
-			"defaultValue": "Hiaffinity-PRD-Password"
-		},
-		"ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName": {
-			"type": "string",
-			"defaultValue": "ICN"
-		},
-		"QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_globalscape_parameters_FileExportName": {
-			"type": "string",
-			"defaultValue": "QAO"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/FSE_StartFSECluster_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_StartFSECluster",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-06-24T05:27:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								45
+							],
+							"hours": [
+								5,
+								6,
+								7,
+								8,
+								9,
+								10,
+								11,
+								12,
+								13,
+								14,
+								15,
+								16,
+								17,
+								18,
+								19,
+								4
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/SUMS_Mart_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
@@ -707,6 +714,319 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2020-03-26T00:04:10Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_BOM_Forecast_BlobToASQL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExecutePL_TRFM_BLOBToASQL",
+						"description": "Loading Temetra API Data into databricks delta and Azure sql db",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceID": {
+									"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "BOM-FORECAST"
+					}
+				},
+				"folder": {
+					"name": "BOM"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Chris21_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "FileMonitoring",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForSourceToBlob",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlySourceToBlob",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Chris21_DM_SourcetoBlob",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"sourcename": {
+												"value": "@pipeline().parameters.SourceName",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CheckExecutionStatusForBlobToASQL",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "CheckExecutionStatusForSourceToBlob",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyBlobtoASQL",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_TRFM_BLOBToASQL",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Archive_UpdateLoadDateforFile",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "CheckExecutionStatusForBlobToASQL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Chris21_Archive_updateFileLoadDate",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sourcename": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								},
+								"Subject": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								},
+								"EmailTo": {
+									"value": "@pipeline().parameters.EmailTo",
+									"type": "Expression"
+								},
+								"LogicAppURL": {
+									"value": "@pipeline().parameters.LogicAppURL",
+									"type": "Expression"
+								},
+								"TriggerName": {
+									"value": "@pipeline().parameters.TriggerName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "FileMonitoring",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_File_Monitoring",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Sourcename": "CHRIS21",
+								"ErrorMessageFileNotReceived": "File not received",
+								"EmailTo": {
+									"value": "@pipeline().parameters.EmailTo",
+									"type": "Expression"
+								},
+								"LogicAppURL": {
+									"value": "@pipeline().parameters.LogicAppURL",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "CHRIS21"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"EmailTo": {
+						"type": "string",
+						"defaultValue": "Analytics-Support@urbanutilities.com.au;DL-IS-Analytics-Data-Foundation@urbanutilities.com.au"
+					},
+					"LogicAppURL": {
+						"type": "string",
+						"defaultValue": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU"
+					},
+					"TriggerName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Chris21"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-10-05T05:45:07Z"
 			},
 			"dependsOn": []
 		},
@@ -3528,14 +3848,13 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_TRFM_BlobToASQL')]",
+			"name": "[concat(parameters('factoryName'), '/PL_Evoqua_Metadata')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "getlistofblobfile",
-						"description": "Lookup activity to retrieve the list blob csv file need to be processed from the metadata table.",
+						"name": "GetSourceID",
 						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
@@ -3549,22 +3868,9 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzureSqlSource",
-								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_tablelist_by_sourceid]",
-								"storedProcedureParameters": {
-									"sourceid": {
-										"type": "Int32",
-										"value": {
-											"value": "@pipeline().parameters.SourceID",
-											"type": "Expression"
-										}
-									},
-									"TriggerName": {
-										"type": "String",
-										"value": {
-											"value": "@pipeline().parameters.TriggerName",
-											"type": "Expression"
-										}
-									}
+								"sqlReaderQuery": {
+									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
 								},
 								"partitionOption": "None"
 							},
@@ -3572,17 +3878,15 @@
 								"referenceName": "DS_ASQL_EDWDiscovery",
 								"type": "DatasetReference",
 								"parameters": {}
-							},
-							"firstRowOnly": false
+							}
 						}
 					},
 					{
-						"name": "foreachblobfile",
-						"description": "looping through the list of blob file.",
-						"type": "ForEach",
+						"name": "ExecutePL_TRFM_BLOBToASQL",
+						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
-								"activity": "getlistofblobfile",
+								"activity": "GetSourceID",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -3590,381 +3894,17 @@
 						],
 						"userProperties": [],
 						"typeProperties": {
-							"items": {
-								"value": "@activity('getlistofblobfile').output.value",
-								"type": "Expression"
+							"pipeline": {
+								"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+								"type": "PipelineReference"
 							},
-							"isSequential": false,
-							"batchCount": 20,
-							"activities": [
-								{
-									"name": "Process Blob To ASQL",
-									"type": "IfCondition",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@if(equals(pipeline().parameters.ProcessType, 'BlobToASQL'), true, false)",
-											"type": "Expression"
-										},
-										"ifTrueActivities": [
-											{
-												"name": "execute_databricks_merge_pipeline",
-												"type": "ExecutePipeline",
-												"dependsOn": [],
-												"userProperties": [],
-												"typeProperties": {
-													"pipeline": {
-														"referenceName": "PL_Framework_TRFM_BlobToASQL",
-														"type": "PipelineReference"
-													},
-													"waitOnCompletion": true,
-													"parameters": {
-														"blobcontainer": {
-															"value": "@item().TargetBlobContainer",
-															"type": "Expression"
-														},
-														"storageaccount": {
-															"value": "@item().StorageAccount",
-															"type": "Expression"
-														},
-														"blobfilename": {
-															"value": "@item().Data_Destination_Folder_Path",
-															"type": "Expression"
-														},
-														"columnlist": {
-															"value": "@item().ColumnSchemaList",
-															"type": "Expression"
-														},
-														"businesskeylist": {
-															"value": "@item().BusinessKeyColumnList",
-															"type": "Expression"
-														},
-														"deltastagingdbname": {
-															"value": "@item().DeltaStagingDbName",
-															"type": "Expression"
-														},
-														"deltatargetdbname": {
-															"value": "@item().DeltaTargetDbName",
-															"type": "Expression"
-														},
-														"deltastagetablename": {
-															"value": "@item().DeltaStagingTableName",
-															"type": "Expression"
-														},
-														"ColumnDelimiter": {
-															"value": "@item().ColumnDelimiter",
-															"type": "Expression"
-														},
-														"azuresqldbetllastmodifieddtm": {
-															"value": "@item().AzuresqldbMaxLastModifieddtm",
-															"type": "Expression"
-														},
-														"tableid": {
-															"value": "@item().TableID",
-															"type": "Expression"
-														},
-														"QuoteCharacter": {
-															"value": "@item().QuoteCharacter",
-															"type": "Expression"
-														},
-														"azuresqltemptablename": {
-															"value": "@item().azuresqltemptablename",
-															"type": "Expression"
-														},
-														"blobfolderpath": {
-															"value": "@item().TargetBlobFolderPath",
-															"type": "Expression"
-														},
-														"deltastagingtableparquetfilepath": {
-															"value": "@item().deltastagingtableparquetfilepath",
-															"type": "Expression"
-														},
-														"DbHostName": {
-															"value": "@item().DestinationHostName",
-															"type": "Expression"
-														},
-														"RowSource": {
-															"value": "@item().SourceName",
-															"type": "Expression"
-														},
-														"azuresqltargettablename": {
-															"value": "@item().AzuresqlTargetTableName",
-															"type": "Expression"
-														},
-														"skipcsvrows": {
-															"value": "@item().skipcsvrows",
-															"type": "Expression"
-														},
-														"skipbottomrows": {
-															"value": "@item().skipbottomrows",
-															"type": "Expression"
-														},
-														"ETLMergeNotebookPath": {
-															"value": "@item().ETLMergeNotebookPath",
-															"type": "Expression"
-														},
-														"StoredProcNameMergeAzuresqltable": {
-															"value": "@item().StoredProcNameMergeAzuresqltable",
-															"type": "Expression"
-														},
-														"databricksclustername": {
-															"value": "@item().databricksclustername",
-															"type": "Expression"
-														},
-														"databricksclusterid": {
-															"value": "@item().databricksclusterid",
-															"type": "Expression"
-														},
-														"SourceTableName": {
-															"value": "@item().SourceTableName",
-															"type": "Expression"
-														},
-														"skipchangedset": "0",
-														"databrickssecretname": {
-															"value": "@item().databrickssecretname",
-															"type": "Expression"
-														},
-														"checkfordeletesind": {
-															"value": "@item().checkfordeletes",
-															"type": "Expression"
-														},
-														"incrementalloadind": {
-															"value": "@item().incrementalloadind",
-															"type": "Expression"
-														}
-													}
-												}
-											}
-										]
-									}
-								},
-								{
-									"name": "Process Blob To ASQL Delete",
-									"type": "IfCondition",
-									"dependsOn": [
-										{
-											"activity": "Process Blob To ASQL",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@if(and(equals(pipeline().parameters.ProcessType, 'BlobToASQLDelete'), equals(item().IncrementalLoadInd, '1')), true, false)",
-											"type": "Expression"
-										},
-										"ifTrueActivities": [
-											{
-												"name": "Framework_CopyDBtoBlobDelete_Pipeline",
-												"description": "Execute copy db to blob storage pipeline",
-												"type": "ExecutePipeline",
-												"dependsOn": [
-													{
-														"activity": "Truncate AzureSQL Delete Table",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"userProperties": [],
-												"typeProperties": {
-													"pipeline": {
-														"referenceName": "PL_Framework_TRFM_BlobToASQL_Delete",
-														"type": "PipelineReference"
-													},
-													"waitOnCompletion": true,
-													"parameters": {
-														"Data_Source_Table_Name": {
-															"value": "@item().Data_Source_Table_Name",
-															"type": "Expression"
-														},
-														"Data_Source_WaterMarkColumn": {
-															"value": "@item().Data_Source_WaterMarkColumn",
-															"type": "Expression"
-														},
-														"Data_Destination_Folder_Path": {
-															"value": "@item().Data_Destination_Folder_Path",
-															"type": "Expression"
-														},
-														"TableID": {
-															"value": "@item().TableID",
-															"type": "Expression"
-														},
-														"Data_Destination_File_Name": {
-															"value": "@item().Data_Destination_File_Name",
-															"type": "Expression"
-														},
-														"SourceServerName": {
-															"value": "@item().SourceServerName",
-															"type": "Expression"
-														},
-														"SourceDatabaseName": {
-															"value": "@item().SourceDatabaseName",
-															"type": "Expression"
-														},
-														"File_Name_Ext": {
-															"value": "@item().File_Name_Ext",
-															"type": "Expression"
-														},
-														"Join_Condition": {
-															"value": "@item().Join_Condition",
-															"type": "Expression"
-														},
-														"Source_Column_List": {
-															"value": "@replace(replace(item().Source_Column_List,'[',''),']','')",
-															"type": "Expression"
-														},
-														"ColumnDelimiter": {
-															"value": "@item().ColumnDelimiter",
-															"type": "Expression"
-														},
-														"QuoteCharacter": {
-															"value": "@item().QuoteCharacter",
-															"type": "Expression"
-														},
-														"source_where_filter": {
-															"value": "@item().Source_Where_Filter",
-															"type": "Expression"
-														},
-														"UserName": {
-															"value": "@item().UserName",
-															"type": "Expression"
-														},
-														"SecretPasswordName": {
-															"value": "@item().SecretPasswordName",
-															"type": "Expression"
-														},
-														"BlobContainer": {
-															"value": "@item().TargetBlobContainer",
-															"type": "Expression"
-														},
-														"BusinessKeyList": {
-															"value": "@item().BusinessKeyColumnList",
-															"type": "Expression"
-														},
-														"DeltaTargetDbName": {
-															"value": "@item().DeltaTargetDbName",
-															"type": "Expression"
-														},
-														"StorageAccount": {
-															"value": "@item().StorageAccount",
-															"type": "Expression"
-														},
-														"RowSource": {
-															"value": "@item().SourceName",
-															"type": "Expression"
-														},
-														"DbHostName": {
-															"value": "@item().DestinationHostName",
-															"type": "Expression"
-														},
-														"AzureTargetTableName": {
-															"value": "@item().AzuresqlTargetTableName",
-															"type": "Expression"
-														},
-														"DeltaStagingTableParquetFilePath": {
-															"value": "@item().DeltaStagingTableParquetFilePath",
-															"type": "Expression"
-														},
-														"DeleteProcessCompletionDTM": {
-															"value": "@item().DeleteProcessCompletionDTM",
-															"type": "Expression"
-														},
-														"DeltaStagingDbName": {
-															"value": "@item().DeltaStagingDbName",
-															"type": "Expression"
-														},
-														"DeltaStageTableName": {
-															"value": "@item().DeltaStagingTableName",
-															"type": "Expression"
-														},
-														"AzureSqlTempDeleteTableName": {
-															"value": "@item().AzuresqlTempDeleteTableName",
-															"type": "Expression"
-														},
-														"Host_Name": {
-															"value": "@item().Host_Name",
-															"type": "Expression"
-														},
-														"Port_No": {
-															"value": "@item().Port_No",
-															"type": "Expression"
-														},
-														"SID": {
-															"value": "@item().SID",
-															"type": "Expression"
-														},
-														"databricksclustername": {
-															"value": "@item().databricksclustername",
-															"type": "Expression"
-														},
-														"databricksclusterid": {
-															"value": "@item().databricksclusterid",
-															"type": "Expression"
-														},
-														"databrickssecretname": {
-															"value": "@item().databrickssecretname",
-															"type": "Expression"
-														},
-														"CheckForDeletes": {
-															"value": "@item().CheckForDeletes",
-															"type": "Expression"
-														},
-														"File_Name_DateTime_Ind": {
-															"value": "@item().File_Name_DateTime_Ind",
-															"type": "Expression"
-														},
-														"Data_Destination_Folder_Path_DeleteProcess": {
-															"value": "@item().Data_Destination_Folder_Path_DeleteProcess",
-															"type": "Expression"
-														},
-														"SourceId": {
-															"value": "@pipeline().parameters.SourceID",
-															"type": "Expression"
-														},
-														"IsInitialLoad": {
-															"value": "@item().IsInitialLoad",
-															"type": "Expression"
-														}
-													}
-												}
-											},
-											{
-												"name": "Truncate AzureSQL Delete Table",
-												"type": "Lookup",
-												"dependsOn": [],
-												"policy": {
-													"timeout": "0.12:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "@concat('DECLARE @ObjectName VARCHAR(120), @SchemaName VARCHAR(100), @TableName VARCHAR(100) SELECT @ObjectName = ''', item().AzuresqlTempDeleteTableName, ''' SELECT @TableName = PARSENAME(@ObjectName, 1), @SchemaName = PARSENAME(@ObjectName, 2) IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @TableName and Table_Schema = @SchemaName) BEGIN Truncate Table ',  item().AzuresqlTempDeleteTableName, ' SELECT COUNT(*) AS RecCount FROM ', item().AzuresqlTempDeleteTableName, ' END ELSE BEGIN SELECT 0  AS RecCount END ')",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00",
-														"partitionOption": "None"
-													},
-													"dataset": {
-														"referenceName": "DS_ASQL_EDWDiscovery",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												}
-											}
-										]
-									}
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceID": {
+									"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+									"type": "Expression"
 								}
-							]
+							}
 						}
 					}
 				],
@@ -3973,191 +3913,94 @@
 					"cancelAfter": {}
 				},
 				"parameters": {
-					"SourceID": {
-						"type": "int",
-						"defaultValue": 1
-					},
-					"TriggerName": {
-						"type": "string"
-					},
-					"ProcessType": {
+					"SourceName": {
 						"type": "string",
-						"defaultValue": "BlobToASQL"
+						"defaultValue": "Evoqua-metadata"
 					}
 				},
 				"folder": {
-					"name": "EDW_Discovery"
+					"name": "Evoqua"
 				},
-				"annotations": [],
-				"lastPublishTime": "2022-01-21T06:37:38Z"
+				"annotations": []
 			},
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/HiAffinity_BPackage_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
+			"name": "[concat(parameters('factoryName'), '/PL_Evoqua_Telemetry')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
+				"activities": [
 					{
-						"pipelineReference": {
-							"referenceName": "PL_EDWDiscovery_DM_SourceToASQL_HiAffinity",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"TargetServerName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetServerName')]",
-							"TargetDatabaseName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetDatabaseName')]",
-							"TargetUserName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetUserName')]",
-							"TargetSecretPasswordName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetSecretPasswordName')]",
-							"SourceHostName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceHostName')]",
-							"SourcePortNo": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourcePortNo')]",
-							"SourceSID": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceSID')]",
-							"SourceUserName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceUserName')]",
-							"SourceSecretPasswordName": "[parameters('HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceSecretPasswordName')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2022-11-11T09:00:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								5
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ICN_Data_Copy_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_ICN_Data_Copy",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Month",
-						"interval": 1,
-						"startTime": "2021-07-16T01:30:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								2
-							],
-							"monthDays": [
-								1
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ICN_Payment_Extract_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_File_Export_To_NFUJPRD202",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"FileExportName": "[parameters('ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-08-19T23:00:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								23
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/QAO_File_Export_Monthly_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Every 2nd Monday of each Month at 9 : 00 AM",
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_File_Export_To_globalscape",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"FileExportName": "[parameters('QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_globalscape_parameters_FileExportName')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Month",
-						"interval": 1,
-						"startTime": "2020-09-22T02:04:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								23
-							],
-							"monthlyOccurrences": [
-								{
-									"day": "Sunday",
-									"occurrence": 2
+						"name": "ExecutePL_TRFM_BLOBToASQL",
+						"description": "Loading Temetra API Data into databricks delta and Azure sql db",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceID": {
+									"value": "@activity('GetSourceID').output.firstRow['SourceID']",
+									"type": "Expression"
 								}
-							]
+							}
+						}
+					},
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
 						}
 					}
-				}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "Evoqua-telemetry"
+					}
+				},
+				"folder": {
+					"name": "Evoqua"
+				},
+				"annotations": []
 			},
 			"dependsOn": []
 		}
