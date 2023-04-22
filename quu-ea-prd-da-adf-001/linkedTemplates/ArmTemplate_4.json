@@ -13,6 +13,91 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_Archive')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Archive folder in GlobalScape",
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@concat(dataset().filefolder,'\\Archive')",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "tag_id",
+						"type": "String"
+					},
+					{
+						"name": "time",
+						"type": "String"
+					},
+					{
+						"name": "counter",
+						"type": "String"
+					},
+					{
+						"name": "event",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_BinaryFile_Archive')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@concat(dataset().filefolder,'\\Archive')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_BinaryFile_source')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -865,117 +950,6 @@
 					"quoteChar": "\""
 				},
 				"schema": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_MySQL')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_MySQL_NetAppManagement",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"Databasename": {
-							"value": "@dataset().Databasename",
-							"type": "Expression"
-						},
-						"SecretPasswordName": {
-							"value": "@dataset().SecretPasswordName",
-							"type": "Expression"
-						},
-						"Servername": {
-							"value": "@dataset().Servername",
-							"type": "Expression"
-						},
-						"Username": {
-							"value": "@dataset().UserName",
-							"type": "Expression"
-						}
-					}
-				},
-				"parameters": {
-					"Databasename": {
-						"type": "string"
-					},
-					"SecretPasswordName": {
-						"type": "string"
-					},
-					"Servername": {
-						"type": "string"
-					},
-					"UserName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "MySqlTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_Oracle_OnPrem')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ORAC_Framework",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"HostName": {
-							"value": "@dataset().HostName",
-							"type": "Expression"
-						},
-						"PortNo": {
-							"value": "@dataset().PortNo",
-							"type": "Expression"
-						},
-						"SID": {
-							"value": "@dataset().SID",
-							"type": "Expression"
-						},
-						"UserName": {
-							"value": "@dataset().UserName",
-							"type": "Expression"
-						},
-						"SecretName": {
-							"value": "@dataset().SecretPasswordName",
-							"type": "Expression"
-						}
-					}
-				},
-				"parameters": {
-					"HostName": {
-						"type": "string",
-						"defaultValue": "QNDCPRD137.corporate.urbanutilities.internal"
-					},
-					"PortNo": {
-						"type": "string",
-						"defaultValue": "1521"
-					},
-					"SID": {
-						"type": "string",
-						"defaultValue": "SDCM"
-					},
-					"UserName": {
-						"type": "string",
-						"defaultValue": "EBI_TECHM_USERS"
-					},
-					"SecretPasswordName": {
-						"type": "string",
-						"defaultValue": "gis-ebi-techm-users"
-					}
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "OracleTable",
-				"schema": [],
-				"typeProperties": {}
 			},
 			"dependsOn": []
 		}
