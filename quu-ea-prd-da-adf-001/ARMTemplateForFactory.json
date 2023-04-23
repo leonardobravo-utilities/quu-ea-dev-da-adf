@@ -262,29 +262,33 @@
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName": {
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "Ellipse9"
 		},
-		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlySourceToBlob": {
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlySourceToBlob": {
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL": {
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_SourceName": {
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_TriggerName": {
 			"type": "string",
-			"defaultValue": "Ellipse9"
-		},
-		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
+			"defaultValue": "Ellipse9_Daily_Trigger"
 		},
 		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 			"type": "string",
@@ -4579,89 +4583,6 @@
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlob_SqlServer')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_EA_Ellipse9_DataModel_Main')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Execute PL_Ellipse9_Main",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Ellipse9_Main",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"SourceName": {
-									"value": "@pipeline().parameters.SourceName",
-									"type": "Expression"
-								},
-								"OnlySourceToBlob": {
-									"value": "@pipeline().parameters.OnlySourceToBlob",
-									"type": "Expression"
-								},
-								"OnlyBlobtoASQL": {
-									"value": "@pipeline().parameters.OnlyBlobtoASQL",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "Execute PL_WorkOrder_Model_Main",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Execute PL_Ellipse9_Main",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_WorkOrder_Model_Main",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceName": {
-						"type": "string",
-						"defaultValue": "Ellipse9"
-					},
-					"OnlySourceToBlob": {
-						"type": "bool",
-						"defaultValue": true
-					},
-					"OnlyBlobtoASQL": {
-						"type": "bool",
-						"defaultValue": true
-					}
-				},
-				"folder": {
-					"name": "Ellipse9"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_Ellipse9_Main')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_WorkOrder_Model_Main')]"
 			]
 		},
 		{
@@ -13259,6 +13180,125 @@
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_DM_SourceToBlob_SqlServer')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Ellipse9_DataModel_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute PL_Ellipse9_Main",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								},
+								"OnlySourceToBlob": {
+									"value": "@pipeline().parameters.OnlySourceToBlob",
+									"type": "Expression"
+								},
+								"OnlyBlobtoASQL": {
+									"value": "@pipeline().parameters.OnlyBlobtoASQL",
+									"type": "Expression"
+								},
+								"AllowPartialUpdateOfDiscovery": {
+									"value": "@pipeline().parameters.AllowPartialUpdateOfDiscovery",
+									"type": "Expression"
+								},
+								"Additional_MappingParam": {
+									"value": "NULL",
+									"type": "Expression"
+								},
+								"OnlyExtractDeletedRecordsFromSourceToBlob": {
+									"value": "@pipeline().parameters.OnlyExtractDeletedRecordsFromSourceToBlob",
+									"type": "Expression"
+								},
+								"OnlyDeleteRecordsFromBlobToASQL": {
+									"value": "@pipeline().parameters.OnlyDeleteRecordsFromBlobToASQL",
+									"type": "Expression"
+								},
+								"TriggerName": {
+									"value": "@pipeline().parameters.TriggerName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute PL_WorkOrder_Model_Main",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute PL_Ellipse9_Main",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_WorkOrder_Model_Main",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "Ellipse9"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"AllowPartialUpdateOfDiscovery": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyExtractDeletedRecordsFromSourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyDeleteRecordsFromBlobToASQL": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"TriggerName": {
+						"type": "string",
+						"defaultValue": "Ellipse9_Daily_Trigger"
+					}
+				},
+				"folder": {
+					"name": "Ellipse9"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_WorkOrder_Model_Main')]"
 			]
 		},
 		{
@@ -34464,48 +34504,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Ellipse9_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_Ellipse9_Main",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('Ellipse9_Daily_Trigger_properties_PL_Ellipse9_Main_parameters_OnlyBlobtoASQL')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-06-15T07:28:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								2
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_Ellipse9_Main')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/Ellipse9_WorkOrderModel_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -34515,13 +34513,17 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "PL_EA_Ellipse9_DataModel_Main",
+							"referenceName": "PL_Ellipse9_DataModel_Main",
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"SourceName": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_EA_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL')]"
+							"SourceName": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_TriggerName')]"
 						}
 					}
 				],
@@ -34537,14 +34539,14 @@
 								0
 							],
 							"hours": [
-								2
+								1
 							]
 						}
 					}
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_EA_Ellipse9_DataModel_Main')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_Ellipse9_DataModel_Main')]"
 			]
 		},
 		{
