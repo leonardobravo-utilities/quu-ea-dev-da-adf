@@ -9,7 +9,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "PL_Ellipse9_Main",
+						"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
@@ -24,6 +24,26 @@
 						},
 						"OnlyBlobtoASQL": {
 							"value": "@pipeline().parameters.OnlyBlobtoASQL",
+							"type": "Expression"
+						},
+						"AllowPartialUpdateOfDiscovery": {
+							"value": "@pipeline().parameters.AllowPartialUpdateOfDiscovery",
+							"type": "Expression"
+						},
+						"Additional_MappingParam": {
+							"value": "@pipeline().parameters.Additional_MappingParam",
+							"type": "Expression"
+						},
+						"OnlyExtractDeletedRecordsFromSourceToBlob": {
+							"value": "@pipeline().parameters.OnlyExtractDeletedRecordsFromSourceToBlob",
+							"type": "Expression"
+						},
+						"OnlyDeleteRecordsFromBlobToASQL": {
+							"value": "@pipeline().parameters.OnlyDeleteRecordsFromBlobToASQL",
+							"type": "Expression"
+						},
+						"TriggerName": {
+							"value": "@pipeline().parameters.TriggerName",
 							"type": "Expression"
 						}
 					}
@@ -62,11 +82,32 @@
 			"OnlyBlobtoASQL": {
 				"type": "bool",
 				"defaultValue": true
+			},
+			"AllowPartialUpdateOfDiscovery": {
+				"type": "string",
+				"defaultValue": "true"
+			},
+			"Additional_MappingParam": {
+				"type": "string"
+			},
+			"OnlyExtractDeletedRecordsFromSourceToBlob": {
+				"type": "string",
+				"defaultValue": "true"
+			},
+			"OnlyDeleteRecordsFromBlobToASQL": {
+				"type": "string",
+				"defaultValue": "true"
+			},
+			"TriggerName": {
+				"type": "string",
+				"defaultValue": "Ellipse9_Daily_Trigger"
 			}
 		},
 		"folder": {
 			"name": "Ellipse9"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-05-24T06:00:02Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
