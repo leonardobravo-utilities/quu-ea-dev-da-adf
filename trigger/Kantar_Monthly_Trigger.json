@@ -6,16 +6,17 @@
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+					"referenceName": "PL_Kantar_DataModel_Main",
 					"type": "PipelineReference"
 				},
 				"parameters": {
 					"SourceName": "Kantar",
 					"OnlySourceToBlob": true,
 					"OnlyBlobtoASQL": true,
-					"AllowPartialUpdateOfDiscovery": false,
-					"OnlyExtractDeletedRecordsFromSourceToBlob": false,
-					"OnlyDeleteRecordsFromBlobToASQL": false,
+					"AllowPartialUpdateOfDiscovery": "false",
+					"Additional_MappingParam": null,
+					"OnlyExtractDeletedRecordsFromSourceToBlob": "false",
+					"OnlyDeleteRecordsFromBlobToASQL": "false",
 					"TriggerName": "Kantar_Monthly_Trigger"
 				}
 			}
