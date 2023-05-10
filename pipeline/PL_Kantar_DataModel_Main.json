@@ -1,9 +1,115 @@
 {
 	"name": "PL_Kantar_DataModel_Main",
 	"properties": {
+		"activities": [
+			{
+				"name": "Execute PL_Kantar_Main",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceName": {
+							"value": "@pipeline().parameters.SourceName",
+							"type": "Expression"
+						},
+						"OnlySourceToBlob": {
+							"value": "@pipeline().parameters.OnlySourceToBlob",
+							"type": "Expression"
+						},
+						"OnlyBlobtoASQL": {
+							"value": "@pipeline().parameters.OnlyBlobtoASQL",
+							"type": "Expression"
+						},
+						"AllowPartialUpdateOfDiscovery": {
+							"value": "@pipeline().parameters.AllowPartialUpdateOfDiscovery",
+							"type": "Expression"
+						},
+						"Additional_MappingParam": {
+							"value": "@pipeline().parameters.Additional_MappingParam",
+							"type": "Expression"
+						},
+						"OnlyExtractDeletedRecordsFromSourceToBlob": {
+							"value": "@pipeline().parameters.OnlyExtractDeletedRecordsFromSourceToBlob",
+							"type": "Expression"
+						},
+						"OnlyDeleteRecordsFromBlobToASQL": {
+							"value": "@pipeline().parameters.OnlyDeleteRecordsFromBlobToASQL",
+							"type": "Expression"
+						},
+						"TriggerName": {
+							"value": "@pipeline().parameters.TriggerName",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute PL_Kantar_Model_Main",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute PL_Kantar_Main",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitOnCompletion": true,
+					"parameters": {
+						"sourcename": {
+							"value": "@pipeline().parameters.SourceName",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "Kantar"
+			},
+			"OnlySourceToBlob": {
+				"type": "bool",
+				"defaultValue": true
+			},
+			"OnlyBlobtoASQL": {
+				"type": "bool",
+				"defaultValue": true
+			},
+			"AllowPartialUpdateOfDiscovery": {
+				"type": "string",
+				"defaultValue": "false"
+			},
+			"Additional_MappingParam": {
+				"type": "string"
+			},
+			"OnlyExtractDeletedRecordsFromSourceToBlob": {
+				"type": "string",
+				"defaultValue": "false"
+			},
+			"OnlyDeleteRecordsFromBlobToASQL": {
+				"type": "string",
+				"defaultValue": "false"
+			},
+			"TriggerName": {
+				"type": "string",
+				"defaultValue": "Kantar_Monthly_Trigger"
+			}
+		},
 		"folder": {
 			"name": "Kantar"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-05-24T06:00:02Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
