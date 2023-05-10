@@ -21,6 +21,246 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_TFSCS_DM_SourcetoBlob')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "TFSCS_Copy_to_Blob",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Lkp_getfilemetadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "FileServerReadSettings",
+									"recursive": false,
+									"wildcardFileName": "*.*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings",
+									"skipLineCount": 4
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_FS_GlobalScape_TFS",
+								"type": "DatasetReference",
+								"parameters": {
+									"filefolder": {
+										"value": "@activity('Lkp_getfilemetadata').output.Firstrow['FileFolderName']",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ABLB_FS_TFS_Sink",
+								"type": "DatasetReference",
+								"parameters": {
+									"targetblobfoldername": {
+										"value": "@variables('targetblobfoldername')",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Archive_Data",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "TFSCS_Copy_to_Blob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "FileServerReadSettings",
+									"recursive": false,
+									"wildcardFileName": "*.*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "FileServerWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_FS_GlobalScape_TFS",
+								"type": "DatasetReference",
+								"parameters": {
+									"filefolder": {
+										"value": "@activity('Lkp_getfilemetadata').output.Firstrow['FileFolderName']",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_FS_GlobalScape_Archive",
+								"type": "DatasetReference",
+								"parameters": {
+									"filefolder": {
+										"value": "@activity('Lkp_getfilemetadata').output.Firstrow['FileFolderName']",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Delete_Processed_files From_CardServices",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Archive_Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_FS_GlobalScape_TFS",
+								"type": "DatasetReference",
+								"parameters": {
+									"filefolder": {
+										"value": "@activity('Lkp_getfilemetadata').output.Firstrow['FileFolderName']",
+										"type": "Expression"
+									}
+								}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "FileServerReadSettings",
+								"recursive": false,
+								"wildcardFileName": "*.*"
+							}
+						}
+					},
+					{
+						"name": "Lkp_getfilemetadata",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select  FileFolderName\nfrom etl.sourcesystem\nwhere sourcename = '@{pipeline().parameters.sourcename}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"sourcename": {
+						"type": "string",
+						"defaultValue": "Tanker Filling Station Card Services"
+					}
+				},
+				"variables": {
+					"Testvar": {
+						"type": "String"
+					},
+					"targetblobfoldername": {
+						"type": "String",
+						"defaultValue": "tankerfillingstation-dataloading/CardService"
+					}
+				},
+				"folder": {
+					"name": "Tanker Filling Station Card Services"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/FSE_StartFSECluster_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -3916,85 +4156,6 @@
 					"SourceName": {
 						"type": "string",
 						"defaultValue": "Evoqua-metadata"
-					}
-				},
-				"folder": {
-					"name": "Evoqua"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Evoqua_Telemetry')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "ExecutePL_TRFM_BLOBToASQL",
-						"description": "Loading Temetra API Data into databricks delta and Azure sql db",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "GetSourceID",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"SourceID": {
-									"value": "@activity('GetSourceID').output.firstRow['SourceID']",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "GetSourceID",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "Select SourceID from etl.SourceSystem\nwhere SourceName='@{pipeline().parameters.SourceName}'",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceName": {
-						"type": "string",
-						"defaultValue": "Evoqua-telemetry"
 					}
 				},
 				"folder": {

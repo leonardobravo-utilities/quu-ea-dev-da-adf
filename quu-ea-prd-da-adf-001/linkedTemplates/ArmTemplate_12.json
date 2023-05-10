@@ -7,6 +7,22 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
+		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Takadu-Reporting-API"
+		},
+		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
 		"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "Takadu-Reporting-API-Week"
@@ -106,12 +122,85 @@
 		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_TriggerName": {
 			"type": "string",
 			"defaultValue": "Ellipse9_Daily_Trigger"
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Kantar"
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "string",
+			"defaultValue": "false"
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_Additional_MappingParam": {
+			"type": "object",
+			"defaultValue": null
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "string",
+			"defaultValue": "false"
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "string",
+			"defaultValue": "false"
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "Kantar_Monthly_Trigger"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Takadu_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlyBlobtoASQL": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"OnlySourceToBlob": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-09-28T06:04:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								5
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Takadu_Weekly_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
@@ -285,6 +374,67 @@
 							],
 							"hours": [
 								1
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Kantar_Monthly_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Kantar_DataModel_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery')]",
+							"Additional_MappingParam": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_Additional_MappingParam')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_TriggerName')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Month",
+						"interval": 1,
+						"startTime": "2022-11-11T09:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								6
+							],
+							"monthDays": [
+								26,
+								27,
+								28,
+								29,
+								30,
+								31,
+								-1,
+								1,
+								2,
+								3,
+								4,
+								5,
+								6,
+								7
 							]
 						}
 					}

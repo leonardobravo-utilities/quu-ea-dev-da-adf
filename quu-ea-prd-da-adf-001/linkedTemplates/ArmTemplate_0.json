@@ -1859,6 +1859,136 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_EDW_Mart_Kantar')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Dim_SurveyVariable",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_SurveyVariable_T2]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Fact_SurveyResults",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Dim_SurveyVariable",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Fact_SurveyResults_T2]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"sourcename": {
+						"type": "string",
+						"defaultValue": "Kantar"
+					}
+				},
+				"folder": {
+					"name": "Kantar-Model"
+				},
+				"annotations": [],
+				"lastPublishTime": "2020-09-29T03:32:11Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_EDW_Mart_LIWIS')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -3303,50 +3433,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_ProcessModel')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_FileExists')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ABLB_quueadadlslanding001",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"blobcontainer": {
-						"type": "string"
-					},
-					"blobfolderpath": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Framework"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": {
-							"value": "@dataset().blobfolderpath",
-							"type": "Expression"
-						},
-						"container": {
-							"value": "@dataset().blobcontainer",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_quueadadlslanding001')]"
 			]
 		}
 	]

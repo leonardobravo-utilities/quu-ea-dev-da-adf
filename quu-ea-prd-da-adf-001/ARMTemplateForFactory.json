@@ -442,31 +442,35 @@
 			"type": "string",
 			"defaultValue": "ICN"
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "Kantar"
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlySourceToBlob": {
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
-			"type": "bool",
-			"defaultValue": false
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "string",
+			"defaultValue": "false"
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
-			"type": "bool",
-			"defaultValue": false
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_Additional_MappingParam": {
+			"type": "object",
+			"defaultValue": null
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
-			"type": "bool",
-			"defaultValue": false
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "string",
+			"defaultValue": "false"
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "string",
+			"defaultValue": "false"
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_TriggerName": {
 			"type": "string",
 			"defaultValue": "Kantar_Monthly_Trigger"
 		},
@@ -11629,6 +11633,136 @@
 					"name": "WorkOrder-Model"
 				},
 				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_EDW_Mart_Kantar')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Dim_SurveyVariable",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_SurveyVariable_T2]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Fact_SurveyResults",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Dim_SurveyVariable",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Fact_SurveyResults_T2]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"sourcename": {
+						"type": "string",
+						"defaultValue": "Kantar"
+					}
+				},
+				"folder": {
+					"name": "Kantar-Model"
+				},
+				"annotations": [],
+				"lastPublishTime": "2020-09-29T03:32:11Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_EDWMart')]"
@@ -26125,6 +26259,134 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_Kantar_DataModel_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute PL_Kantar_Main",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								},
+								"OnlySourceToBlob": {
+									"value": "@pipeline().parameters.OnlySourceToBlob",
+									"type": "Expression"
+								},
+								"OnlyBlobtoASQL": {
+									"value": "@pipeline().parameters.OnlyBlobtoASQL",
+									"type": "Expression"
+								},
+								"AllowPartialUpdateOfDiscovery": {
+									"value": "@pipeline().parameters.AllowPartialUpdateOfDiscovery",
+									"type": "Expression"
+								},
+								"Additional_MappingParam": {
+									"value": "@pipeline().parameters.Additional_MappingParam",
+									"type": "Expression"
+								},
+								"OnlyExtractDeletedRecordsFromSourceToBlob": {
+									"value": "@pipeline().parameters.OnlyExtractDeletedRecordsFromSourceToBlob",
+									"type": "Expression"
+								},
+								"OnlyDeleteRecordsFromBlobToASQL": {
+									"value": "@pipeline().parameters.OnlyDeleteRecordsFromBlobToASQL",
+									"type": "Expression"
+								},
+								"TriggerName": {
+									"value": "@pipeline().parameters.TriggerName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute PL_Kantar_Model_Main",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute PL_Kantar_Main",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDW_Mart_Kantar",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sourcename": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "Kantar"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"AllowPartialUpdateOfDiscovery": {
+						"type": "string",
+						"defaultValue": "false"
+					},
+					"Additional_MappingParam": {
+						"type": "string"
+					},
+					"OnlyExtractDeletedRecordsFromSourceToBlob": {
+						"type": "string",
+						"defaultValue": "false"
+					},
+					"OnlyDeleteRecordsFromBlobToASQL": {
+						"type": "string",
+						"defaultValue": "false"
+					},
+					"TriggerName": {
+						"type": "string",
+						"defaultValue": "Kantar_Monthly_Trigger"
+					}
+				},
+				"folder": {
+					"name": "Kantar"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-05-24T06:00:02Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_EDW_Mart_Kantar')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_LIMS_Source_To_ASQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -35103,17 +35365,18 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"referenceName": "PL_Kantar_DataModel_Main",
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"SourceName": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
-							"AllowPartialUpdateOfDiscovery": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
-							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
-							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
-							"TriggerName": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
+							"SourceName": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery')]",
+							"Additional_MappingParam": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_Additional_MappingParam')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_TriggerName')]"
 						}
 					}
 				],
@@ -35152,7 +35415,7 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_Kantar_DataModel_Main')]"
 			]
 		},
 		{

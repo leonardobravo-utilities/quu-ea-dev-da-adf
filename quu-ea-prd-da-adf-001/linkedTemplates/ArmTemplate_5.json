@@ -17,6 +17,56 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_GlobalScape_ExcelFile_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"Filefolder": {
+						"type": "string",
+						"defaultValue": "NOPV"
+					},
+					"SheetName": {
+						"type": "string",
+						"defaultValue": "Bank_Details_Check"
+					},
+					"FileName": {
+						"type": "string",
+						"defaultValue": "Bank_Details_Check_2023_02_08.xlsx"
+					}
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": {
+						"value": "@dataset().SheetName",
+						"type": "Expression"
+					},
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().Filefolder",
+							"type": "Expression"
+						}
+					},
+					"firstRowAsHeader": true
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_ICN_Payment_Extract_File')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -2637,472 +2687,6 @@
 					"name": "EDW_Discovery"
 				},
 				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_TRFM_BlobToASQL')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "getlistofblobfile",
-						"description": "Lookup activity to retrieve the list blob csv file need to be processed from the metadata table.",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderStoredProcedureName": "[[ETL].[usp_get_tablelist_by_sourceid]",
-								"storedProcedureParameters": {
-									"sourceid": {
-										"type": "Int32",
-										"value": {
-											"value": "@pipeline().parameters.SourceID",
-											"type": "Expression"
-										}
-									},
-									"TriggerName": {
-										"type": "String",
-										"value": {
-											"value": "@pipeline().parameters.TriggerName",
-											"type": "Expression"
-										}
-									}
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "foreachblobfile",
-						"description": "looping through the list of blob file.",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "getlistofblobfile",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('getlistofblobfile').output.value",
-								"type": "Expression"
-							},
-							"isSequential": false,
-							"batchCount": 20,
-							"activities": [
-								{
-									"name": "Process Blob To ASQL",
-									"type": "IfCondition",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@if(equals(pipeline().parameters.ProcessType, 'BlobToASQL'), true, false)",
-											"type": "Expression"
-										},
-										"ifTrueActivities": [
-											{
-												"name": "execute_databricks_merge_pipeline",
-												"type": "ExecutePipeline",
-												"dependsOn": [],
-												"userProperties": [],
-												"typeProperties": {
-													"pipeline": {
-														"referenceName": "PL_Framework_TRFM_BlobToASQL",
-														"type": "PipelineReference"
-													},
-													"waitOnCompletion": true,
-													"parameters": {
-														"blobcontainer": {
-															"value": "@item().TargetBlobContainer",
-															"type": "Expression"
-														},
-														"storageaccount": {
-															"value": "@item().StorageAccount",
-															"type": "Expression"
-														},
-														"blobfilename": {
-															"value": "@item().Data_Destination_Folder_Path",
-															"type": "Expression"
-														},
-														"columnlist": {
-															"value": "@item().ColumnSchemaList",
-															"type": "Expression"
-														},
-														"businesskeylist": {
-															"value": "@item().BusinessKeyColumnList",
-															"type": "Expression"
-														},
-														"deltastagingdbname": {
-															"value": "@item().DeltaStagingDbName",
-															"type": "Expression"
-														},
-														"deltatargetdbname": {
-															"value": "@item().DeltaTargetDbName",
-															"type": "Expression"
-														},
-														"deltastagetablename": {
-															"value": "@item().DeltaStagingTableName",
-															"type": "Expression"
-														},
-														"ColumnDelimiter": {
-															"value": "@item().ColumnDelimiter",
-															"type": "Expression"
-														},
-														"azuresqldbetllastmodifieddtm": {
-															"value": "@item().AzuresqldbMaxLastModifieddtm",
-															"type": "Expression"
-														},
-														"tableid": {
-															"value": "@item().TableID",
-															"type": "Expression"
-														},
-														"QuoteCharacter": {
-															"value": "@item().QuoteCharacter",
-															"type": "Expression"
-														},
-														"azuresqltemptablename": {
-															"value": "@item().azuresqltemptablename",
-															"type": "Expression"
-														},
-														"blobfolderpath": {
-															"value": "@item().TargetBlobFolderPath",
-															"type": "Expression"
-														},
-														"deltastagingtableparquetfilepath": {
-															"value": "@item().deltastagingtableparquetfilepath",
-															"type": "Expression"
-														},
-														"DbHostName": {
-															"value": "@item().DestinationHostName",
-															"type": "Expression"
-														},
-														"RowSource": {
-															"value": "@item().SourceName",
-															"type": "Expression"
-														},
-														"azuresqltargettablename": {
-															"value": "@item().AzuresqlTargetTableName",
-															"type": "Expression"
-														},
-														"skipcsvrows": {
-															"value": "@item().skipcsvrows",
-															"type": "Expression"
-														},
-														"skipbottomrows": {
-															"value": "@item().skipbottomrows",
-															"type": "Expression"
-														},
-														"ETLMergeNotebookPath": {
-															"value": "@item().ETLMergeNotebookPath",
-															"type": "Expression"
-														},
-														"StoredProcNameMergeAzuresqltable": {
-															"value": "@item().StoredProcNameMergeAzuresqltable",
-															"type": "Expression"
-														},
-														"databricksclustername": {
-															"value": "@item().databricksclustername",
-															"type": "Expression"
-														},
-														"databricksclusterid": {
-															"value": "@item().databricksclusterid",
-															"type": "Expression"
-														},
-														"SourceTableName": {
-															"value": "@item().SourceTableName",
-															"type": "Expression"
-														},
-														"skipchangedset": "0",
-														"databrickssecretname": {
-															"value": "@item().databrickssecretname",
-															"type": "Expression"
-														},
-														"checkfordeletesind": {
-															"value": "@item().checkfordeletes",
-															"type": "Expression"
-														},
-														"incrementalloadind": {
-															"value": "@item().incrementalloadind",
-															"type": "Expression"
-														}
-													}
-												}
-											}
-										]
-									}
-								},
-								{
-									"name": "Process Blob To ASQL Delete",
-									"type": "IfCondition",
-									"dependsOn": [
-										{
-											"activity": "Process Blob To ASQL",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@if(and(equals(pipeline().parameters.ProcessType, 'BlobToASQLDelete'), equals(item().IncrementalLoadInd, '1')), true, false)",
-											"type": "Expression"
-										},
-										"ifTrueActivities": [
-											{
-												"name": "Framework_CopyDBtoBlobDelete_Pipeline",
-												"description": "Execute copy db to blob storage pipeline",
-												"type": "ExecutePipeline",
-												"dependsOn": [
-													{
-														"activity": "Truncate AzureSQL Delete Table",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"userProperties": [],
-												"typeProperties": {
-													"pipeline": {
-														"referenceName": "PL_Framework_TRFM_BlobToASQL_Delete",
-														"type": "PipelineReference"
-													},
-													"waitOnCompletion": true,
-													"parameters": {
-														"Data_Source_Table_Name": {
-															"value": "@item().Data_Source_Table_Name",
-															"type": "Expression"
-														},
-														"Data_Source_WaterMarkColumn": {
-															"value": "@item().Data_Source_WaterMarkColumn",
-															"type": "Expression"
-														},
-														"Data_Destination_Folder_Path": {
-															"value": "@item().Data_Destination_Folder_Path",
-															"type": "Expression"
-														},
-														"TableID": {
-															"value": "@item().TableID",
-															"type": "Expression"
-														},
-														"Data_Destination_File_Name": {
-															"value": "@item().Data_Destination_File_Name",
-															"type": "Expression"
-														},
-														"SourceServerName": {
-															"value": "@item().SourceServerName",
-															"type": "Expression"
-														},
-														"SourceDatabaseName": {
-															"value": "@item().SourceDatabaseName",
-															"type": "Expression"
-														},
-														"File_Name_Ext": {
-															"value": "@item().File_Name_Ext",
-															"type": "Expression"
-														},
-														"Join_Condition": {
-															"value": "@item().Join_Condition",
-															"type": "Expression"
-														},
-														"Source_Column_List": {
-															"value": "@replace(replace(item().Source_Column_List,'[',''),']','')",
-															"type": "Expression"
-														},
-														"ColumnDelimiter": {
-															"value": "@item().ColumnDelimiter",
-															"type": "Expression"
-														},
-														"QuoteCharacter": {
-															"value": "@item().QuoteCharacter",
-															"type": "Expression"
-														},
-														"source_where_filter": {
-															"value": "@item().Source_Where_Filter",
-															"type": "Expression"
-														},
-														"UserName": {
-															"value": "@item().UserName",
-															"type": "Expression"
-														},
-														"SecretPasswordName": {
-															"value": "@item().SecretPasswordName",
-															"type": "Expression"
-														},
-														"BlobContainer": {
-															"value": "@item().TargetBlobContainer",
-															"type": "Expression"
-														},
-														"BusinessKeyList": {
-															"value": "@item().BusinessKeyColumnList",
-															"type": "Expression"
-														},
-														"DeltaTargetDbName": {
-															"value": "@item().DeltaTargetDbName",
-															"type": "Expression"
-														},
-														"StorageAccount": {
-															"value": "@item().StorageAccount",
-															"type": "Expression"
-														},
-														"RowSource": {
-															"value": "@item().SourceName",
-															"type": "Expression"
-														},
-														"DbHostName": {
-															"value": "@item().DestinationHostName",
-															"type": "Expression"
-														},
-														"AzureTargetTableName": {
-															"value": "@item().AzuresqlTargetTableName",
-															"type": "Expression"
-														},
-														"DeltaStagingTableParquetFilePath": {
-															"value": "@item().DeltaStagingTableParquetFilePath",
-															"type": "Expression"
-														},
-														"DeleteProcessCompletionDTM": {
-															"value": "@item().DeleteProcessCompletionDTM",
-															"type": "Expression"
-														},
-														"DeltaStagingDbName": {
-															"value": "@item().DeltaStagingDbName",
-															"type": "Expression"
-														},
-														"DeltaStageTableName": {
-															"value": "@item().DeltaStagingTableName",
-															"type": "Expression"
-														},
-														"AzureSqlTempDeleteTableName": {
-															"value": "@item().AzuresqlTempDeleteTableName",
-															"type": "Expression"
-														},
-														"Host_Name": {
-															"value": "@item().Host_Name",
-															"type": "Expression"
-														},
-														"Port_No": {
-															"value": "@item().Port_No",
-															"type": "Expression"
-														},
-														"SID": {
-															"value": "@item().SID",
-															"type": "Expression"
-														},
-														"databricksclustername": {
-															"value": "@item().databricksclustername",
-															"type": "Expression"
-														},
-														"databricksclusterid": {
-															"value": "@item().databricksclusterid",
-															"type": "Expression"
-														},
-														"databrickssecretname": {
-															"value": "@item().databrickssecretname",
-															"type": "Expression"
-														},
-														"CheckForDeletes": {
-															"value": "@item().CheckForDeletes",
-															"type": "Expression"
-														},
-														"File_Name_DateTime_Ind": {
-															"value": "@item().File_Name_DateTime_Ind",
-															"type": "Expression"
-														},
-														"Data_Destination_Folder_Path_DeleteProcess": {
-															"value": "@item().Data_Destination_Folder_Path_DeleteProcess",
-															"type": "Expression"
-														},
-														"SourceId": {
-															"value": "@pipeline().parameters.SourceID",
-															"type": "Expression"
-														},
-														"IsInitialLoad": {
-															"value": "@item().IsInitialLoad",
-															"type": "Expression"
-														}
-													}
-												}
-											},
-											{
-												"name": "Truncate AzureSQL Delete Table",
-												"type": "Lookup",
-												"dependsOn": [],
-												"policy": {
-													"timeout": "0.12:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "@concat('DECLARE @ObjectName VARCHAR(120), @SchemaName VARCHAR(100), @TableName VARCHAR(100) SELECT @ObjectName = ''', item().AzuresqlTempDeleteTableName, ''' SELECT @TableName = PARSENAME(@ObjectName, 1), @SchemaName = PARSENAME(@ObjectName, 2) IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @TableName and Table_Schema = @SchemaName) BEGIN Truncate Table ',  item().AzuresqlTempDeleteTableName, ' SELECT COUNT(*) AS RecCount FROM ', item().AzuresqlTempDeleteTableName, ' END ELSE BEGIN SELECT 0  AS RecCount END ')",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00",
-														"partitionOption": "None"
-													},
-													"dataset": {
-														"referenceName": "DS_ASQL_EDWDiscovery",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												}
-											}
-										]
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceID": {
-						"type": "int",
-						"defaultValue": 1
-					},
-					"TriggerName": {
-						"type": "string"
-					},
-					"ProcessType": {
-						"type": "string",
-						"defaultValue": "BlobToASQL"
-					}
-				},
-				"folder": {
-					"name": "EDW_Discovery"
-				},
-				"annotations": [],
-				"lastPublishTime": "2022-01-21T06:37:38Z"
 			},
 			"dependsOn": []
 		}

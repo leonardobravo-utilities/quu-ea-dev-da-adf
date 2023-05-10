@@ -7,6 +7,18 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "OpenWindows"
+		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "REFERENCE"
@@ -167,34 +179,6 @@
 			"type": "string",
 			"defaultValue": "Envizi_Monthly_Trigger"
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "Kantar"
-		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
-			"type": "bool",
-			"defaultValue": false
-		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
-			"type": "bool",
-			"defaultValue": false
-		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
-			"type": "bool",
-			"defaultValue": false
-		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
-			"type": "string",
-			"defaultValue": "Kantar_Monthly_Trigger"
-		},
 		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "NOPV"
@@ -278,28 +262,53 @@
 		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
 			"type": "string",
 			"defaultValue": "SUMS_Hourly_Trigger"
-		},
-		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "Takadu-Reporting-API"
-		},
-		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
-			"type": "bool",
-			"defaultValue": false
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/OpenWindows_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "OpenWindows Daily Trigger",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_Openwindows_SourceToASQL",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-04-30T05:47:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								21
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/REF_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
@@ -1570,6 +1579,133 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_Kantar_DataModel_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute PL_Kantar_Main",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								},
+								"OnlySourceToBlob": {
+									"value": "@pipeline().parameters.OnlySourceToBlob",
+									"type": "Expression"
+								},
+								"OnlyBlobtoASQL": {
+									"value": "@pipeline().parameters.OnlyBlobtoASQL",
+									"type": "Expression"
+								},
+								"AllowPartialUpdateOfDiscovery": {
+									"value": "@pipeline().parameters.AllowPartialUpdateOfDiscovery",
+									"type": "Expression"
+								},
+								"Additional_MappingParam": {
+									"value": "@pipeline().parameters.Additional_MappingParam",
+									"type": "Expression"
+								},
+								"OnlyExtractDeletedRecordsFromSourceToBlob": {
+									"value": "@pipeline().parameters.OnlyExtractDeletedRecordsFromSourceToBlob",
+									"type": "Expression"
+								},
+								"OnlyDeleteRecordsFromBlobToASQL": {
+									"value": "@pipeline().parameters.OnlyDeleteRecordsFromBlobToASQL",
+									"type": "Expression"
+								},
+								"TriggerName": {
+									"value": "@pipeline().parameters.TriggerName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute PL_Kantar_Model_Main",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute PL_Kantar_Main",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDW_Mart_Kantar",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sourcename": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "Kantar"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"AllowPartialUpdateOfDiscovery": {
+						"type": "string",
+						"defaultValue": "false"
+					},
+					"Additional_MappingParam": {
+						"type": "string"
+					},
+					"OnlyExtractDeletedRecordsFromSourceToBlob": {
+						"type": "string",
+						"defaultValue": "false"
+					},
+					"OnlyDeleteRecordsFromBlobToASQL": {
+						"type": "string",
+						"defaultValue": "false"
+					},
+					"TriggerName": {
+						"type": "string",
+						"defaultValue": "Kantar_Monthly_Trigger"
+					}
+				},
+				"folder": {
+					"name": "Kantar"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-05-24T06:00:02Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Daptiv_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -1652,68 +1788,6 @@
 							],
 							"monthDays": [
 								1
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Kantar_Monthly_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
-							"AllowPartialUpdateOfDiscovery": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
-							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
-							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
-							"TriggerName": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Month",
-						"interval": 1,
-						"startTime": "2022-11-11T09:00:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								6
-							],
-							"monthDays": [
-								26,
-								27,
-								28,
-								29,
-								30,
-								31,
-								-1,
-								1,
-								2,
-								3,
-								4,
-								5,
-								6,
-								7
 							]
 						}
 					}
@@ -1846,49 +1920,6 @@
 						"interval": 1,
 						"startTime": "2022-09-06T15:40:00",
 						"timeZone": "E. Australia Standard Time"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Takadu_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
-							"OnlyBlobtoASQL": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
-							"OnlySourceToBlob": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
-							"AllowPartialUpdateOfDiscovery": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2021-09-28T06:04:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								5
-							]
-						}
 					}
 				}
 			},

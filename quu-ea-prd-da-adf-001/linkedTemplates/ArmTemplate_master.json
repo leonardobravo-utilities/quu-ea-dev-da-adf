@@ -442,31 +442,35 @@
 			"type": "string",
 			"defaultValue": "ICN"
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "Kantar"
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlySourceToBlob": {
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyBlobtoASQL": {
 			"type": "bool",
 			"defaultValue": true
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
-			"type": "bool",
-			"defaultValue": false
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "string",
+			"defaultValue": "false"
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
-			"type": "bool",
-			"defaultValue": false
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_Additional_MappingParam": {
+			"type": "object",
+			"defaultValue": null
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
-			"type": "bool",
-			"defaultValue": false
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "string",
+			"defaultValue": "false"
 		},
-		"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "string",
+			"defaultValue": "false"
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_TriggerName": {
 			"type": "string",
 			"defaultValue": "Kantar_Monthly_Trigger"
 		},
@@ -1244,12 +1248,6 @@
 					},
 					"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_Additional_MappingParam": {
 						"value": "[parameters('NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_Additional_MappingParam')]"
-					},
-					"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
-						"value": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name')]"
-					},
-					"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
-						"value": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type')]"
 					}
 				}
 			},
@@ -1270,6 +1268,12 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
+						"value": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name')]"
+					},
+					"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
+						"value": "[parameters('SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type')]"
 					},
 					"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_SourceName": {
 						"value": "[parameters('ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_SourceName')]"
@@ -1408,15 +1412,6 @@
 					},
 					"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL')]"
-					},
-					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
-						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName')]"
-					},
-					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob": {
-						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob')]"
-					},
-					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL')]"
 					}
 				}
 			},
@@ -1437,6 +1432,15 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
+						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName')]"
+					},
+					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob": {
+						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob')]"
+					},
+					"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL')]"
 					},
 					"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName": {
 						"value": "[parameters('REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName')]"
@@ -1558,27 +1562,6 @@
 					"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
 						"value": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
 					},
-					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
-						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
-					},
-					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
-						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]"
-					},
-					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]"
-					},
-					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
-						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
-					},
-					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
-						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]"
-					},
-					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
-						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]"
-					},
-					"Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
-						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
-					},
 					"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 						"value": "[parameters('NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
 					},
@@ -1641,18 +1624,6 @@
 					},
 					"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
 						"value": "[parameters('SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
-					},
-					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
-						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
-					},
-					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]"
-					},
-					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
-						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]"
-					},
-					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
-						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
 					}
 				}
 			},
@@ -1673,6 +1644,18 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
+					},
+					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]"
+					},
+					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]"
+					},
+					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]"
 					},
 					"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 						"value": "[parameters('Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
@@ -1748,6 +1731,30 @@
 					},
 					"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_TriggerName": {
 						"value": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_TriggerName')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_SourceName": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_SourceName')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlySourceToBlob": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlySourceToBlob')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyBlobtoASQL')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_Additional_MappingParam": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_Additional_MappingParam')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL')]"
+					},
+					"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_TriggerName": {
+						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_TriggerName')]"
 					}
 				}
 			},

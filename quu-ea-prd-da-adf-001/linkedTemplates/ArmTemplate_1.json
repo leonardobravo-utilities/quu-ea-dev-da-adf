@@ -13,6 +13,48 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_FileExists')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"blobcontainer": {
+						"type": "string"
+					},
+					"blobfolderpath": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().blobfolderpath",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().blobcontainer",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_FizeSize')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -810,53 +852,6 @@
 						}
 					}
 				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_FS_FTP')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_FS_FTP",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"Host": {
-							"value": "@dataset().FileServer",
-							"type": "Expression"
-						}
-					}
-				},
-				"parameters": {
-					"FileFolderPath": {
-						"type": "string",
-						"defaultValue": "anon/gen/clim_data/IDCKWCDEA0/tables/qld/brisbane"
-					},
-					"FileFolderName": {
-						"type": "string"
-					},
-					"FileServer": {
-						"type": "string",
-						"defaultValue": "ftp://ftp.bom.gov.au/"
-					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FtpServerLocation",
-						"folderPath": {
-							"value": "@concat(dataset().FileFolderPath,dataset().FileFolderName)",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": false,
-					"quoteChar": "\""
-				},
-				"schema": []
 			},
 			"dependsOn": []
 		}
