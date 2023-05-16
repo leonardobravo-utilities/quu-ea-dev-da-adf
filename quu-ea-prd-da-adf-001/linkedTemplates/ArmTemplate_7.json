@@ -466,7 +466,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "PL_Framework_DM_SourcetoBlob_SqlServer",
+											"referenceName": "PL_Framework_DM_SourceToBlob_Oracle",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -495,16 +495,16 @@
 												"value": "@item().TableID",
 												"type": "Expression"
 											},
+											"Data_Destination_File_Name": {
+												"value": "@item().Data_Destination_File_Name",
+												"type": "Expression"
+											},
 											"SourceServerName": {
 												"value": "@item().SourceServerName",
 												"type": "Expression"
 											},
 											"SourceDatabaseName": {
 												"value": "@item().SourceDatabaseName",
-												"type": "Expression"
-											},
-											"Data_Destination_File_Name": {
-												"value": "@item().Data_Destination_File_Name",
 												"type": "Expression"
 											},
 											"IncrementalLoadInd": {
@@ -539,28 +539,44 @@
 												"value": "@item().Source_Where_Filter",
 												"type": "Expression"
 											},
-											"UserName": {
-												"value": "@item().UserName\n",
+											"Host_Name": {
+												"value": "@item().Host_Name",
 												"type": "Expression"
 											},
-											"SecretPasswordName": {
-												"value": "@item().SecretPasswordName\n",
+											"Port_No": {
+												"value": "@item().Port_No",
 												"type": "Expression"
 											},
-											"CDCMigrationCompleted": {
-												"value": "@item().CDCMigrationCompleted",
+											"SID": {
+												"value": "@item().SID",
 												"type": "Expression"
 											},
-											"CDCMigrationInd": {
-												"value": "@item().CDCMigrationInd",
+											"User_Name": {
+												"value": "@item().UserName",
 												"type": "Expression"
 											},
-											"SourceName": {
-												"value": "@item().SourceName",
+											"Secret_Password_Name": {
+												"value": "@item().SecretPasswordName",
 												"type": "Expression"
 											},
-											"DeltaTargetTableName": {
-												"value": "@item().DeltaTargetTableName",
+											"IsInitialLoad": {
+												"value": "@item().IsInitialLoad",
+												"type": "Expression"
+											},
+											"MaxInitialLoadDataIntegrationUnit": {
+												"value": "@item().MaxInitialLoadDataIntegrationUnit",
+												"type": "Expression"
+											},
+											"MaxInitialLoadDegreeOfCopyParallelism": {
+												"value": "@item().MaxInitialLoadDegreeOfCopyParallelism",
+												"type": "Expression"
+											},
+											"MaxDailyLoadDataIntegrationUnit": {
+												"value": "@item().MaxDailyLoadDataIntegrationUnit",
+												"type": "Expression"
+											},
+											"MaxDailyLoadDegreeOfCopyParallelism": {
+												"value": "@item().MaxDailyLoadDegreeOfCopyParallelism",
 												"type": "Expression"
 											}
 										}
@@ -656,7 +672,8 @@
 				"folder": {
 					"name": "ABN"
 				},
-				"annotations": []
+				"annotations": [],
+				"lastPublishTime": "2021-12-06T06:44:09Z"
 			},
 			"dependsOn": []
 		},
