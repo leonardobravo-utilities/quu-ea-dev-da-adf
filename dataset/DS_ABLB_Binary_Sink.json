@@ -1,0 +1,37 @@
+{
+	"name": "DS_ABLB_Binary_Sink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueaprddasrclanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"blob_container": {
+				"type": "string"
+			},
+			"storage_account": {
+				"type": "string",
+				"defaultValue": "quueaprddasrclanding001"
+			},
+			"blob_folder": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().blob_folder",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().blob_container",
+					"type": "Expression"
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
