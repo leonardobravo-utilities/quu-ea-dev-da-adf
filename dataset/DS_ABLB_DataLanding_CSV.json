@@ -1,0 +1,41 @@
+{
+	"name": "DS_ABLB_DataLanding_CSV",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueadadlslanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"target_storageaccount": {
+				"type": "string"
+			},
+			"target_blobcontainer": {
+				"type": "string"
+			},
+			"target_blobfolder": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().target_blobfolder",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().target_blobcontainer",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"rowDelimiter": "\n",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
