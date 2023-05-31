@@ -1,0 +1,40 @@
+{
+	"name": "DS_ABLB_Binary_Sink_File",
+	"properties": {
+		"parameters": {
+			"blob_directory": {
+				"type": "string"
+			},
+			"blob_File": {
+				"type": "string"
+			},
+			"blob_storageaccount": {
+				"type": "string",
+				"defaultValue": "quueatstdadlslanding001"
+			},
+			"blob_container": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().blob_File",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().blob_directory",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().blob_container",
+					"type": "Expression"
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
