@@ -1,6 +1,178 @@
 {
 	"name": "PL_BOM_Rainfall_Zip_SourcetoBlob",
 	"properties": {
-		"annotations": []
-	}
+		"activities": [
+			{
+				"name": "For Active Station",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GetActiveLoadTableList",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetActiveLoadTableList').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 2,
+					"activities": [
+						{
+							"name": "Execute HTTPZip",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_BOM_HTTPZIPtoBlob",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"relative_url": {
+										"value": "@item().APIRelativeURL\r\n",
+										"type": "Expression"
+									},
+									"fileNameExt": {
+										"value": "@item().File_Name_Ext",
+										"type": "Expression"
+									},
+									"blobcontainer": {
+										"value": "@item().TargetBlobContainer",
+										"type": "Expression"
+									},
+									"blobfolder": {
+										"value": "@item().TargetBlobFolderPath",
+										"type": "Expression"
+									},
+									"blobfile": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"src_blobstorageaccount": {
+										"value": "@item().SourceStorageAccount",
+										"type": "Expression"
+									},
+									"webrequest_url": {
+										"value": "@item().APIBaseURL\r\n",
+										"type": "Expression"
+									},
+									"station": {
+										"value": "@replace(item().Data_Destination_File_Name,'idcjac0009_','')",
+										"type": "Expression"
+									},
+									"blobstorageaccount": {
+										"value": "@item().StorageAccount",
+										"type": "Expression"
+									},
+									"src_blobcontainer": {
+										"value": "@item().SourceLandingContainer",
+										"type": "Expression"
+									},
+									"delimiter": {
+										"value": "@item().ColumnDelimiter",
+										"type": "Expression"
+									},
+									"TableID": {
+										"value": "@item().TableID",
+										"type": "Expression"
+									},
+									"File_Name_DateTime_Ind": {
+										"value": "@item().File_Name_DateTime_Ind",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "GetActiveLoadTableList",
+				"description": "Lookup activity to retrieve the list of partitions stored in the external control table.",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[ETL].[usp_get_tablelist_by_sourceid]",
+						"storedProcedureParameters": {
+							"sourceid": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.SourceID",
+									"type": "Expression"
+								}
+							},
+							"TriggerName": {
+								"value": {
+									"value": "@pipeline().parameters.TriggerName",
+									"type": "Expression"
+								}
+							}
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"parameters": {
+			"SourceID": {
+				"type": "string"
+			},
+			"TriggerName": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"Fileserverlocation": {
+				"type": "String"
+			},
+			"FileFolderPath": {
+				"type": "String"
+			},
+			"STATION_POINT_NAME": {
+				"type": "String"
+			},
+			"TableID": {
+				"type": "String"
+			},
+			"fromDate": {
+				"type": "String"
+			},
+			"ToDate": {
+				"type": "String"
+			},
+			"year": {
+				"type": "String"
+			},
+			"current_year": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "BOM"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-03-26T00:04:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }

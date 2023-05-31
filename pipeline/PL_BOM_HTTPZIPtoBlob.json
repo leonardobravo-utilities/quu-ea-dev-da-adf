@@ -1,6 +1,547 @@
 {
 	"name": "PL_BOM_HTTPZIPtoBlob",
 	"properties": {
+		"activities": [
+			{
+				"name": "Copy HTTP bin Zip",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set url_variable",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Lkp_tmp_folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "HttpReadSettings",
+							"requestMethod": "GET"
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings",
+							"copyBehavior": "FlattenHierarchy"
+						}
+					},
+					"enableStaging": false
+				},
+				"outputs": [
+					{
+						"referenceName": "DS_ABLB_Binary_Sink_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"blob_directory": {
+								"value": "@concat(pipeline().parameters.blobfolder,'/zip')",
+								"type": "Expression"
+							},
+							"blob_File": {
+								"value": "@concat(variables('url_variable'),'.zip')",
+								"type": "Expression"
+							},
+							"blob_storageaccount": {
+								"value": "@pipeline().parameters.src_blobstorageaccount",
+								"type": "Expression"
+							},
+							"blob_container": {
+								"value": "@pipeline().parameters.src_blobcontainer",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Set url_variable",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set year",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "url_variable",
+					"value": {
+						"value": "@concat(toUpper(pipeline().parameters.blobfile),'_',variables('year'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "BOM Daily Rainfall Weather",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.0:05:00",
+					"retry": 10,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat(pipeline().parameters.webrequest_url,pipeline().parameters.relative_url)",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"disableCertValidation": true
+				}
+			},
+			{
+				"name": "Unzip SRC Blob to  ADLS Blob",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy HTTP bin Zip",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": false,
+							"deleteFilesAfterCompletion": false
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings",
+							"compressionProperties": {
+								"type": "ZipDeflateReadSettings",
+								"preserveZipFileNameAsFolder": false
+							}
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings",
+							"copyBehavior": "PreserveHierarchy"
+						}
+					},
+					"enableStaging": false
+				},
+				"outputs": [
+					{
+						"referenceName": "DS_ABLB_Binary_Sink",
+						"type": "DatasetReference",
+						"parameters": {
+							"blob_container": {
+								"value": "@pipeline().parameters.src_blobcontainer",
+								"type": "Expression"
+							},
+							"storage_account": {
+								"value": "@pipeline().parameters.src_blobstorageaccount",
+								"type": "Expression"
+							},
+							"blob_folder": {
+								"value": "@concat(pipeline().parameters.blobfolder,'/unzip/')",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy BOM file to Blob",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Unzip SRC Blob to  ADLS Blob",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Lkp_Station_Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "station_no",
+								"value": {
+									"value": "@activity('Lkp_Station_Name').output.firstRow.Display_Name",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "observation_date",
+								"value": {
+									"value": "@convertTimeZone(utcNow(),'UTC','E. Australia Standard Time')",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": false,
+							"wildcardFileName": {
+								"value": "@concat('*',pipeline().parameters.fileNameExt)",
+								"type": "Expression"
+							},
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": {
+								"value": "@pipeline().parameters.fileNameExt",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableStaging": false
+				},
+				"outputs": [
+					{
+						"referenceName": "DS_ABLB_DataLanding_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"target_storageaccount": {
+								"value": "@pipeline().parameters.blobstorageaccount",
+								"type": "Expression"
+							},
+							"target_blobcontainer": {
+								"value": "@pipeline().parameters.blobcontainer",
+								"type": "Expression"
+							},
+							"target_blobfolder": {
+								"value": "@pipeline().parameters.blobfolder",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Set year",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "BOM Daily Rainfall Weather",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "year",
+					"value": {
+						"value": "@if(equals(substring(activity('BOM Daily Rainfall Weather').output.Response, add(indexOf(activity('BOM Daily Rainfall Weather').output.Response,pipeline().parameters.blobfile),18),4),'BLIC'),pipeline().parameters.year,substring(activity('BOM Daily Rainfall Weather').output.Response, add(indexOf(activity('BOM Daily Rainfall Weather').output.Response,pipeline().parameters.blobfile),18),4) )",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Lkp_Station_Name",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT TOP 1 Display_Name \nFROM BOM.Station s  \njoin [ETL].[SourceTableDetails] STD \non  s.Station_Number =  SUBSTRING (SourceTableName, charindex('_',SourceTableName,1)+1 ,6)\njoin  ETL.SourceSystem ss \non STD.SourceID = ss.SourceID \nwhere 1=1\nand  TableID = '@{pipeline().parameters.TableID}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "Lkp_tmp_folder",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT [ParameterValue],\ndbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2\n  FROM [ETL].[SourceTableParameter]\n  WHERE IsActive = 1\n  AND ParameterName = 'URL_Folder_Data'\n  AND [TableID] = '@{pipeline().parameters.TableID}'\n  \n",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "Archive_Data",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy BOM file to Blob",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": false
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_ABLB_FS_Srclanding_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"blobcontainer": {
+								"value": "@pipeline().parameters.src_blobcontainer",
+								"type": "Expression"
+							},
+							"blobfolderpath": {
+								"value": "@concat(pipeline().parameters.blobfolder,'/unzip/')",
+								"type": "Expression"
+							},
+							"blobfilename": {
+								"value": "@concat(variables('url_variable'),'_Data',pipeline().parameters.fileNameExt)",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ABLB_FS_Srclanding_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"blobcontainer": {
+								"value": "@pipeline().parameters.src_blobcontainer",
+								"type": "Expression"
+							},
+							"blobfolderpath": {
+								"value": "@concat(pipeline().parameters.blobfolder,'/Archived')",
+								"type": "Expression"
+							},
+							"blobfilename": {
+								"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1)\n,concat(variables('url_variable'),'-',\nactivity('Lkp_tmp_folder').output.firstRow.localstarttime2,pipeline().parameters.fileNameExt),\nconcat(variables('url_variable'),pipeline().parameters.fileNameExt))",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Delete_Old_From_SRCLanding",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Archive_Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_ABLB_FS_Srclanding_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"blobcontainer": {
+								"value": "@pipeline().parameters.src_blobcontainer",
+								"type": "Expression"
+							},
+							"blobfolderpath": {
+								"value": "@concat(pipeline().parameters.blobfolder,'/unzip/')",
+								"type": "Expression"
+							},
+							"blobfilename": {
+								"value": "@concat(variables('url_variable'),'_Data',pipeline().parameters.fileNameExt)",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": false
+					}
+				}
+			}
+		],
+		"parameters": {
+			"relative_url": {
+				"type": "string",
+				"defaultValue": "av?p_nccObsCode=136&p_display_type=dailyDataFile&p_startYear=&p_c=&p_stn_num=040120"
+			},
+			"year": {
+				"type": "string",
+				"defaultValue": "2023"
+			},
+			"fileNameExt": {
+				"type": "string",
+				"defaultValue": ".csv"
+			},
+			"blobcontainer": {
+				"type": "string",
+				"defaultValue": "bom-datalanding"
+			},
+			"blobfolder": {
+				"type": "string",
+				"defaultValue": "rainfall/idcjac0009_040120"
+			},
+			"blobfile": {
+				"type": "string",
+				"defaultValue": "idcjac0009_040120"
+			},
+			"src_blobstorageaccount": {
+				"type": "string",
+				"defaultValue": "quueatstdasrclanding001"
+			},
+			"webrequest_url": {
+				"type": "string",
+				"defaultValue": "http://www.bom.gov.au/jsp/ncc/cdio/weatherData/"
+			},
+			"station": {
+				"type": "string",
+				"defaultValue": "040120"
+			},
+			"blobstorageaccount": {
+				"type": "string",
+				"defaultValue": "quueatstdadlslanding001"
+			},
+			"src_blobcontainer": {
+				"type": "string",
+				"defaultValue": "http-datalanding/bom-datalanding"
+			},
+			"delimiter": {
+				"type": "string",
+				"defaultValue": ","
+			},
+			"TableID": {
+				"type": "string",
+				"defaultValue": "7092"
+			},
+			"File_Name_DateTime_Ind": {
+				"type": "int",
+				"defaultValue": 1
+			}
+		},
+		"variables": {
+			"url_variable": {
+				"type": "String"
+			},
+			"year": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "BOM"
+		},
 		"annotations": []
 	}
 }
