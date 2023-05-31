@@ -64,7 +64,8 @@
 							"FileFolderName": {
 								"value": "@pipeline().parameters.STATION_POINT_NAME",
 								"type": "Expression"
-							}
+							},
+							"FileServer": "ftp://ftp.bom.gov.au/"
 						}
 					}
 				],
@@ -73,7 +74,10 @@
 						"referenceName": "DS_ABLB_FS_SUMS",
 						"type": "DatasetReference",
 						"parameters": {
-							"targetblobfoldername": "@concat('bom-datalanding/',pipeline().parameters.STATION_POINT_NAME)"
+							"targetblobfoldername": {
+								"value": "@concat('bom-datalanding/',pipeline().parameters.STATION_POINT_NAME)",
+								"type": "Expression"
+							}
 						}
 					}
 				]
