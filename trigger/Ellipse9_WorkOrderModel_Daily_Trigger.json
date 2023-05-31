@@ -6,13 +6,17 @@
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "PL_EA_Ellipse9_DataModel_Main",
+					"referenceName": "PL_Ellipse9_DataModel_Main",
 					"type": "PipelineReference"
 				},
 				"parameters": {
 					"SourceName": "Ellipse9",
 					"OnlySourceToBlob": true,
-					"OnlyBlobtoASQL": true
+					"OnlyBlobtoASQL": true,
+					"AllowPartialUpdateOfDiscovery": true,
+					"OnlyExtractDeletedRecordsFromSourceToBlob": true,
+					"OnlyDeleteRecordsFromBlobToASQL": true,
+					"TriggerName": "Ellipse9_Daily_Trigger"
 				}
 			}
 		],
@@ -28,7 +32,7 @@
 						0
 					],
 					"hours": [
-						2
+						1
 					]
 				}
 			}
