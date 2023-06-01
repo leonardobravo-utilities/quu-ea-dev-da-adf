@@ -52,8 +52,14 @@
 						"referenceName": "DS_HTTP_ZipBin_Parameter",
 						"type": "DatasetReference",
 						"parameters": {
-							"s_url_base": "http://www.bom.gov.au/",
-							"s_url_relative": "fwo/IDQ65389/IDQ65389%2E540363%2Etbl.shtml"
+							"s_url_base": {
+								"value": "@activity('Lkp_tmp_folder').output.firstRow.ParameterValue",
+								"type": "Expression"
+							},
+							"s_url_relative": {
+								"value": "@concat(variables('url_variable'),'.zip')",
+								"type": "Expression"
+							}
 						}
 					}
 				],
