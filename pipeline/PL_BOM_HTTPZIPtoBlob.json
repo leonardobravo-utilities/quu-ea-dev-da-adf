@@ -483,7 +483,7 @@
 								"type": "Expression"
 							},
 							"blobfilename": {
-								"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1)\n,concat(variables('url_variable'),'-',\nactivity('Lkp_tmp_folder').output.firstRow.localstarttime2,pipeline().parameters.fileNameExt),\nconcat(variables('url_variable'),pipeline().parameters.fileNameExt))",
+								"value": "@if(equals(pipeline().parameters.File_Name_DateTime_Ind,1),concat(variables('url_variable'),'-',activity('Lkp_tmp_folder').output.firstRow.localstarttime2,pipeline().parameters.fileNameExt),concat(variables('url_variable'),pipeline().parameters.fileNameExt))",
 								"type": "Expression"
 							}
 						}
