@@ -278,7 +278,21 @@
 				"inputs": [
 					{
 						"referenceName": "DS_ABLB_CSVFile_Source",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"src_blobcontainer": {
+								"value": "@pipeline().parameters.src_blobcontainer",
+								"type": "Expression"
+							},
+							"src_blobfolder": {
+								"value": "@concat(pipeline().parameters.blobfolder,'/unzip/')",
+								"type": "Expression"
+							},
+							"delimiter": {
+								"value": "@pipeline().parameters.delimiter",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"outputs": [
