@@ -6,25 +6,35 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"s_url_base": {
-				"type": "string",
-				"defaultValue": "http://www.bom.gov.au/"
+			"blob_directory": {
+				"type": "string"
 			},
-			"s_url_relative": {
+			"blob_container": {
+				"type": "string"
+			},
+			"storage_account": {
 				"type": "string",
-				"defaultValue": "fwo/IDQ65389/IDQ65389%2E540363%2Etbl.shtml"
+				"defaultValue": "quueatstdadlslanding001"
 			}
 		},
 		"annotations": [],
 		"type": "Binary",
 		"typeProperties": {
 			"location": {
-				"type": "HttpServerLocation",
-				"relativeUrl": {
-					"value": "@dataset().s_url_relative",
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().blob_directory",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().blob_container",
 					"type": "Expression"
 				}
+			},
+			"compression": {
+				"type": "ZipDeflate"
 			}
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }
