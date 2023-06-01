@@ -1,0 +1,30 @@
+{
+	"name": "DS_ABLB_BinZip_Source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueaprddasrclanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"s_url_base": {
+				"type": "string",
+				"defaultValue": "http://www.bom.gov.au/"
+			},
+			"s_url_relative": {
+				"type": "string",
+				"defaultValue": "fwo/IDQ65389/IDQ65389%2E540363%2Etbl.shtml"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": {
+					"value": "@dataset().s_url_relative",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}
