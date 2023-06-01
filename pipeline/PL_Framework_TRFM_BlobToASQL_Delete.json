@@ -125,24 +125,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataset": {
-						"referenceName": "DS_FS_ABLB_DataLanding_Binary_FileExists",
-						"type": "DatasetReference",
-						"parameters": {
-							"blobcontainer": {
-								"value": "@pipeline().parameters.BlobContainer",
-								"type": "Expression"
-							},
-							"blobfolderpath": {
-								"value": "@replace(pipeline().parameters.Data_Destination_Folder_Path_DeleteProcess, pipeline().parameters.BlobContainer, '')",
-								"type": "Expression"
-							},
-							"blobfilename": {
-								"value": "@concat(\npipeline().parameters.Data_Destination_File_Name, '_source'\n,pipeline().parameters.File_Name_Ext)\n",
-								"type": "Expression"
-							}
-						}
-					},
 					"fieldList": [
 						"exists"
 					],
@@ -175,24 +157,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataset": {
-						"referenceName": "DS_FS_ABLB_DataLanding_Binary_FileExists",
-						"type": "DatasetReference",
-						"parameters": {
-							"blobcontainer": {
-								"value": "@pipeline().parameters.BlobContainer",
-								"type": "Expression"
-							},
-							"blobfolderpath": {
-								"value": "@replace(pipeline().parameters.Data_Destination_Folder_Path_DeleteProcess, pipeline().parameters.BlobContainer, '')",
-								"type": "Expression"
-							},
-							"blobfilename": {
-								"value": "@concat(\npipeline().parameters.Data_Destination_File_Name, '_source_deleted_records'\n,pipeline().parameters.File_Name_Ext)\n",
-								"type": "Expression"
-							}
-						}
-					},
 					"fieldList": [
 						"exists"
 					],
