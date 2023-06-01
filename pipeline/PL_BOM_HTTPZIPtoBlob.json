@@ -350,7 +350,7 @@
 				"typeProperties": {
 					"variableName": "year",
 					"value": {
-						"value": "@if(equals(substring(activity('BOM Daily Rainfall Weather').output.Response, add(indexOf(activity('BOM Daily Rainfall Weather').output.Response,pipeline().parameters.blobfile),18),4),'BLIC'),pipeline().parameters.year,substring(activity('BOM Daily Rainfall Weather').output.Response, add(indexOf(activity('BOM Daily Rainfall Weather').output.Response,pipeline().parameters.blobfile),18),4) )",
+						"value": "@if(equals(substring(activity('BOM Daily Rainfall Weather').output.Response, add(indexOf(activity('BOM Daily Rainfall Weather').output.Response,pipeline().parameters.blobfile),18),4),'BLIC'),pipeline().parameters.year,substring(activity('BOM Daily Rainfall Weather').output.Response,add(indexOf(activity('BOM Daily Rainfall Weather').output.Response,pipeline().parameters.blobfile),18),4))",
 						"type": "Expression"
 					}
 				}
