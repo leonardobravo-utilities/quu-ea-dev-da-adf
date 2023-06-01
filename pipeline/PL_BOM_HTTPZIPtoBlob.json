@@ -157,7 +157,10 @@
 							"deleteFilesAfterCompletion": false
 						},
 						"formatSettings": {
-							"type": "BinaryReadSettings"
+							"type": "BinaryReadSettings",
+							"compressionProperties": {
+								"type": "ZipDeflateReadSettings"
+							}
 						}
 					},
 					"sink": {
@@ -174,8 +177,18 @@
 						"referenceName": "DS_ABLB_BinZip_Source",
 						"type": "DatasetReference",
 						"parameters": {
-							"s_url_base": "http://www.bom.gov.au/",
-							"s_url_relative": "fwo/IDQ65389/IDQ65389%2E540363%2Etbl.shtml"
+							"blob_directory": {
+								"value": "@concat(pipeline().parameters.blobfolder,'/zip/')",
+								"type": "Expression"
+							},
+							"blob_container": {
+								"value": "@pipeline().parameters.src_blobcontainer",
+								"type": "Expression"
+							},
+							"storage_account": {
+								"value": "@pipeline().parameters.src_blobstorageaccount",
+								"type": "Expression"
+							}
 						}
 					}
 				],
