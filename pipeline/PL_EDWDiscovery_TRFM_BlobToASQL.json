@@ -188,7 +188,10 @@
 													"value": "@item().SourceTableName",
 													"type": "Expression"
 												},
-												"skipchangedset": "0",
+												"skipchangedset": {
+													"value": "@item().skipchangedset",
+													"type": "Expression"
+												},
 												"databrickssecretname": {
 													"value": "@item().databrickssecretname",
 													"type": "Expression"
@@ -199,6 +202,10 @@
 												},
 												"incrementalloadind": {
 													"value": "@item().incrementalloadind",
+													"type": "Expression"
+												},
+												"sourcecolumnlist": {
+													"value": "@item().Source_Column_List",
 													"type": "Expression"
 												}
 											}
@@ -239,10 +246,6 @@
 										],
 										"userProperties": [],
 										"typeProperties": {
-											"pipeline": {
-												"referenceName": "PL_Framework_TRFM_BlobToASQL_Delete",
-												"type": "PipelineReference"
-											},
 											"waitOnCompletion": true,
 											"parameters": {
 												"Data_Source_Table_Name": {
