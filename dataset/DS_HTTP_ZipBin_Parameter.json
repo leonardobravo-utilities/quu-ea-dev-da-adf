@@ -3,7 +3,13 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_HTTP_Parameter",
-			"type": "LinkedServiceReference"
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"s_url": {
+					"value": "@dataset().s_url_base",
+					"type": "Expression"
+				}
+			}
 		},
 		"parameters": {
 			"s_url_base": {
