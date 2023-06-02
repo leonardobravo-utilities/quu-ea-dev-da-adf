@@ -187,7 +187,10 @@
 								"value": "@replace(pipeline().parameters.Data_Destination_Folder_Path_DeleteProcess, pipeline().parameters.BlobContainer, '')",
 								"type": "Expression"
 							},
-							"blobfilename": "@concat( pipeline().parameters.Data_Destination_File_Name, '_source_deleted_records' ,pipeline().parameters.File_Name_Ext)"
+							"blobfilename": {
+								"value": "@concat(\npipeline().parameters.Data_Destination_File_Name, '_source_deleted_records'\n,pipeline().parameters.File_Name_Ext)\n",
+								"type": "Expression"
+							}
 						}
 					},
 					"fieldList": [
