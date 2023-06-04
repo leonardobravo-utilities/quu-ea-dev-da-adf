@@ -188,7 +188,10 @@
 													"value": "@item().SourceTableName",
 													"type": "Expression"
 												},
-												"skipchangedset": "0",
+												"skipchangedset": {
+													"value": "@string(item().skipchangedset)",
+													"type": "Expression"
+												},
 												"databrickssecretname": {
 													"value": "@item().databrickssecretname",
 													"type": "Expression"
@@ -199,6 +202,10 @@
 												},
 												"incrementalloadind": {
 													"value": "@item().incrementalloadind",
+													"type": "Expression"
+												},
+												"sourcecolumnlist": {
+													"value": "@item().Source_Column_List",
 													"type": "Expression"
 												}
 											}

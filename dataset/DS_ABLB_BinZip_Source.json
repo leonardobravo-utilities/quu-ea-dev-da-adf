@@ -1,0 +1,40 @@
+{
+	"name": "DS_ABLB_BinZip_Source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueaprddasrclanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"blob_directory": {
+				"type": "string"
+			},
+			"blob_container": {
+				"type": "string"
+			},
+			"storage_account": {
+				"type": "string",
+				"defaultValue": "quueaprddadlslanding001"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().blob_directory",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().blob_container",
+					"type": "Expression"
+				}
+			},
+			"compression": {
+				"type": "ZipDeflate"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

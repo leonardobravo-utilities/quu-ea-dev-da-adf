@@ -1,0 +1,40 @@
+{
+	"name": "BOM_Daily_Rainfall",
+	"properties": {
+		"description": "BOM_Daily_Rainfall",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "BOM Rainfall",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true,
+					"AllowPartialUpdateOfDiscovery": false,
+					"TriggerName": "BOM_Daily_Rainfall"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-05-23T01:17:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						11
+					]
+				}
+			}
+		}
+	}
+}

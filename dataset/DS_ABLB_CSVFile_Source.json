@@ -1,0 +1,42 @@
+{
+	"name": "DS_ABLB_CSVFile_Source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_quueaprddasrclanding001",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"src_blobcontainer": {
+				"type": "string"
+			},
+			"src_blobfolder": {
+				"type": "string"
+			},
+			"delimiter": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().src_blobfolder",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().src_blobcontainer",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": {
+				"value": "@dataset().delimiter",
+				"type": "Expression"
+			},
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
