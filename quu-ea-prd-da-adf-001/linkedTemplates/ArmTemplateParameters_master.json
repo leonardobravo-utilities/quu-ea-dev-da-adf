@@ -89,6 +89,9 @@
 		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
 			"value": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
 		},
+		"LS_HTTP_Parameter_properties_typeProperties_url": {
+			"value": "@{linkedService().s_url}"
+		},
 		"LS_SF_properties_typeProperties_environmentUrl": {
 			"value": "https://login.salesforce.com"
 		},
@@ -103,6 +106,21 @@
 		},
 		"LS_SQL_Framework_properties_typeProperties_userName": {
 			"value": "@{linkedService().UserName}"
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "BOM Rainfall"
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "BOM_Daily_Rainfall"
 		},
 		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
 			"value": "BOM Weather Data"
