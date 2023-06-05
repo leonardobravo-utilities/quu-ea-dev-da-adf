@@ -150,26 +150,6 @@
 			"type": "string",
 			"defaultValue": "@{linkedService().UserName}"
 		},
-		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "BOM Rainfall"
-		},
-		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
-			"type": "bool",
-			"defaultValue": false
-		},
-		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
-			"type": "string",
-			"defaultValue": "BOM_Daily_Rainfall"
-		},
 		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "BOM Weather Data"
@@ -881,6 +861,34 @@
 		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param": {
 			"type": "string",
 			"defaultValue": ",\"collectionReference\": \"$['Entry']['PhotoTable']\""
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "BOM Rainfall"
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "BOM_Daily_Rainfall"
 		}
 	},
 	"variables": {
@@ -35583,51 +35591,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/BOM_Daily_Rainfall')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "BOM_Daily_Rainfall",
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
-							"AllowPartialUpdateOfDiscovery": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
-							"TriggerName": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2023-05-23T01:17:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								11
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/BOM_Daily_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -37881,6 +37844,53 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BOM_Daily_Rainfall')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "BOM_Daily_Rainfall",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-05-23T01:17:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								11
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
 		}
 	]
 }
