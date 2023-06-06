@@ -232,8 +232,8 @@
 											"timeout": "7.00:00:00",
 											"retry": 0,
 											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
+											"secureOutput": true,
+											"secureInput": true
 										},
 										"userProperties": [],
 										"typeProperties": {
@@ -265,22 +265,6 @@
 												"type": "Expression"
 											}
 										},
-										"inputs": [
-											{
-												"referenceName": "DS_ABLB_srclanding_json_source",
-												"type": "DatasetReference",
-												"parameters": {
-													"Sourceblobfoldername": {
-														"value": "@concat(pipeline().parameters.SourceLandingContainer,'/',pipeline().parameters.SourceFilePath)",
-														"type": "Expression"
-													},
-													"Sourceblobfilename": {
-														"value": "@variables('FileName')",
-														"type": "Expression"
-													}
-												}
-											}
-										],
 										"outputs": [
 											{
 												"referenceName": "DS_ABLB_Datalanding",
@@ -388,39 +372,7 @@
 												}
 											},
 											"enableStaging": false
-										},
-										"inputs": [
-											{
-												"referenceName": "DS_ABLB_srclanding_json_source",
-												"type": "DatasetReference",
-												"parameters": {
-													"Sourceblobfoldername": {
-														"value": "@concat(pipeline().parameters.SourceLandingContainer,'/',pipeline().parameters.SourceFilePath)",
-														"type": "Expression"
-													},
-													"Sourceblobfilename": {
-														"value": "@variables('FileName')",
-														"type": "Expression"
-													}
-												}
-											}
-										],
-										"outputs": [
-											{
-												"referenceName": "DS_ABLB_srclanding_json_source",
-												"type": "DatasetReference",
-												"parameters": {
-													"Sourceblobfoldername": {
-														"value": "@concat(pipeline().parameters.SourceLandingContainer,'/',pipeline().parameters.SourceFilePath,'\\Archived')",
-														"type": "Expression"
-													},
-													"Sourceblobfilename": {
-														"value": "@variables('FileName')",
-														"type": "Expression"
-													}
-												}
-											}
-										]
+										}
 									},
 									{
 										"name": "Delete_files_after_archival",
@@ -442,20 +394,6 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"dataset": {
-												"referenceName": "DS_ABLB_srclanding_json_source",
-												"type": "DatasetReference",
-												"parameters": {
-													"Sourceblobfoldername": {
-														"value": "@concat(pipeline().parameters.SourceLandingContainer,'/',pipeline().parameters.SourceFilePath)",
-														"type": "Expression"
-													},
-													"Sourceblobfilename": {
-														"value": "@variables('FileName')",
-														"type": "Expression"
-													}
-												}
-											},
 											"enableLogging": false,
 											"storeSettings": {
 												"type": "AzureBlobStorageReadSettings",
@@ -508,20 +446,6 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"dataset": {
-									"referenceName": "DS_ABLB_srclanding_json_source",
-									"type": "DatasetReference",
-									"parameters": {
-										"Sourceblobfoldername": {
-											"value": "@concat(pipeline().parameters.SourceLandingContainer,'/',pipeline().parameters.SourceFilePath)",
-											"type": "Expression"
-										},
-										"Sourceblobfilename": {
-											"value": "@variables('FileName')",
-											"type": "Expression"
-										}
-									}
-								},
 								"fieldList": [
 									"size"
 								],
@@ -646,6 +570,8 @@
 		"folder": {
 			"name": "FrameWork"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-04-14T01:26:33Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
