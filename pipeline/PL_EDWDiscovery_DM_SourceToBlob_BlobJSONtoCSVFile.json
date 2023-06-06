@@ -1,0 +1,129 @@
+{
+	"name": "PL_EDWDiscovery_DM_SourceToBlob_BlobJSONtoCSVFile",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lkp_getfilemetadata",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select \ns.sourceID,\ntableID, \nSourceLandingContainer,\nconcat(LOWER(SourceSchemaName),'-datalanding/',SourceTableName) as SourceFilePath,\nTargetBlobContainer,\nTargetBlobFilePath,\nTargetBlobFileName = lower(TargetBlobFileName + '_' + cast(SYSDATETIME() as varchar(100))+ targetBlobFileNameExt ),\nColumnDelimiter,QuoteCharacter\nfrom etl.sourcesystem s\nLEFT OUTER JOIN ETL.SourceTableDetails d\nON s.sourceid = d.sourceid \nand d.isactive = 1\nwhere s.sourceid='@{pipeline().parameters.sourceid}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FOREACH_json_to_csv",
+				"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lkp_getfilemetadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lkp_getfilemetadata').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "Execute_json_csv_conversion",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Framework_DM_json_to_csv",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceLandingContainer": {
+										"value": "@item().SourceLandingContainer",
+										"type": "Expression"
+									},
+									"SourceFilePath": {
+										"value": "@item().SourceFilePath",
+										"type": "Expression"
+									},
+									"sourceID": {
+										"value": "@item().sourceID",
+										"type": "Expression"
+									},
+									"tableID": {
+										"value": "@item().tableID",
+										"type": "Expression"
+									},
+									"TargetBlobFilePath": {
+										"value": "@item().TargetBlobFilePath",
+										"type": "Expression"
+									},
+									"TargetBlobFileName": {
+										"value": "@item().TargetBlobFileName",
+										"type": "Expression"
+									},
+									"ColumnDelimiter": {
+										"value": "@item().ColumnDelimiter",
+										"type": "Expression"
+									},
+									"QuoteCharacter": {
+										"value": "@item().QuoteCharacter",
+										"type": "Expression"
+									},
+									"TargetBlobContainer": {
+										"value": "@item().TargetBlobContainer",
+										"type": "Expression"
+									},
+									"Additional_MappingParam": {
+										"value": "@pipeline().parameters.Additional_MappingParam",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"SourceId": {
+				"type": "int"
+			},
+			"Additional_MappingParam": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "EDW_Discovery"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-01-11T12:29:20Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
