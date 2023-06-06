@@ -201,6 +201,30 @@
 							]
 						},
 						{
+							"value": "FTP_CSV_FILE",
+							"activities": [
+								{
+									"name": "EXEC FTP CSV",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_BOM_Evapo_SourcetoBlob_stageCopy",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@pipeline().parameters.SourceID",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						},
+						{
 							"value": "HTTP_ZIP_CSV_FILE",
 							"activities": [
 								{
@@ -221,6 +245,35 @@
 											},
 											"TriggerName": {
 												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						},
+						{
+							"value": "BLOB_JSON_FILE",
+							"activities": [
+								{
+									"name": "Execute SourceToBlob_BlobJSONtoCSVFile",
+									"description": "Executes the PL_EDWDiscovery_DM_SourceToBlob_BlobJSONtoCSVFile pipeline",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_BlobJSONtoCSVFile",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceId": {
+												"value": "@pipeline().parameters.SourceID",
+												"type": "Expression"
+											},
+											"Additional_MappingParam": {
+												"value": "@pipeline().parameters.Additional_MappingParam",
 												"type": "Expression"
 											}
 										}
