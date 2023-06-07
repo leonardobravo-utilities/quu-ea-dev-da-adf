@@ -1,0 +1,35 @@
+{
+	"name": "NOPVDigital_Daily_Trigger",
+	"properties": {
+		"description": "run the NOPV datasets from blob json files into EDW_Discovery",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "NOPV-Digital",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true,
+					"AllowPartialUpdateOfDiscovery": false,
+					"Additional_MappingParam": ",\"collectionReference\": \"$['Entry']['attribute']\",\"mapComplexValuesToString\": true",
+					"OnlyExtractDeletedRecordsFromSourceToBlob": false,
+					"OnlyDeleteRecordsFromBlobToASQL": false,
+					"TriggerName": "NOPV_Digital_Daily_Trigger"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-06-03T03:15:00",
+				"timeZone": "E. Australia Standard Time"
+			}
+		}
+	}
+}
