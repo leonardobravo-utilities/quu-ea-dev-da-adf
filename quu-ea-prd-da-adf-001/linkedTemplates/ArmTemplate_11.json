@@ -7,6 +7,18 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "quu-ea-prd-da-adf-001"
 		},
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Field Service Edge"
+		},
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
 		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "Field Service Edge Hourly_Refresh"
@@ -216,6 +228,46 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/FSE_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_FSE_Source_To_ASQL",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-06-23T06:30:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								45
+							],
+							"hours": [
+								0
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/FSE_Hourly_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
@@ -977,301 +1029,6 @@
 						}
 					}
 				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_SourceToBlob')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "SourceToBlob_CommandType",
-						"type": "Switch",
-						"dependsOn": [
-							{
-								"activity": "fetchSwitchCommandType",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"on": {
-								"value": "@activity('fetchSwitchCommandType').output.firstRow.ADFAction",
-								"type": "Expression"
-							},
-							"cases": [
-								{
-									"value": "DATABRICKS_NOTEBOOK",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_Databricks",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Databricks",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "DB_SQL",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_SQLDatabase",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_SqlServer",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "BLOB_EXCEL_FILE",
-									"activities": [
-										{
-											"name": "Exec DM_SourcetoBlob_Blob_ConfigExcelWorkbooks",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Blob_ConfigExcelWorkbooks",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "GLOBALSCAPE_CSV_FILE",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_GlobalScape_CSVFile",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_GlobalScape_CSVFile",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													},
-													"TriggerName": {
-														"value": "@pipeline().parameters.TriggerName",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "API",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_API",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_API",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "GLOBALSCAPE_EXCEL_FILE",
-									"activities": [
-										{
-											"name": "Exec DM_SourcetoBlob_GlobalScape_ConfigExcelWorkbooks",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_GlobalScape_ConfigExcelWorkbooks",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "DB_ORACLE",
-									"activities": [
-										{
-											"name": "Execute DM_SourcetoBlob_OracleDatabase",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Oracle",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													},
-													"TriggerName": {
-														"value": "@pipeline().parameters.TriggerName",
-														"type": "Expression"
-													},
-													"ProcessType": {
-														"value": "@pipeline().parameters.ProcessType",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "HTTP_ZIP_CSV_FILE",
-									"activities": [
-										{
-											"name": "Execute ZIP file copy",
-											"type": "ExecutePipeline",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"pipeline": {
-													"referenceName": "PL_BOM_Rainfall_Zip_SourcetoBlob",
-													"type": "PipelineReference"
-												},
-												"waitOnCompletion": true,
-												"parameters": {
-													"SourceID": {
-														"value": "@pipeline().parameters.SourceID",
-														"type": "Expression"
-													},
-													"TriggerName": {
-														"value": "@pipeline().parameters.TriggerName",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					{
-						"name": "fetchSwitchCommandType",
-						"description": "Based on SourceType and LoadType SQL procedure will fetch switch command type",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "EXEC etl.usp_get_switch_command_type '@{pipeline().parameters.SourceID}'",
-									"type": "Expression"
-								},
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_ASQL_EDWDiscovery",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"SourceID": {
-						"type": "int"
-					},
-					"LoadTypeName": {
-						"type": "string"
-					},
-					"Additional_MappingParam": {
-						"type": "string"
-					},
-					"TriggerName": {
-						"type": "string"
-					},
-					"ProcessType": {
-						"type": "string",
-						"defaultValue": "SourceToBlob"
-					}
-				},
-				"folder": {
-					"name": "EDW_Discovery"
-				},
-				"annotations": [],
-				"lastPublishTime": "2022-04-27T05:48:52Z"
 			},
 			"dependsOn": []
 		}
