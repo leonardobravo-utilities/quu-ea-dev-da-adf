@@ -2,17 +2,21 @@
 	"name": "GIS_SDCM_Daily_Trigger",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "PL_GIS_Source_To_ASQL_SQLServer",
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
 					"type": "PipelineReference"
 				},
 				"parameters": {
 					"SourceName": "GIS_SQLServer_SDCM_SQL",
 					"OnlySourceToBlob": true,
-					"OnlyBlobtoASQL": true
+					"OnlyBlobtoASQL": true,
+					"AllowPartialUpdateOfDiscovery": false,
+					"OnlyExtractDeletedRecordsFromSourceToBlob": false,
+					"OnlyDeleteRecordsFromBlobToASQL": false,
+					"TriggerName": "GIS_SDCM_Daily_Trigger"
 				}
 			}
 		],
