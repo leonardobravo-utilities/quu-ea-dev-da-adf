@@ -146,7 +146,7 @@
 										"type": "Expression"
 									},
 									"TriggerName": {
-										"value": "@if(equals(pipeline().parameters.TriggerName, ''), pipeline().TriggerName, pipeline().parameters.TriggerName)",
+										"value": "@pipeline().parameters.TriggerName",
 										"type": "Expression"
 									},
 									"ProcessType": {
@@ -419,7 +419,7 @@
 		"parameters": {
 			"SourceName": {
 				"type": "string",
-				"defaultValue": "Ellipse9"
+				"defaultValue": "GIS_SQLServer_SDCM_SQL"
 			},
 			"OnlySourceToBlob": {
 				"type": "bool",
@@ -438,15 +438,15 @@
 			},
 			"OnlyExtractDeletedRecordsFromSourceToBlob": {
 				"type": "bool",
-				"defaultValue": true
+				"defaultValue": false
 			},
 			"OnlyDeleteRecordsFromBlobToASQL": {
 				"type": "bool",
-				"defaultValue": true
+				"defaultValue": false
 			},
 			"TriggerName": {
 				"type": "string",
-				"defaultValue": "Ellipse9_Daily_Trigger"
+				"defaultValue": "GIS_SDCM_Daily_Trigger"
 			}
 		},
 		"variables": {
