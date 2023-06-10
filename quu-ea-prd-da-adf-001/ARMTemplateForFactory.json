@@ -9573,6 +9573,13 @@
 											"value": "@pipeline().parameters.SourceID",
 											"type": "Expression"
 										}
+									},
+									"TriggerName": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.TriggerName",
+											"type": "Expression"
+										}
 									}
 								},
 								"partitionOption": "None"
@@ -9607,102 +9614,135 @@
 							"batchCount": 50,
 							"activities": [
 								{
-									"name": "Framework_CopyDBtoBlob_Pipeline",
-									"description": "Execute copy db to blob storage pipeline",
-									"type": "ExecutePipeline",
+									"name": "Generate Source To Blob Files Required",
+									"type": "IfCondition",
 									"dependsOn": [],
 									"userProperties": [],
 									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_Framework_DM_SourcetoBlob_SqlServer",
-											"type": "PipelineReference"
+										"expression": {
+											"value": "@if(equals(pipeline().parameters.ProcessType, 'SourceToBlob'), true, false)",
+											"type": "Expression"
 										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"Data_Source_Table_Name": {
-												"value": "@item().Data_Source_Table_Name",
-												"type": "Expression"
-											},
-											"Data_Source_WaterMarkColumn": {
-												"value": "@item().Data_Source_WaterMarkColumn",
-												"type": "Expression"
-											},
-											"Data_Destination_Folder_Path": {
-												"value": "@item().Data_Destination_Folder_Path",
-												"type": "Expression"
-											},
-											"Control_Table_Table_Name": {
-												"value": "@item().Control_Table_Table_Name",
-												"type": "Expression"
-											},
-											"Control_Table_Column_Name": {
-												"value": "@item().Control_Table_Column_Name",
-												"type": "Expression"
-											},
-											"TableID": {
-												"value": "@item().TableID",
-												"type": "Expression"
-											},
-											"SourceServerName": {
-												"value": "@item().SourceServerName",
-												"type": "Expression"
-											},
-											"SourceDatabaseName": {
-												"value": "@item().SourceDatabaseName",
-												"type": "Expression"
-											},
-											"Data_Destination_File_Name": {
-												"value": "@item().Data_Destination_File_Name",
-												"type": "Expression"
-											},
-											"IncrementalLoadInd": {
-												"value": "@item().IncrementalLoadInd",
-												"type": "Expression"
-											},
-											"File_Name_Ext": {
-												"value": "@item().File_Name_Ext",
-												"type": "Expression"
-											},
-											"File_Name_DateTime_Ind": {
-												"value": "@item().File_Name_DateTime_Ind",
-												"type": "Expression"
-											},
-											"Join_Condition": {
-												"value": "@item().Join_Condition",
-												"type": "Expression"
-											},
-											"Source_Column_List": {
-												"value": "@item().Source_Column_List",
-												"type": "Expression"
-											},
-											"ColumnDelimiter": {
-												"value": "@item().ColumnDelimiter",
-												"type": "Expression"
-											},
-											"QuoteCharacter": {
-												"value": "@item().QuoteCharacter",
-												"type": "Expression"
-											},
-											"source_where_filter": {
-												"value": "@item().Source_Where_Filter",
-												"type": "Expression"
-											},
-											"UserName": {
-												"value": "@item().UserName",
-												"type": "Expression"
-											},
-											"SecretPasswordName": {
-												"value": "@item().SecretPasswordName",
-												"type": "Expression"
-											},
-											"SourceName": {
-												"value": "@item().SourceName",
-												"type": "Expression"
-											},
-											"DeltaTargetTableName": {
-												"value": "@item().DeltaTargetTableName",
-												"type": "Expression"
+										"ifTrueActivities": [
+											{
+												"name": "Framework_CopyDBtoBlob_Pipeline",
+												"description": "Execute copy db to blob storage pipeline",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "PL_Framework_DM_SourcetoBlob_SqlServer",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"Data_Source_Table_Name": {
+															"value": "@item().Data_Source_Table_Name",
+															"type": "Expression"
+														},
+														"Data_Source_WaterMarkColumn": {
+															"value": "@item().Data_Source_WaterMarkColumn",
+															"type": "Expression"
+														},
+														"Data_Destination_Folder_Path": {
+															"value": "@item().Data_Destination_Folder_Path",
+															"type": "Expression"
+														},
+														"Control_Table_Table_Name": {
+															"value": "@item().Control_Table_Table_Name",
+															"type": "Expression"
+														},
+														"Control_Table_Column_Name": {
+															"value": "@item().Control_Table_Column_Name",
+															"type": "Expression"
+														},
+														"TableID": {
+															"value": "@item().TableID",
+															"type": "Expression"
+														},
+														"Data_Destination_File_Name": {
+															"value": "@item().Data_Destination_File_Name",
+															"type": "Expression"
+														},
+														"SourceServerName": {
+															"value": "@item().SourceServerName",
+															"type": "Expression"
+														},
+														"SourceDatabaseName": {
+															"value": "@item().SourceDatabaseName",
+															"type": "Expression"
+														},
+														"IncrementalLoadInd": {
+															"value": "@item().IncrementalLoadInd",
+															"type": "Expression"
+														},
+														"File_Name_Ext": {
+															"value": "@item().File_Name_Ext",
+															"type": "Expression"
+														},
+														"File_Name_DateTime_Ind": {
+															"value": "@item().File_Name_DateTime_Ind",
+															"type": "Expression"
+														},
+														"Join_Condition": {
+															"value": "@item().Join_Condition",
+															"type": "Expression"
+														},
+														"Source_Column_List": {
+															"value": "@item().Source_Column_List",
+															"type": "Expression"
+														},
+														"ColumnDelimiter": {
+															"value": "@item().ColumnDelimiter",
+															"type": "Expression"
+														},
+														"QuoteCharacter": {
+															"value": "@item().QuoteCharacter",
+															"type": "Expression"
+														},
+														"source_where_filter": {
+															"value": "@item().Source_Where_Filter",
+															"type": "Expression"
+														},
+														"UserName": {
+															"value": "@item().UserName",
+															"type": "Expression"
+														},
+														"SecretPasswordName": {
+															"value": "@item().SecretPasswordName",
+															"type": "Expression"
+														},
+														"SourceName": {
+															"value": "@item().SourceName",
+															"type": "Expression"
+														},
+														"DeltaTargetTableName": {
+															"value": "@item().DeltaTargetTableName",
+															"type": "Expression"
+														}
+													}
+												}
 											}
+										]
+									}
+								},
+								{
+									"name": "Generate Source To Blob Delete Files Required",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Generate Source To Blob Files Required",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@if(and(equals(pipeline().parameters.ProcessType, 'SourceToBlobDelete'), equals(item().IncrementalLoadInd, '1')), true, false)",
+											"type": "Expression"
 										}
 									}
 								}
@@ -9718,12 +9758,20 @@
 					"SourceID": {
 						"type": "string",
 						"defaultValue": "3"
+					},
+					"TriggerName": {
+						"type": "string"
+					},
+					"ProcessType": {
+						"type": "string",
+						"defaultValue": "SourceToBlob"
 					}
 				},
 				"folder": {
 					"name": "EDW_Discovery"
 				},
-				"annotations": []
+				"annotations": [],
+				"lastPublishTime": "2020-01-29T04:03:47Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
@@ -10484,6 +10532,14 @@
 													"SourceID": {
 														"value": "@pipeline().parameters.SourceID",
 														"type": "Expression"
+													},
+													"TriggerName": {
+														"value": "@pipeline().parameters.TriggerName",
+														"type": "Expression"
+													},
+													"ProcessType": {
+														"value": "@pipeline().parameters.ProcessType",
+														"type": "Expression"
 													}
 												}
 											}
@@ -11181,7 +11237,7 @@
 				"parameters": {
 					"SourceName": {
 						"type": "string",
-						"defaultValue": "Ellipse9"
+						"defaultValue": "GIS_SQLServer_SDCM_SQL"
 					},
 					"OnlySourceToBlob": {
 						"type": "bool",
@@ -11200,15 +11256,15 @@
 					},
 					"OnlyExtractDeletedRecordsFromSourceToBlob": {
 						"type": "bool",
-						"defaultValue": true
+						"defaultValue": false
 					},
 					"OnlyDeleteRecordsFromBlobToASQL": {
 						"type": "bool",
-						"defaultValue": true
+						"defaultValue": false
 					},
 					"TriggerName": {
 						"type": "string",
-						"defaultValue": "Ellipse9_Daily_Trigger"
+						"defaultValue": "GIS_SDCM_Daily_Trigger"
 					}
 				},
 				"variables": {
