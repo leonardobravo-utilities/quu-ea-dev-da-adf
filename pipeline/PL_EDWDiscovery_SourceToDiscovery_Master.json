@@ -107,6 +107,46 @@
 									}
 								}
 							}
+						},
+						{
+							"name": "CaptureError2a",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorArray",
+								"value": {
+									"value": "@{concat('Activity2a: ', activity('ExecutePL_EDWOnPrem_DM_SourcetoBlob').Error['message'])}",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "CaptureError2b",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Execute PL_Framework_TRFM_TransformSourceDate",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorArray",
+								"value": {
+									"value": "@{concat('Activity2b: ', activity('Execute PL_Framework_TRFM_TransformSourceDate').Error['message'])}",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -155,6 +195,26 @@
 									}
 								}
 							}
+						},
+						{
+							"name": "CaptureError4a_Success",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "ExecutePL_TRFM_BLOBToASQL - No Failure",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorArray",
+								"value": {
+									"value": "@{concat('Activity4a_Success: ', activity('ExecutePL_TRFM_BLOBToASQL - No Failure').Error['message'])}",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -201,6 +261,26 @@
 										"value": "BlobToASQL",
 										"type": "Expression"
 									}
+								}
+							}
+						},
+						{
+							"name": "CaptureError4a_failure",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "ExecutePL_TRFM_BLOBToASQL - Has Failure",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorArray",
+								"value": {
+									"value": "@{concat('Activity4a_failure: ', activity('ExecutePL_TRFM_BLOBToASQL - Has Failure').Error['message'])}",
+									"type": "Expression"
 								}
 							}
 						}
@@ -259,6 +339,26 @@
 									}
 								}
 							}
+						},
+						{
+							"name": "CaptureError3a_Success",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Extract Deleted Records from SourceToBlob - No Failure",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorArray",
+								"value": {
+									"value": "@{concat('Activity3a_Success: ', activity('Extract Deleted Records from SourceToBlob - No Failure').Error['message'])}",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -315,6 +415,26 @@
 									}
 								}
 							}
+						},
+						{
+							"name": "CaptureError3a_failure",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Extract Deleted Records from SourceToBlob - Has Failure",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorArray",
+								"value": {
+									"value": "@{concat('Activity3_failure: ', activity('Extract Deleted Records from SourceToBlob - Has Failure').Error['message'])}",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -361,6 +481,26 @@
 										"value": "BlobToASQLDelete",
 										"type": "Expression"
 									}
+								}
+							}
+						},
+						{
+							"name": "CaptureError5a_success",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Delete Records from Delta and ASQL - No Failure",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorArray",
+								"value": {
+									"value": "@{concat('Activity5_Success: ', activity('Delete Records from Delta and ASQL - No Failure').Error['message'])}",
+									"type": "Expression"
 								}
 							}
 						}
@@ -411,6 +551,381 @@
 									}
 								}
 							}
+						},
+						{
+							"name": "CaptureError5a_failure",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Delete Records from Delta and ASQL - Has Failure",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorArray",
+								"value": {
+									"value": "@{concat('Activity5_failure: ', activity('Delete Records from Delta and ASQL - Has Failure').Error['message'])}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "CaptureError1",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Source ID",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ErrorArray",
+					"value": {
+						"value": "@{concat('Activity1: ', activity('Get Source ID').Error['message'])}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "CaptureError2",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Is Source to Blob Load Required",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ErrorArray",
+					"value": {
+						"value": "@{concat('Activity2: ', activity('Is Source to Blob Load Required').Error['message'])}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "CaptureError3_Success",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Is Source To Blob Delete Required - No Failure",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ErrorArray",
+					"value": {
+						"value": "@{concat('Activity3_Success: ', activity('Is Source To Blob Delete Required - No Failure').Error['message'])}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "CaptureError4_Success",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Is Blob to ASQL Required - No Failure",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ErrorArray",
+					"value": {
+						"value": "@{concat('Activity4_Success: ', activity('Is Blob to ASQL Required - No Failure').Error['message'])}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "CaptureError5_success",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Is Blob To ASQL Delete Required - No Failure",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ErrorArray",
+					"value": {
+						"value": "@{concat('Activity5_Success: ', activity('Is Blob To ASQL Delete Required - No Failure').Error['message'])}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "CaptureError3_failure",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Is Source To Blob Delete Required - Has Failure",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ErrorArray",
+					"value": {
+						"value": "@{concat('Activity3_failure: ', activity('Is Source To Blob Delete Required - Has Failure').Error['message'])}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "CaptureError4_failure",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Is Blob to ASQL Required - Has Failure",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ErrorArray",
+					"value": {
+						"value": "@{concat('Activity4_failure: ', activity('Is Blob to ASQL Required - Has Failure').Error['message'])}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "CaptureError5_failure",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Is Blob To ASQL Delete Required - Has Failure",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ErrorArray",
+					"value": {
+						"value": "@{concat('Activity5_failure: ', activity('Is Blob To ASQL Delete Required - Has Failure').Error['message'])}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "If Errors Caught",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Is Blob To ASQL Delete Required - No Failure",
+						"dependencyConditions": [
+							"Completed",
+							"Skipped"
+						]
+					},
+					{
+						"activity": "Is Blob To ASQL Delete Required - Has Failure",
+						"dependencyConditions": [
+							"Completed",
+							"Skipped"
+						]
+					},
+					{
+						"activity": "CaptureError5_failure",
+						"dependencyConditions": [
+							"Completed",
+							"Skipped"
+						]
+					},
+					{
+						"activity": "CaptureError5_success",
+						"dependencyConditions": [
+							"Completed",
+							"Skipped"
+						]
+					},
+					{
+						"activity": "CaptureError1",
+						"dependencyConditions": [
+							"Skipped",
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@{empty(variables('ErrorArray'))}",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "HTTP Trigger",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('Get Source ID').output.firstRow.SourceID",
+										"type": "Expression"
+									},
+									"SourceCategoryType": "Failed",
+									"PipelineRunId": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"PipelineName": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"PipelineStartTime": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									},
+									"PipelineMessage": {
+										"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+										"type": "Expression"
+									},
+									"PipelineEndTime": {
+										"value": "@utcnow()",
+										"type": "Expression"
+									},
+									"PipelineTriggerName": {
+										"value": "@pipeline().TriggerName",
+										"type": "Expression"
+									},
+									"PipelineTriggerId": {
+										"value": "@pipeline().TriggerId",
+										"type": "Expression"
+									},
+									"SourceCategory": {
+										"value": "@pipeline().parameters.HttpTriggerCategory",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Raise Failure",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "HTTP Trigger",
+									"dependencyConditions": [
+										"Completed"
+									]
+								},
+								{
+									"activity": "Append Error Array",
+									"dependencyConditions": [
+										"Skipped",
+										"Completed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+									"type": "Expression"
+								},
+								"errorCode": "500"
+							}
+						},
+						{
+							"name": "Append Error Array",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "HTTP Trigger",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorArray",
+								"value": {
+									"value": "@{concat('HTTP Trigger: ', activity('HTTP Trigger').Error['message'])}",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "HTTP Triggers",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('Get Source ID').output.firstRow.SourceID",
+										"type": "Expression"
+									},
+									"SourceCategoryType": "Succeeded",
+									"PipelineRunId": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"PipelineName": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"PipelineStartTime": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									},
+									"PipelineMessage": {
+										"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),',[',''),']',''),'\"',''),'[','')}",
+										"type": "Expression"
+									},
+									"PipelineEndTime": {
+										"value": "@utcnow()",
+										"type": "Expression"
+									},
+									"PipelineTriggerName": {
+										"value": "@pipeline().TriggerName",
+										"type": "Expression"
+									},
+									"PipelineTriggerId": {
+										"value": "@pipeline().TriggerId",
+										"type": "Expression"
+									},
+									"SourceCategory": {
+										"value": "@pipeline().parameters.HttpTriggerCategory",
+										"type": "Expression"
+									}
+								}
+							}
 						}
 					]
 				}
@@ -447,12 +962,18 @@
 			"TriggerName": {
 				"type": "string",
 				"defaultValue": "GIS_SDCM_Daily_Trigger"
+			},
+			"HttpTriggerCategory": {
+				"type": "string"
 			}
 		},
 		"variables": {
 			"hasFailedFlag": {
 				"type": "Boolean",
 				"defaultValue": false
+			},
+			"ErrorArray": {
+				"type": "Array"
 			}
 		},
 		"folder": {
