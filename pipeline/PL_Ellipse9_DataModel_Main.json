@@ -5,7 +5,14 @@
 			{
 				"name": "Execute PL_Ellipse9_Main",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Get SourceID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
@@ -31,7 +38,7 @@
 							"type": "Expression"
 						},
 						"Additional_MappingParam": {
-							"value": "NULL",
+							"value": "@pipeline().parameters.Additional_MappingParam",
 							"type": "Expression"
 						},
 						"OnlyExtractDeletedRecordsFromSourceToBlob": {
@@ -45,7 +52,8 @@
 						"TriggerName": {
 							"value": "@pipeline().parameters.TriggerName",
 							"type": "Expression"
-						}
+						},
+						"HttpTriggerCategory": "EDW_Completion"
 					}
 				}
 			},
@@ -68,6 +76,249 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "CaptureError1",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Execute PL_Ellipse9_Main",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ErrorArray",
+					"value": {
+						"value": "@{concat('Activity1: ', activity('Execute PL_Ellipse9_Main').Error['message'])}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "CaptureError2",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Execute PL_WorkOrder_Model_Main",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ErrorArray",
+					"value": {
+						"value": "@{concat('Activity1: ', activity('Execute PL_WorkOrder_Model_Main').Error['message'])}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "If Errors Caught",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Execute PL_WorkOrder_Model_Main",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "CaptureError2",
+						"dependencyConditions": [
+							"Completed",
+							"Skipped"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@{empty(variables('ErrorArray'))}",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "HTTP Trigger",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Framework_PE_HttpRequest",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('Get SourceID').output.firstRow.SourceID",
+										"type": "Expression"
+									},
+									"SourceCategoryType": "Failed",
+									"PipelineRunId": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"PipelineName": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"PipelineStartTime": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									},
+									"PipelineMessage": {
+										"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+										"type": "Expression"
+									},
+									"PipelineEndTime": {
+										"value": "@utcnow()",
+										"type": "Expression"
+									},
+									"PipelineTriggerName": {
+										"value": "@pipeline().TriggerName",
+										"type": "Expression"
+									},
+									"PipelineTriggerId": {
+										"value": "@pipeline().TriggerId",
+										"type": "Expression"
+									},
+									"SourceCategory": "Trigger"
+								}
+							}
+						},
+						{
+							"name": "Raise Failure",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "HTTP Trigger",
+									"dependencyConditions": [
+										"Completed"
+									]
+								},
+								{
+									"activity": "Append Error Array",
+									"dependencyConditions": [
+										"Skipped",
+										"Completed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+									"type": "Expression"
+								},
+								"errorCode": "500"
+							}
+						},
+						{
+							"name": "Append Error Array",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "HTTP Trigger",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorArray",
+								"value": {
+									"value": "@{concat('HTTP Trigger: ', activity('HTTP Trigger').Error['message'])}",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "HTTP Triggers",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Framework_PE_HttpRequest",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('Get SourceID').output.firstRow.SourceID",
+										"type": "Expression"
+									},
+									"SourceCategoryType": "Succeeded",
+									"PipelineRunId": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"PipelineName": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"PipelineStartTime": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									},
+									"PipelineMessage": {
+										"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),',[',''),']',''),'\"',''),'[','')}",
+										"type": "Expression"
+									},
+									"PipelineEndTime": {
+										"value": "@utcnow()",
+										"type": "Expression"
+									},
+									"PipelineTriggerName": {
+										"value": "@pipeline().TriggerName",
+										"type": "Expression"
+									},
+									"PipelineTriggerId": {
+										"value": "@pipeline().TriggerId",
+										"type": "Expression"
+									},
+									"SourceCategory": "Trigger"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get SourceID",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT\r\n  srcSys.SourceID\r\nFROM ETL.SourceSystem srcSys\r\nWHERE srcSys.SourceName = '@{pipeline().parameters.SourceName}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -87,6 +338,9 @@
 				"type": "bool",
 				"defaultValue": true
 			},
+			"Additional_MappingParam": {
+				"type": "string"
+			},
 			"OnlyExtractDeletedRecordsFromSourceToBlob": {
 				"type": "bool",
 				"defaultValue": true
@@ -100,9 +354,16 @@
 				"defaultValue": "Ellipse9_Daily_Trigger"
 			}
 		},
+		"variables": {
+			"ErrorArray": {
+				"type": "Array"
+			}
+		},
 		"folder": {
 			"name": "Ellipse9"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-05-24T06:00:02Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
