@@ -122,6 +122,10 @@
 			"type": "string",
 			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		},
+		"LS_HTTP_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{linkedService().BaseURL}"
+		},
 		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
@@ -535,20 +539,20 @@
 			"defaultValue": true
 		},
 		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery": {
-			"type": "string",
-			"defaultValue": "false"
+			"type": "bool",
+			"defaultValue": false
 		},
 		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_Additional_MappingParam": {
 			"type": "object",
 			"defaultValue": null
 		},
 		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
-			"type": "string",
-			"defaultValue": "false"
+			"type": "bool",
+			"defaultValue": false
 		},
 		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL": {
-			"type": "string",
-			"defaultValue": "false"
+			"type": "bool",
+			"defaultValue": false
 		},
 		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_TriggerName": {
 			"type": "string",
@@ -617,6 +621,10 @@
 		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
 			"type": "string",
 			"defaultValue": "NOPV_Digital_Daily_Trigger"
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"type": "string",
+			"defaultValue": "Trigger"
 		},
 		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 			"type": "string",
@@ -3226,6 +3234,12 @@
 								]
 							}
 						],
+						"policy": {
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
 						"userProperties": [],
 						"typeProperties": {
 							"variableName": "url_variable",
@@ -3475,6 +3489,12 @@
 								]
 							}
 						],
+						"policy": {
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
 						"userProperties": [],
 						"typeProperties": {
 							"variableName": "year",
@@ -4156,6 +4176,12 @@
 									"name": "SetFileName",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileName",
@@ -4312,6 +4338,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "processfile",
@@ -4383,6 +4415,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileSize",
@@ -6946,6 +6984,12 @@
 									"name": "Set ActualExcelFileName",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "ActualExcelFileNameWithoutExt",
@@ -7682,6 +7726,12 @@
 									"name": "Set ActualExcelFileName",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "ActualExcelFileNameWithoutExt",
@@ -10969,6 +11019,46 @@
 											}
 										}
 									}
+								},
+								{
+									"name": "CaptureError2a",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity2a: ', activity('ExecutePL_EDWOnPrem_DM_SourcetoBlob').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "CaptureError2b",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Execute PL_Framework_TRFM_TransformSourceDate",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity2b: ', activity('Execute PL_Framework_TRFM_TransformSourceDate').Error['message'])}",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -11017,6 +11107,26 @@
 											}
 										}
 									}
+								},
+								{
+									"name": "CaptureError4a_Success",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "ExecutePL_TRFM_BLOBToASQL - No Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity4a_Success: ', activity('ExecutePL_TRFM_BLOBToASQL - No Failure').Error['message'])}",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -11063,6 +11173,26 @@
 												"value": "BlobToASQL",
 												"type": "Expression"
 											}
+										}
+									}
+								},
+								{
+									"name": "CaptureError4a_failure",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "ExecutePL_TRFM_BLOBToASQL - Has Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity4a_failure: ', activity('ExecutePL_TRFM_BLOBToASQL - Has Failure').Error['message'])}",
+											"type": "Expression"
 										}
 									}
 								}
@@ -11121,6 +11251,26 @@
 											}
 										}
 									}
+								},
+								{
+									"name": "CaptureError3a_Success",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Extract Deleted Records from SourceToBlob - No Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity3a_Success: ', activity('Extract Deleted Records from SourceToBlob - No Failure').Error['message'])}",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -11177,6 +11327,26 @@
 											}
 										}
 									}
+								},
+								{
+									"name": "CaptureError3a_failure",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Extract Deleted Records from SourceToBlob - Has Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity3_failure: ', activity('Extract Deleted Records from SourceToBlob - Has Failure').Error['message'])}",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -11223,6 +11393,26 @@
 												"value": "BlobToASQLDelete",
 												"type": "Expression"
 											}
+										}
+									}
+								},
+								{
+									"name": "CaptureError5a_success",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Delete Records from Delta and ASQL - No Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity5_Success: ', activity('Delete Records from Delta and ASQL - No Failure').Error['message'])}",
+											"type": "Expression"
 										}
 									}
 								}
@@ -11273,6 +11463,389 @@
 											}
 										}
 									}
+								},
+								{
+									"name": "CaptureError5a_failure",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Delete Records from Delta and ASQL - Has Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity5_failure: ', activity('Delete Records from Delta and ASQL - Has Failure').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CaptureError1",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Source ID",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity1: ', activity('Get Source ID').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError2",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Source to Blob Load Required",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity2: ', activity('Is Source to Blob Load Required').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError3_Success",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Source To Blob Delete Required - No Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity3_Success: ', activity('Is Source To Blob Delete Required - No Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError4_Success",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Blob to ASQL Required - No Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity4_Success: ', activity('Is Blob to ASQL Required - No Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError5_success",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Blob To ASQL Delete Required - No Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity5_Success: ', activity('Is Blob To ASQL Delete Required - No Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError3_failure",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Source To Blob Delete Required - Has Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity3_failure: ', activity('Is Source To Blob Delete Required - Has Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError4_failure",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Blob to ASQL Required - Has Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity4_failure: ', activity('Is Blob to ASQL Required - Has Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError5_failure",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Blob To ASQL Delete Required - Has Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity5_failure: ', activity('Is Blob To ASQL Delete Required - Has Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "If Errors Caught",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Blob To ASQL Delete Required - No Failure",
+								"dependencyConditions": [
+									"Completed",
+									"Skipped"
+								]
+							},
+							{
+								"activity": "Is Blob To ASQL Delete Required - Has Failure",
+								"dependencyConditions": [
+									"Completed",
+									"Skipped"
+								]
+							},
+							{
+								"activity": "CaptureError5_failure",
+								"dependencyConditions": [
+									"Completed",
+									"Skipped"
+								]
+							},
+							{
+								"activity": "CaptureError5_success",
+								"dependencyConditions": [
+									"Completed",
+									"Skipped"
+								]
+							},
+							{
+								"activity": "CaptureError1",
+								"dependencyConditions": [
+									"Skipped",
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@{empty(variables('ErrorArray'))}",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "HTTP Trigger",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_PE_HttpRequest",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow.SourceID",
+												"type": "Expression"
+											},
+											"SourceCategoryType": "Failed",
+											"PipelineRunId": {
+												"value": "@pipeline().RunId",
+												"type": "Expression"
+											},
+											"PipelineName": {
+												"value": "@pipeline().Pipeline",
+												"type": "Expression"
+											},
+											"PipelineStartTime": {
+												"value": "@pipeline().TriggerTime",
+												"type": "Expression"
+											},
+											"PipelineMessage": {
+												"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+												"type": "Expression"
+											},
+											"PipelineEndTime": {
+												"value": "@utcnow()",
+												"type": "Expression"
+											},
+											"PipelineTriggerName": {
+												"value": "@pipeline().TriggerName",
+												"type": "Expression"
+											},
+											"PipelineTriggerId": {
+												"value": "@pipeline().TriggerId",
+												"type": "Expression"
+											},
+											"SourceCategory": {
+												"value": "@pipeline().parameters.HttpTriggerCategory",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "Raise Failure",
+									"type": "Fail",
+									"dependsOn": [
+										{
+											"activity": "HTTP Trigger",
+											"dependencyConditions": [
+												"Completed"
+											]
+										},
+										{
+											"activity": "Append Error Array",
+											"dependencyConditions": [
+												"Skipped",
+												"Completed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"message": {
+											"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+											"type": "Expression"
+										},
+										"errorCode": "500"
+									}
+								},
+								{
+									"name": "Append Error Array",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "HTTP Trigger",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('HTTP Trigger: ', activity('HTTP Trigger').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "HTTP Triggers",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_PE_HttpRequest",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow.SourceID",
+												"type": "Expression"
+											},
+											"SourceCategoryType": "Succeeded",
+											"PipelineRunId": {
+												"value": "@pipeline().RunId",
+												"type": "Expression"
+											},
+											"PipelineName": {
+												"value": "@pipeline().Pipeline",
+												"type": "Expression"
+											},
+											"PipelineStartTime": {
+												"value": "@pipeline().TriggerTime",
+												"type": "Expression"
+											},
+											"PipelineMessage": {
+												"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),',[',''),']',''),'\"',''),'[','')}",
+												"type": "Expression"
+											},
+											"PipelineEndTime": {
+												"value": "@utcnow()",
+												"type": "Expression"
+											},
+											"PipelineTriggerName": {
+												"value": "@pipeline().TriggerName",
+												"type": "Expression"
+											},
+											"PipelineTriggerId": {
+												"value": "@pipeline().TriggerId",
+												"type": "Expression"
+											},
+											"SourceCategory": {
+												"value": "@pipeline().parameters.HttpTriggerCategory",
+												"type": "Expression"
+											}
+										}
+									}
 								}
 							]
 						}
@@ -11313,12 +11886,18 @@
 					"TriggerName": {
 						"type": "string",
 						"defaultValue": "GIS_SDCM_Daily_Trigger"
+					},
+					"HttpTriggerCategory": {
+						"type": "string"
 					}
 				},
 				"variables": {
 					"hasFailedFlag": {
 						"type": "Boolean",
 						"defaultValue": false
+					},
+					"ErrorArray": {
+						"type": "Array"
 					}
 				},
 				"folder": {
@@ -11331,7 +11910,8 @@
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToBlob')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_Framework_TRFM_TransformSourceDate')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_TRFM_BlobToASQL')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Framework_PE_HttpRequest')]"
 			]
 		},
 		{
@@ -14537,7 +15117,14 @@
 					{
 						"name": "Execute PL_Ellipse9_Main",
 						"type": "ExecutePipeline",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Get SourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
@@ -14577,7 +15164,8 @@
 								"TriggerName": {
 									"value": "@pipeline().parameters.TriggerName",
 									"type": "Expression"
-								}
+								},
+								"HttpTriggerCategory": "EDW_Completion"
 							}
 						}
 					},
@@ -14600,6 +15188,250 @@
 							},
 							"waitOnCompletion": true,
 							"parameters": {}
+						}
+					},
+					{
+						"name": "CaptureError1",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute PL_Ellipse9_Main",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity1: ', activity('Execute PL_Ellipse9_Main').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError2",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute PL_WorkOrder_Model_Main",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity1: ', activity('Execute PL_WorkOrder_Model_Main').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "If Errors Caught",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Execute PL_WorkOrder_Model_Main",
+								"dependencyConditions": [
+									"Completed"
+								]
+							},
+							{
+								"activity": "CaptureError2",
+								"dependencyConditions": [
+									"Completed",
+									"Skipped"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@{empty(variables('ErrorArray'))}",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "HTTP Trigger",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_PE_HttpRequest",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get SourceID').output.firstRow.SourceID",
+												"type": "Expression"
+											},
+											"SourceCategoryType": "Failed",
+											"PipelineRunId": {
+												"value": "@pipeline().RunId",
+												"type": "Expression"
+											},
+											"PipelineName": {
+												"value": "@pipeline().Pipeline",
+												"type": "Expression"
+											},
+											"PipelineStartTime": {
+												"value": "@pipeline().TriggerTime",
+												"type": "Expression"
+											},
+											"PipelineMessage": {
+												"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+												"type": "Expression"
+											},
+											"PipelineEndTime": {
+												"value": "@utcnow()",
+												"type": "Expression"
+											},
+											"PipelineTriggerName": {
+												"value": "@pipeline().TriggerName",
+												"type": "Expression"
+											},
+											"PipelineTriggerId": {
+												"value": "@pipeline().TriggerId",
+												"type": "Expression"
+											},
+											"SourceCategory": "Trigger"
+										}
+									}
+								},
+								{
+									"name": "Raise Failure",
+									"type": "Fail",
+									"dependsOn": [
+										{
+											"activity": "HTTP Trigger",
+											"dependencyConditions": [
+												"Completed"
+											]
+										},
+										{
+											"activity": "Append Error Array",
+											"dependencyConditions": [
+												"Skipped",
+												"Completed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"message": {
+											"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+											"type": "Expression"
+										},
+										"errorCode": "500"
+									}
+								},
+								{
+									"name": "Append Error Array",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "HTTP Trigger",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('HTTP Trigger: ', activity('HTTP Trigger').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "HTTP Triggers",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_PE_HttpRequest",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get SourceID').output.firstRow.SourceID",
+												"type": "Expression"
+											},
+											"SourceCategoryType": "Succeeded",
+											"PipelineRunId": {
+												"value": "@pipeline().RunId",
+												"type": "Expression"
+											},
+											"PipelineName": {
+												"value": "@pipeline().Pipeline",
+												"type": "Expression"
+											},
+											"PipelineStartTime": {
+												"value": "@pipeline().TriggerTime",
+												"type": "Expression"
+											},
+											"PipelineMessage": {
+												"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),',[',''),']',''),'\"',''),'[','')}",
+												"type": "Expression"
+											},
+											"PipelineEndTime": {
+												"value": "@utcnow()",
+												"type": "Expression"
+											},
+											"PipelineTriggerName": {
+												"value": "@pipeline().TriggerName",
+												"type": "Expression"
+											},
+											"PipelineTriggerId": {
+												"value": "@pipeline().TriggerId",
+												"type": "Expression"
+											},
+											"SourceCategory": "Trigger"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Get SourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT\r\n  srcSys.SourceID\r\nFROM ETL.SourceSystem srcSys\r\nWHERE srcSys.SourceName = '@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
 						}
 					}
 				],
@@ -14637,14 +15469,22 @@
 						"defaultValue": "Ellipse9_Daily_Trigger"
 					}
 				},
+				"variables": {
+					"ErrorArray": {
+						"type": "Array"
+					}
+				},
 				"folder": {
 					"name": "Ellipse9"
 				},
-				"annotations": []
+				"annotations": [],
+				"lastPublishTime": "2022-05-24T06:00:02Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_WorkOrder_Model_Main')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_WorkOrder_Model_Main')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Framework_PE_HttpRequest')]"
 			]
 		},
 		{
@@ -15350,6 +16190,12 @@
 								]
 							}
 						],
+						"policy": {
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
 						"userProperties": [],
 						"typeProperties": {
 							"variableName": "ClusterId",
@@ -15370,6 +16216,12 @@
 								]
 							}
 						],
+						"policy": {
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
 						"userProperties": [],
 						"typeProperties": {
 							"variableName": "ClusterSecret",
@@ -16443,6 +17295,12 @@
 												"name": "Set File Name",
 												"type": "SetVariable",
 												"dependsOn": [],
+												"policy": {
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
 												"userProperties": [],
 												"typeProperties": {
 													"variableName": "FileName",
@@ -16511,6 +17369,12 @@
 														]
 													}
 												],
+												"policy": {
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
 												"userProperties": [],
 												"typeProperties": {
 													"variableName": "FileSize",
@@ -16578,6 +17442,12 @@
 														]
 													}
 												],
+												"policy": {
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
 												"userProperties": [],
 												"typeProperties": {
 													"variableName": "LastModifiedDate",
@@ -16869,6 +17739,12 @@
 									"name": "Set variable1",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "ErrorMessage",
@@ -16974,6 +17850,12 @@
 									"name": "Set error message",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "ErrorMessage",
@@ -17876,6 +18758,12 @@
 								]
 							}
 						],
+						"policy": {
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
 						"userProperties": [],
 						"typeProperties": {
 							"variableName": "BlobFileType",
@@ -18036,6 +18924,12 @@
 									"name": "Set Max DIU - Daily Load",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "MaxCopyDIU",
@@ -18056,6 +18950,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "MaxCopyDCP",
@@ -18071,6 +18971,12 @@
 									"name": "Set Max DIU - Initial Load",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "MaxCopyDIU",
@@ -18091,6 +18997,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "MaxCopyDCP",
@@ -19962,6 +20874,12 @@
 									"name": "SetFileName",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileName",
@@ -20266,6 +21184,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "processfile",
@@ -20337,6 +21261,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileSize",
@@ -21566,6 +22496,12 @@
 								]
 							}
 						],
+						"policy": {
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
 						"userProperties": [],
 						"typeProperties": {
 							"variableName": "BlobFileType",
@@ -21590,6 +22526,12 @@
 									"name": "Set Max DIU - Daily Load",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "MaxCopyDIU",
@@ -21611,6 +22553,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "MaxCopyDCP",
@@ -21626,6 +22574,12 @@
 									"name": "Set Max DIU - Initial Load",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "MaxCopyDIU",
@@ -21646,6 +22600,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "MaxCopyDCP",
@@ -22859,6 +23819,12 @@
 									"name": "SetFileName",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileName",
@@ -23274,6 +24240,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "processfile",
@@ -23341,6 +24313,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileSize",
@@ -23525,6 +24503,12 @@
 									"name": "SetFileName",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileName",
@@ -24030,6 +25014,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "processfile",
@@ -24101,6 +25091,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileSize",
@@ -24328,6 +25324,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "CDCRun",
@@ -25084,6 +26086,386 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_Framework_PE_HttpRequest')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Http Requests",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": true,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[HTTPRequest_GetBySource]",
+								"storedProcedureParameters": {
+									"SourceCategory": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.SourceCategory",
+											"type": "Expression"
+										}
+									},
+									"SourceCategoryType": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.SourceCategoryType",
+											"type": "Expression"
+										}
+									},
+									"SourceId": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.SourceID",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "For Each HTTP Request",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Http Requests",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Http Requests').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "HTTP Output Type Switch",
+									"type": "Switch",
+									"dependsOn": [
+										{
+											"activity": "If Teams Message",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"on": {
+											"value": "@item().HTTPOutputType",
+											"type": "Expression"
+										},
+										"cases": [
+											{
+												"value": "JSON",
+												"activities": [
+													{
+														"name": "HTTP Request",
+														"type": "Lookup",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": true,
+															"secureInput": true
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"source": {
+																"type": "JsonSource",
+																"storeSettings": {
+																	"type": "HttpReadSettings",
+																	"requestMethod": {
+																		"value": "@{item().HTTPMethod}",
+																		"type": "Expression"
+																	},
+																	"additionalHeaders": {
+																		"value": "@{item().HTTPHeader}",
+																		"type": "Expression"
+																	},
+																	"requestBody": {
+																		"value": "@{item().HTTPBody}",
+																		"type": "Expression"
+																	},
+																	"requestTimeout": {
+																		"value": "@{item().RequestTimeout}",
+																		"type": "Expression"
+																	}
+																},
+																"formatSettings": {
+																	"type": "JsonReadSettings"
+																}
+															},
+															"dataset": {
+																"referenceName": "DS_HTTP_JSON",
+																"type": "DatasetReference",
+																"parameters": {
+																	"BaseURL": {
+																		"value": "@{item().HTTPURL}",
+																		"type": "Expression"
+																	}
+																}
+															},
+															"firstRowOnly": {
+																"value": "@item().FirstRowOnly",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"value": "DelimitedText",
+												"activities": [
+													{
+														"name": "HTTP Request_CSV",
+														"type": "Lookup",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": true,
+															"secureInput": true
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"source": {
+																"type": "DelimitedTextSource",
+																"storeSettings": {
+																	"type": "HttpReadSettings",
+																	"requestMethod": {
+																		"value": "@{item().HTTPMethod}",
+																		"type": "Expression"
+																	},
+																	"additionalHeaders": {
+																		"value": "@{item().HTTPHeader}",
+																		"type": "Expression"
+																	},
+																	"requestBody": {
+																		"value": "@{if(equals(item().HTTPBody,'ADFReplaced'),variables('RequestBody'),item().HTTPBody)}",
+																		"type": "Expression"
+																	},
+																	"requestTimeout": {
+																		"value": "@{item().RequestTimeout}",
+																		"type": "Expression"
+																	}
+																},
+																"formatSettings": {
+																	"type": "DelimitedTextReadSettings"
+																}
+															},
+															"dataset": {
+																"referenceName": "DS_HTTP_DelimitedText",
+																"type": "DatasetReference",
+																"parameters": {
+																	"BaseURL": {
+																		"value": "@item().HTTPURL",
+																		"type": "Expression"
+																	}
+																}
+															},
+															"firstRowOnly": {
+																"value": "@item().FirstRowOnly",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								},
+								{
+									"name": "If Teams Message",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@{bool(if(and(equals(item().Category,'Teams'),equals(item().HTTPBody,'ADFReplaced')),true,false))}",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Set Teams Message",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"policy": {
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "RequestBody",
+													"value": {
+														"value": "{\n    \"@type\": \"MessageCard\",\n    \"@context\": \"http://schema.org/extensions\",\n    \"themeColor\": \"0076D7\",\n    \"summary\": \"Pipeline status alert message​​​​\",\n    \"sections\": [\n        {\n            \"activityTitle\": \"@{concat('Source:',item().SourceName,'|Status:', pipeline().parameters.SourceCategoryType,'|Trigger:', pipeline().parameters.PipelineTriggerName, '|Start:',formatDateTime(addHours(pipeline().parameters.PipelineStartTime,10), 'yyyy-MM-dd HH:mm:ss'),'|End:',formatDateTime(addHours(pipeline().parameters.PipelineEndTime,10), 'yyyy-MM-dd HH:mm:ss'))}\",\n            \"markdown\": true\n        }\n    ]\n}",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "Set Error Array_Post Teams",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "If Teams Message",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorMessage",
+										"value": {
+											"value": "@{concat('HTTPTrigger-Switch: ',activity('If Teams Message').error['Message'])}",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set Error Array",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "HTTP Output Type Switch",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorMessage",
+										"value": {
+											"value": "@{concat('HTTPTrigger-Switch: ',activity('HTTP Output Type Switch').error['Message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "For Each HTTP Request",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@{bool(if(empty(variables('ErrorMessage')),true,false))}",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Raise Error",
+									"type": "Fail",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"message": {
+											"value": "@{replace(replace(replace(replace(string(variables('ErrorMessage')),'[',''),']',''),'\"',''),',|','\\n')}",
+											"type": "Expression"
+										},
+										"errorCode": "500"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceID": {
+						"type": "int"
+					},
+					"SourceCategoryType": {
+						"type": "string"
+					},
+					"PipelineRunId": {
+						"type": "string"
+					},
+					"PipelineName": {
+						"type": "string"
+					},
+					"PipelineStartTime": {
+						"type": "string"
+					},
+					"PipelineMessage": {
+						"type": "string"
+					},
+					"PipelineEndTime": {
+						"type": "string"
+					},
+					"PipelineTriggerName": {
+						"type": "string"
+					},
+					"PipelineTriggerId": {
+						"type": "string"
+					},
+					"SourceCategory": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"RequestBody": {
+						"type": "String"
+					},
+					"ErrorMessage": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "FrameWork"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
+				"[concat(variables('factoryId'), '/datasets/DS_HTTP_JSON')]",
+				"[concat(variables('factoryId'), '/datasets/DS_HTTP_DelimitedText')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_Framework_TRFM_BlobToASQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -25152,6 +26534,12 @@
 									"name": "SetFileName",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileName",
@@ -25634,6 +27022,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "processfile",
@@ -25705,6 +27099,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileSize",
@@ -26296,6 +27696,12 @@
 						"name": "Set Blob File Type",
 						"type": "SetVariable",
 						"dependsOn": [],
+						"policy": {
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
 						"userProperties": [],
 						"typeProperties": {
 							"variableName": "BlobFileType",
@@ -26531,6 +27937,12 @@
 									"name": "SetFileName",
 									"type": "SetVariable",
 									"dependsOn": [],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileName",
@@ -26675,6 +28087,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "processfile",
@@ -26746,6 +28164,12 @@
 											]
 										}
 									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "FileSize",
@@ -27526,7 +28950,8 @@
 								"TriggerName": {
 									"value": "@pipeline().parameters.TriggerName",
 									"type": "Expression"
-								}
+								},
+								"HttpTriggerCategory": "EDW_Completion"
 							}
 						}
 					},
@@ -27575,19 +29000,19 @@
 						"defaultValue": true
 					},
 					"AllowPartialUpdateOfDiscovery": {
-						"type": "string",
-						"defaultValue": "false"
+						"type": "bool",
+						"defaultValue": false
 					},
 					"Additional_MappingParam": {
 						"type": "string"
 					},
 					"OnlyExtractDeletedRecordsFromSourceToBlob": {
-						"type": "string",
-						"defaultValue": "false"
+						"type": "bool",
+						"defaultValue": false
 					},
 					"OnlyDeleteRecordsFromBlobToASQL": {
-						"type": "string",
-						"defaultValue": "false"
+						"type": "bool",
+						"defaultValue": false
 					},
 					"TriggerName": {
 						"type": "string",
@@ -34748,6 +36173,75 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_HTTP_DelimitedText')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_HTTP",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"BaseURL": {
+							"value": "@dataset().BaseURL",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"BaseURL": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_HTTP')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_HTTP_JSON')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_HTTP",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"BaseURL": {
+							"value": "@dataset().BaseURL",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"BaseURL": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_HTTP')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_HTTP_ZipBin_Parameter')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -35599,6 +37093,26 @@
 				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedRuntime')]",
 				"[concat(variables('factoryId'), '/linkedServices/ADF_LS_AKV')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_HTTP')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"BaseURL": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "HttpServer",
+				"typeProperties": {
+					"url": "[parameters('LS_HTTP_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_HTTPS_Temetra_Geospatial_API_EndPoint')]",
@@ -37168,7 +38682,8 @@
 							"Additional_MappingParam": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_Additional_MappingParam')]",
 							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
 							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
-							"TriggerName": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]"
+							"TriggerName": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
+							"HttpTriggerCategory": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
 						}
 					}
 				],
