@@ -1,0 +1,368 @@
+{
+	"name": "PL_Framework_PE_HttpRequest",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Http Requests",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[ETL].[HTTPRequest_GetBySource]",
+						"storedProcedureParameters": {
+							"SourceCategory": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.SourceCategory",
+									"type": "Expression"
+								}
+							},
+							"SourceCategoryType": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.SourceCategoryType",
+									"type": "Expression"
+								}
+							},
+							"SourceId": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.SourceID",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "For Each HTTP Request",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Http Requests",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Http Requests').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "HTTP Output Type Switch",
+							"type": "Switch",
+							"dependsOn": [
+								{
+									"activity": "If Teams Message",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"on": {
+									"value": "@item().HTTPOutputType",
+									"type": "Expression"
+								},
+								"cases": [
+									{
+										"value": "JSON",
+										"activities": [
+											{
+												"name": "HTTP Request",
+												"type": "Lookup",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": true,
+													"secureInput": true
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "JsonSource",
+														"storeSettings": {
+															"type": "HttpReadSettings",
+															"requestMethod": {
+																"value": "@{item().HTTPMethod}",
+																"type": "Expression"
+															},
+															"additionalHeaders": {
+																"value": "@{item().HTTPHeader}",
+																"type": "Expression"
+															},
+															"requestBody": {
+																"value": "@{item().HTTPBody}",
+																"type": "Expression"
+															},
+															"requestTimeout": {
+																"value": "@{item().RequestTimeout}",
+																"type": "Expression"
+															}
+														},
+														"formatSettings": {
+															"type": "JsonReadSettings"
+														}
+													},
+													"dataset": {
+														"referenceName": "DS_HTTP_JSON",
+														"type": "DatasetReference",
+														"parameters": {
+															"BaseURL": {
+																"value": "@{item().HTTPURL}",
+																"type": "Expression"
+															}
+														}
+													},
+													"firstRowOnly": {
+														"value": "@item().FirstRowOnly",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"value": "DelimitedText",
+										"activities": [
+											{
+												"name": "HTTP Request_CSV",
+												"type": "Lookup",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": true,
+													"secureInput": true
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "DelimitedTextSource",
+														"storeSettings": {
+															"type": "HttpReadSettings",
+															"requestMethod": {
+																"value": "@{item().HTTPMethod}",
+																"type": "Expression"
+															},
+															"additionalHeaders": {
+																"value": "@{item().HTTPHeader}",
+																"type": "Expression"
+															},
+															"requestBody": {
+																"value": "@{if(equals(item().HTTPBody,'ADFReplaced'),variables('RequestBody'),item().HTTPBody)}",
+																"type": "Expression"
+															},
+															"requestTimeout": {
+																"value": "@{item().RequestTimeout}",
+																"type": "Expression"
+															}
+														},
+														"formatSettings": {
+															"type": "DelimitedTextReadSettings"
+														}
+													},
+													"dataset": {
+														"referenceName": "DS_HTTP_DelimitedText",
+														"type": "DatasetReference",
+														"parameters": {
+															"BaseURL": {
+																"value": "@item().HTTPURL",
+																"type": "Expression"
+															}
+														}
+													},
+													"firstRowOnly": {
+														"value": "@item().FirstRowOnly",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								]
+							}
+						},
+						{
+							"name": "If Teams Message",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@{bool(if(and(equals(item().Category,'Teams'),equals(item().HTTPBody,'ADFReplaced')),true,false))}",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Set Teams Message",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"policy": {
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "RequestBody",
+											"value": {
+												"value": "{\n    \"@type\": \"MessageCard\",\n    \"@context\": \"http://schema.org/extensions\",\n    \"themeColor\": \"0076D7\",\n    \"summary\": \"Pipeline status alert message​​​​\",\n    \"sections\": [\n        {\n            \"activityTitle\": \"@{concat('Source:',item().SourceName,'|Status:', pipeline().parameters.SourceCategoryType,'|Trigger:', pipeline().parameters.PipelineTriggerName, '|Start:',formatDateTime(addHours(pipeline().parameters.PipelineStartTime,10), 'yyyy-MM-dd HH:mm:ss'),'|End:',formatDateTime(addHours(pipeline().parameters.PipelineEndTime,10), 'yyyy-MM-dd HH:mm:ss'))}\",\n            \"markdown\": true\n        }\n    ]\n}",
+												"type": "Expression"
+											}
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "Set Error Array_Post Teams",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "If Teams Message",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorMessage",
+								"value": {
+									"value": "@{concat('HTTPTrigger-Switch: ',activity('If Teams Message').error['Message'])}",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Error Array",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "HTTP Output Type Switch",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorMessage",
+								"value": {
+									"value": "@{concat('HTTPTrigger-Switch: ',activity('HTTP Output Type Switch').error['Message'])}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "For Each HTTP Request",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@{bool(if(empty(variables('ErrorMessage')),true,false))}",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Raise Error",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@{replace(replace(replace(replace(string(variables('ErrorMessage')),'[',''),']',''),'\"',''),',|','\\n')}",
+									"type": "Expression"
+								},
+								"errorCode": "500"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"SourceID": {
+				"type": "int"
+			},
+			"SourceCategoryType": {
+				"type": "string"
+			},
+			"PipelineRunId": {
+				"type": "string"
+			},
+			"PipelineName": {
+				"type": "string"
+			},
+			"PipelineStartTime": {
+				"type": "string"
+			},
+			"PipelineMessage": {
+				"type": "string"
+			},
+			"PipelineEndTime": {
+				"type": "string"
+			},
+			"PipelineTriggerName": {
+				"type": "string"
+			},
+			"PipelineTriggerId": {
+				"type": "string"
+			},
+			"SourceCategory": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"RequestBody": {
+				"type": "String"
+			},
+			"ErrorMessage": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "FrameWork"
+		},
+		"annotations": []
+	}
+}
