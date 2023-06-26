@@ -65,6 +65,12 @@
 							"name": "SetFileName",
 							"type": "SetVariable",
 							"dependsOn": [],
+							"policy": {
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "FileName",
@@ -547,6 +553,12 @@
 									]
 								}
 							],
+							"policy": {
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "processfile",
@@ -618,6 +630,12 @@
 									]
 								}
 							],
+							"policy": {
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "FileSize",
@@ -770,7 +788,8 @@
 				"defaultValue": "0"
 			},
 			"sourcecolumnlist": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "@pipeline().parameters.sourcecolumnlist"
 			}
 		},
 		"variables": {
