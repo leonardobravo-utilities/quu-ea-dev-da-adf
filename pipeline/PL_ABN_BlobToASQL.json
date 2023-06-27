@@ -35,7 +35,8 @@
 									"type": "Expression"
 								}
 							}
-						}
+						},
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",
@@ -173,6 +174,10 @@
 									"databrickssecretname": {
 										"value": "@item().databrickssecretname",
 										"type": "Expression"
+									},
+									"sourcecolumnlist": {
+										"value": "@item().Source_Column_list",
+										"type": "Expression"
 									}
 								}
 							}
@@ -248,7 +253,8 @@
 						"sqlReaderQuery": {
 							"value": "Select SourceID FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
 							"type": "Expression"
-						}
+						},
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",
