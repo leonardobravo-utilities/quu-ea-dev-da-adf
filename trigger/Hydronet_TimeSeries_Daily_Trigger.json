@@ -1,0 +1,64 @@
+{
+	"name": "Hydronet_TimeSeries_Daily_Trigger",
+	"properties": {
+		"description": "Time series trigger, this has a reliance on the Locations data for hydronet",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Hydronet_TimeSeries_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"StartDate": "1900-01-01",
+					"EndDate": "1900-01-01",
+					"DaysPerFile": 90,
+					"LocationCodes": "1326,1327",
+					"LocationCodesExclude": "@coalesce(null)",
+					"TimeZone": "+1000",
+					"DataSources": [
+						"QUU.BoM.RF3.IDR66"
+					],
+					"SourceName": "Hydronet",
+					"DestinationTable": "Hydronet.Rainfall_Exceedance",
+					"VariableCodes": [
+						"EY_30min",
+						"EY_1hr",
+						"EY_2hr",
+						"EY_3hr",
+						"EY_4.5hr",
+						"EY_6hr",
+						"EY_9hr",
+						"EY_12hr",
+						"EY_18hr",
+						"EY_24hr",
+						"EY_36hr",
+						"EY_48hr",
+						"EY_72hr",
+						"EY_168hr"
+					],
+					"TriggerName": "Hydronet_Daily_Trigger",
+					"KeyVaultPath": "https://quu-ea-prd-da-key-vault.vault.azure.net/secrets/<secretname>?api-version=7.0"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-05-21T06:45:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						35
+					],
+					"hours": [
+						9
+					]
+				}
+			}
+		}
+	}
+}

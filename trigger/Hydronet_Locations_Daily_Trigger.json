@@ -1,0 +1,42 @@
+{
+	"name": "Hydronet_Locations_Daily_Trigger",
+	"properties": {
+		"description": "This trigger is a prerequisite to other hydronet ingestions",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Hydronet_Locations_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"DataSources": [
+						"QUU.BoM.RF3.IDR66"
+					],
+					"SourceName": "Hydronet",
+					"DestinationTable": "Hydronet.Location",
+					"TriggerName": "Hydronet_PreReq_Daily",
+					"KeyVaultPath": "https://quu-ea-prd-da-key-vault.vault.azure.net/secrets/<secretname>?api-version=7.0"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-05-21T06:00:00",
+				"timeZone": "E. Australia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						9
+					]
+				}
+			}
+		}
+	}
+}
