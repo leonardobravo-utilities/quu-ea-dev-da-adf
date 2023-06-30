@@ -1,6 +1,413 @@
 {
 	"name": "PL_Hydronet_Locations_Main",
 	"properties": {
+		"activities": [
+			{
+				"name": "Obtain Auth Token",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Auth-ClientID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Auth-ClientSecret",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "API-URL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": true
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://login.hydronet.com/auth/realms/hydronet/protocol/openid-connect/token",
+					"method": "POST",
+					"headers": {
+						"content-type": "application/x-www-form-urlencoded"
+					},
+					"body": {
+						"value": "@{concat('grant_type=client_credentials&client_id=',activity('Auth-ClientID').output.value,'&client_secret=',activity('Auth-ClientSecret').output.value,'&')}",
+						"type": "Expression"
+					},
+					"httpRequestTimeout": "00:10:00"
+				}
+			},
+			{
+				"name": "Get Locations",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Obtain Auth Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": true
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@{concat(activity('API-URL').output.value,'entity/locations/get')}",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Authorization": {
+							"value": "Bearer @{activity('Obtain Auth Token').output.access_token}",
+							"type": "Expression"
+						},
+						"Content-type": "application/json"
+					},
+					"body": {
+						"value": "@{concat('{\"DataSourceCodes\":',pipeline().parameters.DataSources,'}')}",
+						"type": "Expression"
+					},
+					"httpRequestTimeout": "00:10:00"
+				}
+			},
+			{
+				"name": "Copy Locations to Blob as CSV",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Get Locations",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "GetColumnMappings",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[ETL].[Hydronet_GetLocations]",
+						"storedProcedureParameters": {
+							"JsonString": {
+								"type": "String",
+								"value": {
+									"value": "@replace(string(activity('Get Locations').output.Locations),variables('ReplaceChar'),variables('ReplaceCharWith'))",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"value": "@activity('GetColumnMappings').output.firstRow.json_output",
+						"type": "Expression"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ABLB_Datalanding_IncludeHeader",
+						"type": "DatasetReference",
+						"parameters": {
+							"FolderPath": {
+								"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].FolderName",
+								"type": "Expression"
+							},
+							"TargetFileName": {
+								"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].FileName",
+								"type": "Expression"
+							},
+							"ColumnDelimiter": {
+								"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].ColumnDelimiter",
+								"type": "Expression"
+							},
+							"QuoteCharacter": {
+								"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].QuoteCharacter",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Obtain Destination File Details",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWDiscovery",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"parameters": [
+								{
+									"name": "SourceName",
+									"type": "String",
+									"value": {
+										"value": "@pipeline().parameters.SourceName",
+										"type": "Expression"
+									},
+									"direction": "Input"
+								},
+								{
+									"name": "DestinationTable",
+									"type": "String",
+									"value": {
+										"value": "@pipeline().parameters.DestinationTable",
+										"type": "Expression"
+									},
+									"direction": "Input"
+								}
+							],
+							"type": "Query",
+							"text": "/*\nDECLARE @SourceName VARCHAR(100) = 'Hydronet',\n\t\t@DestinationTable VARCHAR(200) = 'Hydronet.Location'\n*/\nDECLARE @SQL NVARCHAR(MAX) = '\nSELECT st.TableId,TargetBlobFilePath AS FolderName, TargetBlobFileName + CASE WHEN st.[File_Name_DateTime_Ind] = 1 THEN ''_'' + CONVERT(VARCHAR(10),dbo.udf_getLocalDTM(),112) ELSE '''' END + TargetBlobFileNameExt AS FileName, QuoteCharacter, ColumnDelimiter\nFROM ETL.SourceTableDetails st\nWHERE EXISTS\n(\n\tSELECT *\n\tFROM ETL.SourceSystem ss\n\tWHERE st.SourceID = ss.SourceID\n\tAND ss.SourceName = @SourceName\n)\nAND AzuresqlTargetTableName = @DestinationTable'\n\nEXEC sp_executesql\t@SQL, \n\t\t\t\t\tN'@SourceName VARCHAR(100), @DestinationTable VARCHAR(200)', \n\t\t\t\t\t@SourceName = @SourceName, \n\t\t\t\t\t@DestinationTable = @DestinationTable"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "Auth-ClientID",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@{replace(pipeline().parameters.KeyVaultPath,'<secretname>','Hydronet-API-ClientID')}",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "Auth-ClientSecret",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@{replace(pipeline().parameters.KeyVaultPath,'<secretname>','Hydronet-API-ClientSecret')}",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "API-URL",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@{replace(pipeline().parameters.KeyVaultPath,'<secretname>','HydroNet-Base-URL')}",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "Land to Destination",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Copy Locations to Blob as CSV",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceName": {
+							"value": "@pipeline().parameters.SourceName",
+							"type": "Expression"
+						},
+						"OnlySourceToBlob": false,
+						"OnlyBlobtoASQL": true,
+						"AllowPartialUpdateOfDiscovery": false,
+						"OnlyExtractDeletedRecordsFromSourceToBlob": false,
+						"OnlyDeleteRecordsFromBlobToASQL": false,
+						"TriggerName": {
+							"value": "@pipeline().parameters.TriggerName",
+							"type": "Expression"
+						},
+						"HttpTriggerCategory": "Trigger"
+					}
+				}
+			},
+			{
+				"name": "GetColumnMappings",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Obtain Destination File Details",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[ETL].[usp_getColumnMapping_json_to_csv]",
+						"storedProcedureParameters": {
+							"additional_param": {
+								"type": "String",
+								"value": ""
+							},
+							"TableID": {
+								"type": "Int32",
+								"value": {
+									"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].TableId",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"DataSources": {
+				"type": "string",
+				"defaultValue": [
+					"QUU.BoM.RF3.IDR66"
+				]
+			},
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "Hydronet"
+			},
+			"DestinationTable": {
+				"type": "string",
+				"defaultValue": "Hydronet.Location"
+			},
+			"TriggerName": {
+				"type": "string",
+				"defaultValue": "Hydronet_PreReq_Daily"
+			},
+			"KeyVaultPath": {
+				"type": "string",
+				"defaultValue": "https://quu-ea-tst-da-key-vault.vault.azure.net/secrets/<secretname>?api-version=7.0"
+			}
+		},
+		"variables": {
+			"ReplaceChar": {
+				"type": "String",
+				"defaultValue": "'"
+			},
+			"ReplaceCharWith": {
+				"type": "String",
+				"defaultValue": "''"
+			}
+		},
 		"folder": {
 			"name": "Hydronet"
 		},
