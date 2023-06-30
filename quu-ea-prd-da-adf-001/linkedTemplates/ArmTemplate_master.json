@@ -546,6 +546,93 @@
 			"type": "string",
 			"defaultValue": "Hiaffinity-PRD-Password"
 		},
+		"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_DataSources": {
+			"type": "array",
+			"defaultValue": [
+				"QUU.BoM.RF3.IDR66"
+			]
+		},
+		"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Hydronet"
+		},
+		"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_DestinationTable": {
+			"type": "string",
+			"defaultValue": "Hydronet.Location"
+		},
+		"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "Hydronet_PreReq_Daily"
+		},
+		"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_KeyVaultPath": {
+			"type": "string",
+			"defaultValue": "https://quu-ea-prd-da-key-vault.vault.azure.net/secrets/<secretname>?api-version=7.0"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_StartDate": {
+			"type": "string",
+			"defaultValue": "1900-01-01"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_EndDate": {
+			"type": "string",
+			"defaultValue": "1900-01-01"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DaysPerFile": {
+			"type": "int",
+			"defaultValue": 90
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_LocationCodes": {
+			"type": "string",
+			"defaultValue": "1326,1327"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_LocationCodesExclude": {
+			"type": "string",
+			"defaultValue": "@coalesce(null)"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_TimeZone": {
+			"type": "string",
+			"defaultValue": "+1000"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DataSources": {
+			"type": "array",
+			"defaultValue": [
+				"QUU.BoM.RF3.IDR66"
+			]
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Hydronet"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DestinationTable": {
+			"type": "string",
+			"defaultValue": "Hydronet.Rainfall_Exceedance"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_VariableCodes": {
+			"type": "array",
+			"defaultValue": [
+				"EY_30min",
+				"EY_1hr",
+				"EY_2hr",
+				"EY_3hr",
+				"EY_4.5hr",
+				"EY_6hr",
+				"EY_9hr",
+				"EY_12hr",
+				"EY_18hr",
+				"EY_24hr",
+				"EY_36hr",
+				"EY_48hr",
+				"EY_72hr",
+				"EY_168hr"
+			]
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "Hydronet_Daily_Trigger"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_KeyVaultPath": {
+			"type": "string",
+			"defaultValue": "https://quu-ea-prd-da-key-vault.vault.azure.net/secrets/<secretname>?api-version=7.0"
+		},
 		"ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName": {
 			"type": "string",
 			"defaultValue": "ICN"
@@ -1149,18 +1236,6 @@
 					},
 					"LS_FS_NFUJPRD202_GDrive_properties_typeProperties_userId": {
 						"value": "[parameters('LS_FS_NFUJPRD202_GDrive_properties_typeProperties_userId')]"
-					},
-					"LS_FS_NFUJPRD301_properties_typeProperties_host": {
-						"value": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_host')]"
-					},
-					"LS_FS_NFUJPRD301_properties_typeProperties_userId": {
-						"value": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_userId')]"
-					},
-					"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
-						"value": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_host')]"
-					},
-					"LS_FS_ServiceNow_MidServer_properties_typeProperties_userId": {
-						"value": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_userId')]"
 					}
 				}
 			},
@@ -1190,6 +1265,18 @@
 					},
 					"LS_SQL_Framework_connectionString": {
 						"value": "[parameters('LS_SQL_Framework_connectionString')]"
+					},
+					"LS_FS_NFUJPRD301_properties_typeProperties_host": {
+						"value": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_host')]"
+					},
+					"LS_FS_NFUJPRD301_properties_typeProperties_userId": {
+						"value": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_userId')]"
+					},
+					"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
+						"value": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_host')]"
+					},
+					"LS_FS_ServiceNow_MidServer_properties_typeProperties_userId": {
+						"value": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_userId')]"
 					},
 					"LS_FS_globalscape_PowerBI_file_properties_typeProperties_host": {
 						"value": "[parameters('LS_FS_globalscape_PowerBI_file_properties_typeProperties_host')]"
@@ -1626,24 +1713,6 @@
 					},
 					"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
 						"value": "[parameters('WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
-					},
-					"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
-						"value": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName')]"
-					},
-					"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
-						"value": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]"
-					},
-					"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
-					},
-					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
-						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName')]"
-					},
-					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
-						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]"
-					},
-					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
-						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
 					}
 				}
 			},
@@ -1664,6 +1733,24 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+						"value": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName')]"
+					},
+					"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+						"value": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]"
+					},
+					"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
+					},
+					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName')]"
+					},
+					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]"
+					},
+					"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+						"value": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
 					},
 					"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
 						"value": "[parameters('eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName')]"
@@ -1925,6 +2012,26 @@
 					},
 					"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
 						"value": "[parameters('SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_11')]"
+			]
+		},
+		{
+			"name": "quu-ea-prd-da-adf-001_ArmTemplate_13",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_13.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
 						"value": "[parameters('Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]"
@@ -1997,26 +2104,6 @@
 					},
 					"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
 						"value": "[parameters('UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'quu-ea-prd-da-adf-001_ArmTemplate_11')]"
-			]
-		},
-		{
-			"name": "quu-ea-prd-da-adf-001_ArmTemplate_13",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_13.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
 					},
 					"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_SourceName": {
 						"value": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_SourceName')]"
@@ -2038,6 +2125,57 @@
 					},
 					"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_TriggerName": {
 						"value": "[parameters('Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_TriggerName')]"
+					},
+					"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_DataSources": {
+						"value": "[parameters('Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_DataSources')]"
+					},
+					"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_SourceName": {
+						"value": "[parameters('Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_SourceName')]"
+					},
+					"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_DestinationTable": {
+						"value": "[parameters('Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_DestinationTable')]"
+					},
+					"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_TriggerName": {
+						"value": "[parameters('Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_TriggerName')]"
+					},
+					"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_KeyVaultPath": {
+						"value": "[parameters('Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_KeyVaultPath')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_StartDate": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_StartDate')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_EndDate": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_EndDate')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DaysPerFile": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DaysPerFile')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_LocationCodes": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_LocationCodes')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_LocationCodesExclude": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_LocationCodesExclude')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_TimeZone": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_TimeZone')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DataSources": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DataSources')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_SourceName": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_SourceName')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DestinationTable": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DestinationTable')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_VariableCodes": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_VariableCodes')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_TriggerName": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_TriggerName')]"
+					},
+					"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_KeyVaultPath": {
+						"value": "[parameters('Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_KeyVaultPath')]"
 					},
 					"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_SourceName": {
 						"value": "[parameters('Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_SourceName')]"

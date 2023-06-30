@@ -47,28 +47,48 @@
 		"LS_FS_NFUJPRD202_GDrive_properties_typeProperties_userId": {
 			"type": "string",
 			"defaultValue": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT"
-		},
-		"LS_FS_NFUJPRD301_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "\\\\NFUJPRD301\\EBI_PROD_LANDING"
-		},
-		"LS_FS_NFUJPRD301_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
-		},
-		"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "@{linkedService().p_MidServerLocation}"
-		},
-		"LS_FS_ServiceNow_MidServer_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_srcLanding_FileExists')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"blobcontainer": {
+						"type": "string"
+					},
+					"blobfolderpath": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().blobfolderpath",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().blobcontainer",
+							"type": "Expression"
+						}
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_ABLB_srclanding_json_source')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
@@ -363,6 +383,42 @@
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
 					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_HTTP_CSV_IncludeHeader')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_HTTP",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"BaseURL": {
+							"value": "@dataset().HTTPURL",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"HTTPURL": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation"
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
 				"schema": []
@@ -670,65 +726,6 @@
 				"typeProperties": {
 					"host": "[parameters('LS_FS_NFUJPRD202_GDrive_properties_typeProperties_host')]",
 					"userId": "[parameters('LS_FS_NFUJPRD202_GDrive_properties_typeProperties_userId')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "svc-ebi-prdc04-agt"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SelfHostedRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_FS_NFUJPRD301')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_host')]",
-					"userId": "[parameters('LS_FS_NFUJPRD301_properties_typeProperties_userId')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ADF_LS_AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "SVC-EBI-PRDC04-AGT"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SelfHostedRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_FS_ServiceNow_MidServer')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Service Now mid-server -    \\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates",
-				"parameters": {
-					"p_MidServerLocation": {
-						"type": "string",
-						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
-					}
-				},
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_host')]",
-					"userId": "[parameters('LS_FS_ServiceNow_MidServer_properties_typeProperties_userId')]",
 					"password": {
 						"type": "AzureKeyVaultSecret",
 						"store": {
