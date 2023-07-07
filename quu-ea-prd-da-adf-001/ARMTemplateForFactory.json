@@ -3370,8 +3370,6 @@
 							}
 						],
 						"policy": {
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
 						},
@@ -3625,8 +3623,6 @@
 							}
 						],
 						"policy": {
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
 						},
@@ -4312,8 +4308,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -4474,8 +4468,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -4551,8 +4543,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -5480,6 +5470,10 @@
 								"LogicAppURL": {
 									"value": "@pipeline().parameters.LogicAppURL",
 									"type": "Expression"
+								},
+								"TriggerName": {
+									"value": "@pipeline().parameters.TriggerName",
+									"type": "Expression"
 								}
 							}
 						}
@@ -5504,14 +5498,15 @@
 					},
 					"EmailTo": {
 						"type": "string",
-						"defaultValue": "Analytics-Support@urbanutilities.com.au;DL-IS-Analytics-Data-Foundation@urbanutilities.com.au"
+						"defaultValue": "DL-IS-Analytics-Data-Foundation@urbanutilities.com.au"
 					},
 					"LogicAppURL": {
 						"type": "string",
 						"defaultValue": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU"
 					},
 					"TriggerName": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "Chris21_Weekly_Trigger_Monday"
 					}
 				},
 				"folder": {
@@ -7120,8 +7115,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -7862,8 +7855,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -16326,8 +16317,6 @@
 							}
 						],
 						"policy": {
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
 						},
@@ -16352,8 +16341,6 @@
 							}
 						],
 						"policy": {
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
 						},
@@ -17306,7 +17293,7 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderQuery": {
-									"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1",
+									"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1 and STD.TriggerName = '@{pipeline().parameters.TriggerName}'",
 									"type": "Expression"
 								},
 								"queryTimeout": "02:00:00",
@@ -17431,8 +17418,6 @@
 												"type": "SetVariable",
 												"dependsOn": [],
 												"policy": {
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
 													"secureOutput": false,
 													"secureInput": false
 												},
@@ -17505,8 +17490,6 @@
 													}
 												],
 												"policy": {
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
 													"secureOutput": false,
 													"secureInput": false
 												},
@@ -17578,8 +17561,6 @@
 													}
 												],
 												"policy": {
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
 													"secureOutput": false,
 													"secureInput": false
 												},
@@ -17709,6 +17690,9 @@
 					},
 					"LogicAppURL": {
 						"type": "string"
+					},
+					"TriggerName": {
+						"type": "string"
 					}
 				},
 				"variables": {
@@ -17731,7 +17715,8 @@
 				"folder": {
 					"name": "Source File Monitoring"
 				},
-				"annotations": []
+				"annotations": [],
+				"lastPublishTime": "2021-03-10T12:15:11Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ASQL_EDWDiscovery')]",
@@ -17875,8 +17860,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -17986,8 +17969,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -18894,8 +18875,6 @@
 							}
 						],
 						"policy": {
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
 						},
@@ -19060,8 +19039,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -19086,8 +19063,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -19107,8 +19082,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -19133,8 +19106,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -21010,8 +20981,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -21320,8 +21289,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -21397,8 +21364,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -22632,8 +22597,6 @@
 							}
 						],
 						"policy": {
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
 						},
@@ -22662,8 +22625,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -22689,8 +22650,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -22710,8 +22669,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -22736,8 +22693,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -23955,8 +23910,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -24376,8 +24329,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -24449,8 +24400,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -24639,8 +24588,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -25150,8 +25097,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -25227,8 +25172,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -25460,8 +25403,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -26450,8 +26391,6 @@
 												"type": "SetVariable",
 												"dependsOn": [],
 												"policy": {
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
 													"secureOutput": false,
 													"secureInput": false
 												},
@@ -26670,8 +26609,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -27158,8 +27095,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -27235,8 +27170,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -27832,8 +27765,6 @@
 						"type": "SetVariable",
 						"dependsOn": [],
 						"policy": {
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
 						},
@@ -28073,8 +28004,6 @@
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -28223,8 +28152,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},
@@ -28300,8 +28227,6 @@
 										}
 									],
 									"policy": {
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
 										"secureInput": false
 									},

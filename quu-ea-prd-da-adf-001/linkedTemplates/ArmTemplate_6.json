@@ -3743,7 +3743,7 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderQuery": {
-									"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1",
+									"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1 and STD.TriggerName = '@{pipeline().parameters.TriggerName}'",
 									"type": "Expression"
 								},
 								"queryTimeout": "02:00:00",
@@ -3868,8 +3868,6 @@
 												"type": "SetVariable",
 												"dependsOn": [],
 												"policy": {
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
 													"secureOutput": false,
 													"secureInput": false
 												},
@@ -3942,8 +3940,6 @@
 													}
 												],
 												"policy": {
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
 													"secureOutput": false,
 													"secureInput": false
 												},
@@ -4015,8 +4011,6 @@
 													}
 												],
 												"policy": {
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
 													"secureOutput": false,
 													"secureInput": false
 												},
@@ -4146,6 +4140,9 @@
 					},
 					"LogicAppURL": {
 						"type": "string"
+					},
+					"TriggerName": {
+						"type": "string"
 					}
 				},
 				"variables": {
@@ -4168,7 +4165,8 @@
 				"folder": {
 					"name": "Source File Monitoring"
 				},
-				"annotations": []
+				"annotations": [],
+				"lastPublishTime": "2021-03-10T12:15:11Z"
 			},
 			"dependsOn": []
 		}
