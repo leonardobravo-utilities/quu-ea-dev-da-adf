@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1",
+							"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1 and STD.TriggerName = '@{pipeline().parameters.TriggerName}'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -123,10 +123,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"url": {
-												"value": "@pipeline().parameters.LogicAppURL",
-												"type": "Expression"
-											},
+											"url": "https://prod-24.australiaeast.logic.azure.com:443/workflows/dc9e1df8aa2e45808aacf97f550a7599/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=xQCVGhMPOjEYrG7FImPoWprQJPEtC5I_9OV0LOzMWyI",
 											"method": "POST",
 											"body": {
 												"value": "{\n   \"DataFactoryName\": \"@{pipeline().DataFactory}\",\n   \"PipelineName\": \"@{pipeline().Pipeline}\",\n   \"Subject\": \"@{pipeline().parameters.Subject}\",\n   \"ErrorMessage\": \" File @{item().TargetFileName}  is not received\",\n   \"EmailTo\": \"@{pipeline().parameters.EmailTo}\"\n}\t",
@@ -140,6 +137,10 @@
 										"name": "Set File Name",
 										"type": "SetVariable",
 										"dependsOn": [],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
 										"userProperties": [],
 										"typeProperties": {
 											"variableName": "FileName",
@@ -180,8 +181,7 @@
 													"file": {
 														"value": "@variables('FileName')",
 														"type": "Expression"
-													},
-													"server": "\\\\Nfujprd310\\ebi_prod_landing"
+													}
 												}
 											},
 											"fieldList": [
@@ -208,6 +208,10 @@
 												]
 											}
 										],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
 										"userProperties": [],
 										"typeProperties": {
 											"variableName": "FileSize",
@@ -248,8 +252,7 @@
 													"file": {
 														"value": "@variables('FileName')",
 														"type": "Expression"
-													},
-													"server": "\\\\Nfujprd310\\ebi_prod_landing"
+													}
 												}
 											},
 											"fieldList": [
@@ -275,6 +278,10 @@
 												]
 											}
 										],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
 										"userProperties": [],
 										"typeProperties": {
 											"variableName": "LastModifiedDate",
@@ -397,6 +404,9 @@
 			},
 			"LogicAppURL": {
 				"type": "string"
+			},
+			"TriggerName": {
+				"type": "string"
 			}
 		},
 		"variables": {
@@ -419,6 +429,8 @@
 		"folder": {
 			"name": "Source File Monitoring"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2021-03-10T12:15:11Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
