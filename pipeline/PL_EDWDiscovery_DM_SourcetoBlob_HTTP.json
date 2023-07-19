@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "For Active Station",
+				"name": "For HTTP request",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -23,70 +23,181 @@
 					"batchCount": 2,
 					"activities": [
 						{
-							"name": "Execute HTTPZip",
-							"type": "ExecutePipeline",
+							"name": "source system",
+							"type": "Switch",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"pipeline": {
-									"referenceName": "PL_BOM_HTTPZIPtoBlob",
-									"type": "PipelineReference"
+								"on": {
+									"value": "@item().SourceName",
+									"type": "Expression"
 								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"relative_url": {
-										"value": "@item().APIRelativeURL\r\n",
-										"type": "Expression"
+								"cases": [
+									{
+										"value": "BOM Rainfall",
+										"activities": [
+											{
+												"name": "Execute HTTPZip",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "PL_BOM_HTTPZIPtoBlob",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"relative_url": {
+															"value": "@item().APIRelativeURL\r\n",
+															"type": "Expression"
+														},
+														"fileNameExt": {
+															"value": "@item().File_Name_Ext",
+															"type": "Expression"
+														},
+														"blobcontainer": {
+															"value": "@item().TargetBlobContainer",
+															"type": "Expression"
+														},
+														"blobfolder": {
+															"value": "@item().TargetBlobFolderPath",
+															"type": "Expression"
+														},
+														"blobfile": {
+															"value": "@item().SourceTableName",
+															"type": "Expression"
+														},
+														"src_blobstorageaccount": {
+															"value": "@item().SourceStorageAccount",
+															"type": "Expression"
+														},
+														"webrequest_url": {
+															"value": "@item().APIBaseURL\r\n",
+															"type": "Expression"
+														},
+														"station": {
+															"value": "@replace(item().Data_Destination_File_Name,'idcjac0009_','')",
+															"type": "Expression"
+														},
+														"blobstorageaccount": {
+															"value": "@item().StorageAccount",
+															"type": "Expression"
+														},
+														"src_blobcontainer": {
+															"value": "@item().SourceLandingContainer",
+															"type": "Expression"
+														},
+														"delimiter": {
+															"value": "@item().ColumnDelimiter",
+															"type": "Expression"
+														},
+														"TableID": {
+															"value": "@item().TableID",
+															"type": "Expression"
+														},
+														"File_Name_DateTime_Ind": {
+															"value": "@item().File_Name_DateTime_Ind",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
 									},
-									"fileNameExt": {
-										"value": "@item().File_Name_Ext",
-										"type": "Expression"
-									},
-									"blobcontainer": {
-										"value": "@item().TargetBlobContainer",
-										"type": "Expression"
-									},
-									"blobfolder": {
-										"value": "@item().TargetBlobFolderPath",
-										"type": "Expression"
-									},
-									"blobfile": {
-										"value": "@item().SourceTableName",
-										"type": "Expression"
-									},
-									"src_blobstorageaccount": {
-										"value": "@item().SourceStorageAccount",
-										"type": "Expression"
-									},
-									"webrequest_url": {
-										"value": "@item().APIBaseURL\r\n",
-										"type": "Expression"
-									},
-									"station": {
-										"value": "@replace(item().Data_Destination_File_Name,'idcjac0009_','')",
-										"type": "Expression"
-									},
-									"blobstorageaccount": {
-										"value": "@item().StorageAccount",
-										"type": "Expression"
-									},
-									"src_blobcontainer": {
-										"value": "@item().SourceLandingContainer",
-										"type": "Expression"
-									},
-									"delimiter": {
-										"value": "@item().ColumnDelimiter",
-										"type": "Expression"
-									},
-									"TableID": {
-										"value": "@item().TableID",
-										"type": "Expression"
-									},
-									"File_Name_DateTime_Ind": {
-										"value": "@item().File_Name_DateTime_Ind",
-										"type": "Expression"
+									{
+										"value": "Ixom",
+										"activities": [
+											{
+												"name": "Ixom",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "PL_Framework_DM_SourcetoBlob_HTTPKeyVault",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"relative_url": {
+															"value": "@item().APIRelativeURL\r\n",
+															"type": "Expression"
+														},
+														"fileNameExt": {
+															"value": "@item().File_Name_Ext",
+															"type": "Expression"
+														},
+														"blobcontainer": {
+															"value": "@item().TargetBlobContainer",
+															"type": "Expression"
+														},
+														"blobfolder": {
+															"value": "@item().TargetBlobFolderPath",
+															"type": "Expression"
+														},
+														"blobfile": {
+															"value": "@item().SourceTableName",
+															"type": "Expression"
+														},
+														"src_blobstorageaccount": {
+															"value": "@item().SourceStorageAccount",
+															"type": "Expression"
+														},
+														"webrequest_url": {
+															"value": "@item().APIBaseURL\r\n",
+															"type": "Expression"
+														},
+														"station": {
+															"value": "@replace(item().Data_Destination_File_Name,'idcjac0009_','')",
+															"type": "Expression"
+														},
+														"blobstorageaccount": {
+															"value": "@item().StorageAccount",
+															"type": "Expression"
+														},
+														"src_blobcontainer": {
+															"value": "@item().SourceLandingContainer",
+															"type": "Expression"
+														},
+														"ColumnDelimiter": {
+															"value": "@item().ColumnDelimiter",
+															"type": "Expression"
+														},
+														"TableID": {
+															"value": "@item().TableID",
+															"type": "Expression"
+														},
+														"File_Name_DateTime_Ind": {
+															"value": "@item().File_Name_DateTime_Ind",
+															"type": "Expression"
+														},
+														"Host_Name": {
+															"value": "@item().Host_Name",
+															"type": "Expression"
+														},
+														"SID": {
+															"value": "@item().SID",
+															"type": "Expression"
+														},
+														"UserName": {
+															"value": "@item().UserName",
+															"type": "Expression"
+														},
+														"SecretPasswordName": {
+															"value": "@item().SecretPasswordName",
+															"type": "Expression"
+														},
+														"QuoteCharacter": {
+															"value": "@item().QuoteCharacter",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
 									}
-								}
+								]
 							}
 						}
 					]
@@ -166,6 +277,15 @@
 			},
 			"current_year": {
 				"type": "String"
+			},
+			"Url_variable": {
+				"type": "String"
+			},
+			"url_array": {
+				"type": "Array"
+			},
+			"url_param": {
+				"type": "Array"
 			}
 		},
 		"folder": {
