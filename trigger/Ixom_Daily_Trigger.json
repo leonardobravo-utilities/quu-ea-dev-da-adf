@@ -2,14 +2,31 @@
 	"name": "Ixom_Daily_Trigger",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
-		"pipelines": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceName": "Ixom",
+					"OnlySourceToBlob": true,
+					"OnlyBlobtoASQL": true,
+					"AllowPartialUpdateOfDiscovery": false,
+					"OnlyExtractDeletedRecordsFromSourceToBlob": false,
+					"OnlyDeleteRecordsFromBlobToASQL": false,
+					"TriggerName": "Ixom_Daily_Rainfall",
+					"HttpTriggerCategory": "Trigger"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
 				"frequency": "Day",
 				"interval": 1,
-				"startTime": "2023-07-19T05:26:00",
+				"startTime": "2023-07-14T04:59:00",
 				"timeZone": "E. Australia Standard Time",
 				"schedule": {
 					"minutes": [
