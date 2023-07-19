@@ -1,0 +1,352 @@
+{
+	"name": "PL_Framework_DM_SourcetoBlob_HTTPKeyVault",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy HTTP csv",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set Url",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "HttpReadSettings",
+							"requestMethod": "GET"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_HTTP_DelimitedText",
+						"type": "DatasetReference",
+						"parameters": {
+							"BaseURL": {
+								"value": "@variables('Url')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ABLB_Datalanding",
+						"type": "DatasetReference",
+						"parameters": {
+							"FolderPath": {
+								"value": "@pipeline().parameters.blobcontainer",
+								"type": "Expression"
+							},
+							"TargetFileName": {
+								"value": "@concat(pipeline().parameters.blobfolder,'/',pipeline().parameters.blobfile,pipeline().parameters.fileNameExt)",
+								"type": "Expression"
+							},
+							"ColumnDelimiter": {
+								"value": "@pipeline().parameters.ColumnDelimiter",
+								"type": "Expression"
+							},
+							"QuoteCharacter": {
+								"value": "@pipeline().parameters.QuoteCharacter",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Set Url",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Read KeyVault",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Url",
+					"value": {
+						"value": "@concat(pipeline().parameters.webrequest_url,pipeline().parameters.relative_url,join(variables('url_param'),'' ))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Read KeyVault",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "lkp_KeyVault_Values",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('lkp_KeyVault_Values').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Key Vault ParameterName",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.0:05:00",
+								"retry": 10,
+								"retryIntervalInSeconds": 60,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@concat(pipeline().parameters.Host_Name,item().ParameterValue,'?api-version=7.3')",
+									"type": "Expression"
+								},
+								"method": "GET",
+								"disableCertValidation": true,
+								"authentication": {
+									"type": "MSI",
+									"resource": "https://vault.azure.net"
+								}
+							}
+						},
+						{
+							"name": "Set Url_variable",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Key Vault ParameterName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Url_variable",
+								"value": {
+									"value": "@concat('&',item().ParameterName,'=',activity('Key Vault ParameterName').output.value)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Append URL",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Set Url_variable",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "url_array",
+								"value": {
+									"value": "@variables('Url_variable')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Url param",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Append URL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "url_param",
+								"value": {
+									"value": "@variables('url_array')",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "lkp_KeyVault_Values",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select [ParameterValue], [ParameterName]\nFROM [ETL].SourceTableParameter\t\nWHERE [TableID] =    '@{pipeline().parameters.TableID}'        \nORDER BY [ColumnOrder]\n",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"parameters": {
+			"relative_url": {
+				"type": "string",
+				"defaultValue": "?EXPORT=Export"
+			},
+			"fileNameExt": {
+				"type": "string",
+				"defaultValue": ".csv"
+			},
+			"blobcontainer": {
+				"type": "string",
+				"defaultValue": "ixom-datalanding"
+			},
+			"blobfolder": {
+				"type": "string",
+				"defaultValue": "ixom_telemetry"
+			},
+			"blobfile": {
+				"type": "string",
+				"defaultValue": "telemetry_readings"
+			},
+			"src_blobstorageaccount": {
+				"type": "string",
+				"defaultValue": "quueatstdasrclanding001"
+			},
+			"webrequest_url": {
+				"type": "string",
+				"defaultValue": "https://ixomtelemetry.com/Subscriber/SiteOverview.asp"
+			},
+			"station": {
+				"type": "string"
+			},
+			"blobstorageaccount": {
+				"type": "string",
+				"defaultValue": "quueatstdadlslanding001"
+			},
+			"src_blobcontainer": {
+				"type": "string",
+				"defaultValue": "http-datalanding/"
+			},
+			"ColumnDelimiter": {
+				"type": "string",
+				"defaultValue": ","
+			},
+			"TableID": {
+				"type": "string"
+			},
+			"File_Name_DateTime_Ind": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"Host_Name": {
+				"type": "string",
+				"defaultValue": "https://quu-ea-tst-da-key-vault.vault.azure.net/secrets/"
+			},
+			"SID": {
+				"type": "string",
+				"defaultValue": "Ixom-AccessCode"
+			},
+			"UserName": {
+				"type": "string",
+				"defaultValue": "Ixom-UserName"
+			},
+			"SecretPasswordName": {
+				"type": "string",
+				"defaultValue": "Ixom-PIN"
+			},
+			"QuoteCharacter": {
+				"type": "string",
+				"defaultValue": "\""
+			}
+		},
+		"variables": {
+			"Url": {
+				"type": "String"
+			},
+			"Url_variable": {
+				"type": "String"
+			},
+			"url_array": {
+				"type": "Array"
+			},
+			"url_param": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "FrameWork"
+		},
+		"annotations": []
+	}
+}
