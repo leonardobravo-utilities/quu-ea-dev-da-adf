@@ -21,6 +21,455 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_File_Monitoring')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup source files",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1 and STD.TriggerName = '@{pipeline().parameters.TriggerName}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup source files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup source files').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Get Metadata",
+									"description": "check if any files need to process in the blob container",
+									"type": "GetMetadata",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "DS_FS_GlobalScape_FileSize",
+											"type": "DatasetReference",
+											"parameters": {
+												"filefolder": {
+													"value": "@item().FileFolderName",
+													"type": "Expression"
+												},
+												"file": {
+													"value": "@item().TargetFileName",
+													"type": "Expression"
+												},
+												"server": "\\\\Nfujprd310\\ebi_prod_landing"
+											}
+										},
+										"fieldList": [
+											"exists",
+											"lastModified"
+										],
+										"storeSettings": {
+											"type": "FileServerReadSettings",
+											"recursive": true
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "Check if file exists",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Get Metadata",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@activity('Get Metadata').output.exists",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Send email file not received",
+												"type": "WebActivity",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"url": {
+														"value": "@pipeline().parameters.LogicAppURL",
+														"type": "Expression"
+													},
+													"method": "POST",
+													"headers": {},
+													"body": {
+														"value": "{\n   \"DataFactoryName\": \"@{pipeline().DataFactory}\",\n   \"PipelineName\": \"@{pipeline().Pipeline}\",\n   \"Subject\": \"@{pipeline().parameters.Subject}\",\n   \"ErrorMessage\": \" File @{item().TargetFileName}  is not received\",\n   \"EmailTo\": \"@{pipeline().parameters.EmailTo}\"\n}\t",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"ifTrueActivities": [
+											{
+												"name": "Set File Name",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "FileName",
+													"value": {
+														"value": "@string(item().TargetFileName)",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Retrieve File Size",
+												"type": "GetMetadata",
+												"dependsOn": [
+													{
+														"activity": "Set File Name",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataset": {
+														"referenceName": "DS_FS_GlobalScape_FileSize",
+														"type": "DatasetReference",
+														"parameters": {
+															"filefolder": {
+																"value": "@item().FileFolderName",
+																"type": "Expression"
+															},
+															"file": {
+																"value": "@variables('FileName')",
+																"type": "Expression"
+															},
+															"server": "\\\\Nfujprd310\\ebi_prod_landing"
+														}
+													},
+													"fieldList": [
+														"size"
+													],
+													"storeSettings": {
+														"type": "FileServerReadSettings",
+														"recursive": true
+													},
+													"formatSettings": {
+														"type": "DelimitedTextReadSettings"
+													}
+												}
+											},
+											{
+												"name": "Set File Size",
+												"description": "Assign the file size value to the variable",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "Retrieve File Size",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "FileSize",
+													"value": {
+														"value": "@string(activity('Retrieve File Size').output.Size)",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Retrieve File Modification Date",
+												"type": "GetMetadata",
+												"dependsOn": [
+													{
+														"activity": "Execute Pipeline for File size check",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataset": {
+														"referenceName": "DS_FS_GlobalScape_FileSize",
+														"type": "DatasetReference",
+														"parameters": {
+															"filefolder": {
+																"value": "@item().FileFolderName",
+																"type": "Expression"
+															},
+															"file": {
+																"value": "@variables('FileName')",
+																"type": "Expression"
+															},
+															"server": "\\\\Nfujprd310\\ebi_prod_landing"
+														}
+													},
+													"fieldList": [
+														"lastModified"
+													],
+													"storeSettings": {
+														"type": "FileServerReadSettings",
+														"recursive": true
+													},
+													"formatSettings": {
+														"type": "DelimitedTextReadSettings"
+													}
+												}
+											},
+											{
+												"name": "Set LastModified Date",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "Retrieve File Modification Date",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "LastModifiedDate",
+													"value": {
+														"value": "@string(convertfromUtc(activity('Retrieve File Modification Date').output.LastModified,'E. Australia Standard Time'))",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Execute Pipeline for File size check",
+												"type": "ExecutePipeline",
+												"dependsOn": [
+													{
+														"activity": "Set File Size",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "PL_File_Monitoring_File_Size_Check",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"FileSize": {
+															"value": "@variables('FileSize')",
+															"type": "Expression"
+														},
+														"Subject": {
+															"value": "@pipeline().parameters.Subject",
+															"type": "Expression"
+														},
+														"FileName": {
+															"value": "@variables('FileName')",
+															"type": "Expression"
+														},
+														"EmailTo": {
+															"value": "@pipeline().parameters.EmailTo",
+															"type": "Expression"
+														},
+														"LogicAppURL": {
+															"value": "@pipeline().parameters.LogicAppURL",
+															"type": "Expression"
+														}
+													}
+												}
+											},
+											{
+												"name": "Execute Pipeline for Lastmodified check",
+												"type": "ExecutePipeline",
+												"dependsOn": [
+													{
+														"activity": "Set LastModified Date",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "PL_File_Monitoring_File_LastModifiedDate_Check",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"LastModifiedDate": {
+															"value": "@variables('LastModifiedDate')",
+															"type": "Expression"
+														},
+														"Subject": {
+															"value": "@pipeline().parameters.Subject",
+															"type": "Expression"
+														},
+														"LastLoadedDate": {
+															"value": "@ITEM().LastLoadedDate",
+															"type": "Expression"
+														},
+														"FileName": {
+															"value": "@variables('FileName')",
+															"type": "Expression"
+														},
+														"EmailTo": {
+															"value": "@pipeline().parameters.EmailTo",
+															"type": "Expression"
+														},
+														"LogicAppURL": {
+															"value": "@pipeline().parameters.LogicAppURL",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"Sourcename": {
+						"type": "string",
+						"defaultValue": "CHRIS21"
+					},
+					"Subject": {
+						"type": "string",
+						"defaultValue": "Chris21"
+					},
+					"ErrorMessageFileNotReceived": {
+						"type": "string",
+						"defaultValue": "File not received"
+					},
+					"EmailTo": {
+						"type": "string"
+					},
+					"LogicAppURL": {
+						"type": "string"
+					},
+					"TriggerName": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"OldFile": {
+						"type": "Array"
+					},
+					"FileSize": {
+						"type": "String"
+					},
+					"LastModifiedDate": {
+						"type": "String"
+					},
+					"EmptyFile": {
+						"type": "Array"
+					},
+					"FileName": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Source File Monitoring"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-03-10T12:15:11Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_Framework_DM_SourceToBlob_Oracle')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -6890,43 +7339,6 @@
 							],
 							"hours": [
 								12
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/WorkOrder_DataModel_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "updating dimensional work order tables in edw_mart",
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_WorkOrder_Model_Main",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-07-28T06:52:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"minutes": [
-								30
-							],
-							"hours": [
-								6
 							]
 						}
 					}
