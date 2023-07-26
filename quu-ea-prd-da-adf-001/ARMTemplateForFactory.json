@@ -637,6 +637,38 @@
 			"type": "string",
 			"defaultValue": "ICN"
 		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Ixom"
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "Ixom_Daily_Trigger"
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"type": "string",
+			"defaultValue": "Trigger"
+		},
 		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_SourceName": {
 			"type": "string",
 			"defaultValue": "Kantar"
@@ -1108,38 +1140,6 @@
 		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param": {
 			"type": "string",
 			"defaultValue": ",\"collectionReference\": \"$['Entry']['PhotoTable']\""
-		},
-		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
-			"type": "string",
-			"defaultValue": "Ixom"
-		},
-		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
-			"type": "bool",
-			"defaultValue": true
-		},
-		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
-			"type": "bool",
-			"defaultValue": false
-		},
-		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
-			"type": "bool",
-			"defaultValue": false
-		},
-		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
-			"type": "bool",
-			"defaultValue": false
-		},
-		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
-			"type": "string",
-			"defaultValue": "Ixom_Daily_Trigger"
-		},
-		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
-			"type": "string",
-			"defaultValue": "Trigger"
 		}
 	},
 	"variables": {
@@ -40384,6 +40384,53 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Ixom_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
+							"HttpTriggerCategory": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-07-14T04:59:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								6
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Kantar_Monthly_Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -40963,7 +41010,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -41718,53 +41765,6 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Ixom_Daily_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceName": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
-							"OnlySourceToBlob": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
-							"OnlyBlobtoASQL": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
-							"AllowPartialUpdateOfDiscovery": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
-							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
-							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
-							"TriggerName": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
-							"HttpTriggerCategory": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2023-07-14T04:59:00",
-						"timeZone": "E. Australia Standard Time",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								6
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
-			]
 		}
 	]
 }
