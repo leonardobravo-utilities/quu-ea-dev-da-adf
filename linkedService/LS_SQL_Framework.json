@@ -5,15 +5,15 @@
 		"parameters": {
 			"Servername": {
 				"type": "string",
-				"defaultValue": "QUUEAELPPRD001"
+				"defaultValue": "PRDC04-SQL"
 			},
 			"Databasename": {
 				"type": "string",
-				"defaultValue": "DATAMART"
+				"defaultValue": "EDW_DISCOVERY"
 			},
 			"SecretPasswordName": {
 				"type": "string",
-				"defaultValue": "SVC-EBI-PRDC04-AGT"
+				"defaultValue": "svc-ebi-prdc04-agt"
 			},
 			"UserName": {
 				"type": "string",
@@ -29,10 +29,7 @@
 				"type": "AzureKeyVaultSecret",
 				"store": {
 					"referenceName": "ADF_LS_AKV",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"environment": "dev"
-					}
+					"type": "LinkedServiceReference"
 				},
 				"secretName": {
 					"value": "@linkedService().SecretPasswordName",
@@ -41,7 +38,7 @@
 			}
 		},
 		"connectVia": {
-			"referenceName": "quu-ea-dev-da-selfhostedruntime-002",
+			"referenceName": "SelfHostedRuntime",
 			"type": "IntegrationRuntimeReference"
 		}
 	}

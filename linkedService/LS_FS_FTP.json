@@ -1,21 +1,20 @@
 {
 	"name": "LS_FS_FTP",
-	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
-		"parameters": {
-			"Host": {
-				"type": "string",
-				"defaultValue": "ftp://ftp.bom.gov.au/"
-			}
-		},
-		"annotations": [],
 		"type": "FtpServer",
+		"annotations": [],
 		"typeProperties": {
 			"host": "@{linkedService().Host}",
 			"port": 21,
 			"enableSsl": false,
 			"enableServerCertificateValidation": false,
 			"authenticationType": "Anonymous"
+		},
+		"parameters": {
+			"Host": {
+				"type": "string",
+				"defaultValue": "ftp://ftp.bom.gov.au/"
+			}
 		}
 	}
 }

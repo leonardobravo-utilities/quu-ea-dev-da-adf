@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1",
+							"value": "select FileFolderName, [FileName] TargetFileName, LastLoadedDate,CheckpointColumn,CheckpointColumnDatatype,CheckpointColumnValue\nfrom ETL.SourceFileLoad SFL join etl.SourceSystem SS on SS.SourceID = SFL.SourceID\njoin ETL.SourceTableDetails STD on replace(SFL.FileName,'.csv','') = STD.SourceTableName\nwhere  SourceName='@{pipeline().parameters.SourceName}' and IsActive = 1 and STD.TriggerName = '@{pipeline().parameters.TriggerName}'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -75,7 +75,8 @@
 										"file": {
 											"value": "@item().TargetFileName",
 											"type": "Expression"
-										}
+										},
+										"server": "\\\\Nfujprd310\\ebi_prod_landing"
 									}
 								},
 								"fieldList": [
@@ -183,7 +184,8 @@
 													"file": {
 														"value": "@variables('FileName')",
 														"type": "Expression"
-													}
+													},
+													"server": "\\\\Nfujprd310\\ebi_prod_landing"
 												}
 											},
 											"fieldList": [
@@ -254,7 +256,8 @@
 													"file": {
 														"value": "@variables('FileName')",
 														"type": "Expression"
-													}
+													},
+													"server": "\\\\Nfujprd310\\ebi_prod_landing"
 												}
 											},
 											"fieldList": [
@@ -406,6 +409,9 @@
 			},
 			"LogicAppURL": {
 				"type": "string"
+			},
+			"TriggerName": {
+				"type": "string"
 			}
 		},
 		"variables": {
@@ -429,7 +435,7 @@
 			"name": "Source File Monitoring"
 		},
 		"annotations": [],
-		"lastPublishTime": "2022-04-19T00:29:16Z"
+		"lastPublishTime": "2021-03-10T12:15:11Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }
