@@ -1,0 +1,46 @@
+{
+	"name": "PL_Billing_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_Billing-Model_SourceToBlob",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Billing-Model_SourceToBlob",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PL_Billing_BlobToASQL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_Billing-Model_SourceToBlob",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Billing_BlobtoASQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Billing-Model"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:25Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

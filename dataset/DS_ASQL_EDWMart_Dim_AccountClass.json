@@ -1,0 +1,32 @@
+{
+	"name": "DS_ASQL_EDWMart_Dim_AccountClass",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_mart"
+			}
+		},
+		"folder": {
+			"name": "Billing-model"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ClassID",
+				"type": "varchar"
+			},
+			{
+				"name": "Class",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "Mart",
+			"table": "Dim_Account_Class"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

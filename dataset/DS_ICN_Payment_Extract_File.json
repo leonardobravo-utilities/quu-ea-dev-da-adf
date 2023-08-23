@@ -2,8 +2,12 @@
 	"name": "DS_ICN_Payment_Extract_File",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_FS_NFUJPRD202",
-			"type": "LinkedServiceReference"
+			"referenceName": "LS_FS",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"host": "\\\\NFUJPRD202\\FDrive",
+				"username": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+			}
 		},
 		"parameters": {
 			"FilePath": {
@@ -36,5 +40,6 @@
 			"quoteChar": "\""
 		},
 		"schema": []
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }

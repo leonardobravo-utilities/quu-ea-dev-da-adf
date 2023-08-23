@@ -1,0 +1,85 @@
+{
+	"name": "Tactical_BENTPLNK",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_tactical"
+			}
+		},
+		"folder": {
+			"name": "HiAffinity TEMP"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "U##ENTITY_REF",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ENTITY_REF",
+				"type": "nvarchar"
+			},
+			{
+				"name": "U##PERSON_REF",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PERSON_REF",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PERSON_ROLE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "OWNERSHIP_PROP",
+				"type": "decimal",
+				"precision": 6,
+				"scale": 3
+			},
+			{
+				"name": "DATESTAMP",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "USTAMP",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "PI_CODE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CDATE",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "CTIME",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "CUSER",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PROGRESS_RECID",
+				"type": "bigint",
+				"precision": 19
+			}
+		],
+		"typeProperties": {
+			"schema": "Hiaffinity",
+			"table": "BENTPLNK"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

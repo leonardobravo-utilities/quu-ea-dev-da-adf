@@ -1,0 +1,82 @@
+{
+	"name": "DS_ASQL_EDWMart_Billing_Date",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_mart"
+			}
+		},
+		"folder": {
+			"name": "Billing-model"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Date",
+				"type": "date"
+			},
+			{
+				"name": "Day",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "MonthNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "MonthName",
+				"type": "varchar"
+			},
+			{
+				"name": "Year",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "YYYYMM",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "DayofWeek",
+				"type": "varchar"
+			},
+			{
+				"name": "Weekend",
+				"type": "varchar"
+			},
+			{
+				"name": "FinancialQuarterNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "FinancialQuarterName",
+				"type": "varchar"
+			},
+			{
+				"name": "FinancialYearQuarter",
+				"type": "varchar"
+			},
+			{
+				"name": "FinancialYear",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PublicHoliday",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "Mart",
+			"table": "Dim_BillingDate"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,946 @@
+{
+	"name": "BCUST",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load BCUST",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table HiAffinity.BCUST",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "U##CUST_REF",
+									"type": "String"
+								},
+								"sink": {
+									"name": "U##CUST_REF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CUST_REF",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CUST_REF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "U##CUST_NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "U##CUST_NAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CUST_NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CUST_NAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "U##INITIALS",
+									"type": "String"
+								},
+								"sink": {
+									"name": "U##INITIALS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "INITIALS",
+									"type": "String"
+								},
+								"sink": {
+									"name": "INITIALS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CUST_TITLE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CUST_TITLE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SOUNDEX",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SOUNDEX",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "LANG_CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LANG_CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CUST_TYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CUST_TYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "U##O_TYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "U##O_TYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "O_TYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "O_TYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "U##OWNER_REF",
+									"type": "String"
+								},
+								"sink": {
+									"name": "U##OWNER_REF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OWNER_REF",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OWNER_REF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CU_INFO_FLAG##1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CU_INFO_FLAG##1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CU_INFO_FLAG##2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CU_INFO_FLAG##2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CU_INFO_FLAG##3",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CU_INFO_FLAG##3",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CU_INFO_FLAG##4",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CU_INFO_FLAG##4",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CU_INFO_FLAG##5",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CU_INFO_FLAG##5",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CU_INFO_FLAG##6",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CU_INFO_FLAG##6",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CU_INFO_FLAG##7",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CU_INFO_FLAG##7",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CU_INFO_FLAG##8",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CU_INFO_FLAG##8",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "U##OLD_CUST_IND",
+									"type": "String"
+								},
+								"sink": {
+									"name": "U##OLD_CUST_IND",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OLD_CUST_IND",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OLD_CUST_IND",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "STAFF_IND",
+									"type": "String"
+								},
+								"sink": {
+									"name": "STAFF_IND",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CLER_INSP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CLER_INSP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "INTEREST_IND",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "INTEREST_IND",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "TEL_NO",
+									"type": "String"
+								},
+								"sink": {
+									"name": "TEL_NO",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DEP_BAL",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "DEP_BAL",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "GTEE_BAL",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "GTEE_BAL",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "DEP_RVW_DT",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "DEP_RVW_DT",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "SALARY",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SALARY",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "SAL_SUB_DT",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "SAL_SUB_DT",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "SAL_RVW_DT",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "SAL_RVW_DT",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "APPORTIONED",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "APPORTIONED",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "REC_IND",
+									"type": "String"
+								},
+								"sink": {
+									"name": "REC_IND",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F00",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SPARE_F00",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F01",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "SPARE_F01",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F02",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SPARE_F02",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F03",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SPARE_F03",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F04",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SPARE_F04",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F05",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SPARE_F05",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F06",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "SPARE_F06",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F07",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SPARE_F07",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "DATESTAMP",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "DATESTAMP",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "USTAMP",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "USTAMP",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "PI_CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PI_CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "U##DIST_NO",
+									"type": "String"
+								},
+								"sink": {
+									"name": "U##DIST_NO",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DIST_NO",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DIST_NO",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "USUAL_OFFICE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USUAL_OFFICE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "USUAL_CLERK",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USUAL_CLERK",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F08",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SPARE_F08",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F09",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SPARE_F09",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F10",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SPARE_F10",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F11",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "SPARE_F11",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F12",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SPARE_F12",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F13",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SPARE_F13",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F14",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SPARE_F14",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SPARE_F15",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SPARE_F15",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "EMPTY_CUST",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "EMPTY_CUST",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "CDATE",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "CDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "CTIME",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "CTIME",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "CUSER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CUSER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CREDITRATING",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "CREDITRATING",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "POST_STATUS",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "POST_STATUS",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "POST_REASON",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "POST_REASON",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "PROGRESS_RECID",
+									"type": "Int64"
+								},
+								"sink": {
+									"name": "PROGRESS_RECID",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "PASTDUE_AMT",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "PASTDUE_AMT",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "MARKET_ATTRB",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MARKET_ATTRB",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "MESSAGE2",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MESSAGE2",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "MESSAGE3",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MESSAGE3",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "IMAGE2",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "IMAGE2",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "IMAGE3",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "IMAGE3",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "PREFERRED_CONTACT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PREFERRED_CONTACT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SYSTEM_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SYSTEM_ID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BUSINESS_UNIT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BUSINESS_UNIT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BUSINESS_AREA",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "BUSINESS_AREA",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "OKTOBILL",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "OKTOBILL",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "AWD_FOLDER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "AWD_FOLDER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PREF_CONTACT_TYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PREF_CONTACT_TYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "STATEMENT_INSP",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "STATEMENT_INSP",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "DD_SUFFIX",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "DD_SUFFIX",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "VAT_CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VAT_CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "NEXT_BILL_REPL",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "NEXT_BILL_REPL",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "U##CLOSE_REASON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "U##CLOSE_REASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CLOSE_REASON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CLOSE_REASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SUMMARY_CONV",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SUMMARY_CONV",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "U##ENTITY_REF",
+									"type": "String"
+								},
+								"sink": {
+									"name": "U##ENTITY_REF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ENTITY_REF",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ENTITY_REF",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "OnPrem_BCUST",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Tactical_BCUST",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "HiAffinity TEMP"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:19Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

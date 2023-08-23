@@ -46,7 +46,8 @@
 						"sqlReaderQuery": {
 							"value": "Select SourceID FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
 							"type": "Expression"
-						}
+						},
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",
@@ -90,6 +91,8 @@
 		"folder": {
 			"name": "LIMS"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:22Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }

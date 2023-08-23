@@ -1,0 +1,385 @@
+{
+	"name": "PL_01_Metadata_CreateDestinationTable_FromSqlServer",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetSourceID",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select [SourceID]\n,  [ServerName]\n      ,[DatabaseName]\n      ,[UserName]\n      ,[SecretPasswordName]\n     ,databricksclustername\n     ,databricksclusterid\n,databrickssecretname\n \nFROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.SourceName}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "GetSourceTableDetails",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "ForEachDestinationTable",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "select Table_Schema, TABLE_NAME from [INFORMATION_SCHEMA].[TABLES]\nwhere Table_Type='BASE TABLE'\nand Table_Catalog='datamart'\nand Table_Schema='dbo'\nAND TABLE_NAME LIKE 'MSF%' OR TABLE_NAME LIKE '%M_ETL_MASTER_CODES%'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_EDWDiscovery_OnPrem",
+						"type": "DatasetReference",
+						"parameters": {
+							"ServerName": {
+								"value": "@activity('GetSourceID').output.firstRow['ServerName']",
+								"type": "Expression"
+							},
+							"DatabaseName": {
+								"value": "@activity('GetSourceID').output.firstRow['DatabaseName']",
+								"type": "Expression"
+							},
+							"UserName": {
+								"value": "@activity('GetSourceID').output.firstRow['UserName']",
+								"type": "Expression"
+							},
+							"SecretPasswordName": {
+								"value": "@activity('GetSourceID').output.firstRow['SecretPasswordName']",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "GetDestinationTableDetails",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "GetSourceID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select  TABLE_NAME from Information_Schema.tables\nwhere Table_Schema='XXXX'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEachDestinationTable",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GetDestinationTableDetails",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetDestinationTableDetails').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 50,
+					"activities": [
+						{
+							"name": "DestinationTableArrayAppend",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "DestinationTableArray",
+								"value": {
+									"value": "@item().TABLE_NAME",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "ForEachSourceTable",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GetSourceTableDetails",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetSourceTableDetails').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 50,
+					"activities": [
+						{
+							"name": "CheckSourceTablePresentInDestination",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@contains(variables('DestinationTableArray'),item().TABLE_NAME)",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "GetColumnDetails",
+										"type": "Lookup",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "SqlServerSource",
+												"sqlReaderQuery": {
+													"value": "select c.TABLE_SCHEMA\n,c.TABLE_CATALOG\n,c.TABLE_NAME\n,c.COLUMN_NAME\n,c.ORDINAL_POSITION\n,c.DATA_TYPE\n,c.DATETIME_PRECISION\n,c.CHARACTER_MAXIMUM_LENGTH\n,c.NUMERIC_PRECISION\n,c.NUMERIC_SCALE\n,case when right(pk.PrimaryKey,1)=',' THEN Left(pk.PrimaryKey,LEN(pk.PrimaryKey)-1) else Pk.PrimaryKey END PrimaryKey\nfrom INFORMATION_SCHEMA.COLUMNS C\nINNER JOIN INFORMATION_SCHEMA.TABLES t on c.TABLE_NAME = t.TABLE_NAME and c.TABLE_SCHEMA = t.TABLE_SCHEMA  and c.TABLE_CATALOG = t.TABLE_CATALOG\nLEFT JOIN (SELECT DISTINCT ST2.TABLE_CATALOG, st2.TABLE_NAME,st2.TABLE_SCHEMA, \n            (\n                SELECT ST0.COLUMN_NAME + ',' AS [text()]\n                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE ST0\n\t\t\t\tINNER JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS st1 on st0.TABLE_CATALOG =st1.TABLE_CATALOG and st0.TABLE_SCHEMA  =st1.TABLE_SCHEMA and st0.TABLE_NAME=st1.TABLE_NAME and st0.CONSTRAINT_NAME =st1.CONSTRAINT_NAME and st0.CONSTRAINT_SCHEMA=st1.CONSTRAINT_SCHEMA\n                WHERE ST1.TABLE_NAME = ST2.TABLE_NAME\n\t\t\t\tand ST1.TABLE_SCHEMA = ST2.TABLE_SCHEMA\n\t\t\t\tand ST1.TABLE_CATALOG = ST2.TABLE_CATALOG\n\t\t\t\tand St1.CONSTRAINT_TYPE='PRIMARY KEY'\n                order by st0.ORDINAL_POSITION\n                FOR XML PATH ('')\n            ) PrimaryKey\n        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE ST2) pk on pk.TABLE_CATALOG = c.TABLE_CATALOG and pk.TABLE_NAME = c.TABLE_NAME and pk.TABLE_SCHEMA = c.TABLE_SCHEMA\nwhere t.TABLE_NAME='@{item().TABLE_NAME}'\nAnd t.TABLE_CATALOG='@{activity('GetSourceID').output.firstRow['DatabaseName']}'\nAND c.Column_Name not like 'Row_%'",
+													"type": "Expression"
+												},
+												"partitionOption": "None"
+											},
+											"dataset": {
+												"referenceName": "DS_SQL_EDWDiscovery_OnPrem",
+												"type": "DatasetReference",
+												"parameters": {
+													"ServerName": {
+														"value": "@activity('GetSourceID').output.firstRow['ServerName']",
+														"type": "Expression"
+													},
+													"DatabaseName": {
+														"value": "@activity('GetSourceID').output.firstRow['DatabaseName']",
+														"type": "Expression"
+													},
+													"UserName": {
+														"value": "@activity('GetSourceID').output.firstRow['UserName']",
+														"type": "Expression"
+													},
+													"SecretPasswordName": {
+														"value": "@activity('GetSourceID').output.firstRow['SecretPasswordName']",
+														"type": "Expression"
+													}
+												}
+											},
+											"firstRowOnly": false
+										}
+									},
+									{
+										"name": "CreateTableAndMetadataScripts",
+										"type": "DatabricksNotebook",
+										"dependsOn": [
+											{
+												"activity": "GetColumnDetails",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"notebookPath": "/edw_discovery/ETLAutomation/CreateTableAndMetadataScript",
+											"baseParameters": {
+												"SrcArray": {
+													"value": "@string(activity('GetColumnDetails').output.value)",
+													"type": "Expression"
+												},
+												"SourceName": {
+													"value": "@if(empty(pipeline().parameters.SourceName),'null',pipeline().parameters.SourceName)",
+													"type": "Expression"
+												},
+												"DestinationSchemaName": {
+													"value": "@if(empty(pipeline().parameters.SchemaName),'null',pipeline().parameters.SchemaName)",
+													"type": "Expression"
+												},
+												"WhereFilterSQL": {
+													"value": "@if(empty(pipeline().parameters.WhereFilterSQL),'null',pipeline().parameters.WhereFilterSQL)",
+													"type": "Expression"
+												},
+												"JoinCondition": {
+													"value": "@if(empty(pipeline().parameters.JoinCondition),'null',pipeline().parameters.JoinCondition)",
+													"type": "Expression"
+												},
+												"IncrementalLoadInd": {
+													"value": "@if(empty(pipeline().parameters.IncrementalLoadInd),'null',pipeline().parameters.IncrementalLoadInd)",
+													"type": "Expression"
+												},
+												"IncrementalDateTimeColumn": {
+													"value": "@if(empty(pipeline().parameters.IncrementalDateTimeColumn),'null',pipeline().parameters.IncrementalDateTimeColumn)",
+													"type": "Expression"
+												},
+												"ContainerName": {
+													"value": "@if(empty(pipeline().parameters.ContainerName),'null',pipeline().parameters.ContainerName)",
+													"type": "Expression"
+												},
+												"StorageAccount": {
+													"value": "@if(empty(pipeline().parameters.StorageAccount),'null',pipeline().parameters.StorageAccount)",
+													"type": "Expression"
+												},
+												"CheckForDeletes": {
+													"value": "@if(empty(pipeline().parameters.CheckForDeletes),'null',pipeline().parameters.CheckForDeletes)",
+													"type": "Expression"
+												},
+												"IncrementalDateTimeSql": {
+													"value": "@if(empty(pipeline().parameters.IncrementalDateTimeSql),'null',pipeline().parameters.IncrementalDateTimeSql)",
+													"type": "Expression"
+												},
+												"DestinationHostName": {
+													"value": "@if(empty(pipeline().parameters.DestinationHostName),'null',pipeline().parameters.DestinationHostName)",
+													"type": "Expression"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "LS_DBR_ADF_Job_Cluster",
+											"type": "LinkedServiceReference",
+											"parameters": {
+												"databricksclusterid": {
+													"value": "@activity('GetSourceID').output.firstRow['databricksclusterid']",
+													"type": "Expression"
+												},
+												"databrickssecretname": {
+													"value": "@activity('GetSourceID').output.firstRow['databrickssecretname']",
+													"type": "Expression"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "Hiaffinity"
+			},
+			"SchemaName": {
+				"type": "string",
+				"defaultValue": "Hiaffinity"
+			},
+			"WhereFilterSQL": {
+				"type": "string"
+			},
+			"JoinCondition": {
+				"type": "string"
+			},
+			"IncrementalLoadInd": {
+				"type": "string",
+				"defaultValue": "0"
+			},
+			"IncrementalDateTimeColumn": {
+				"type": "string",
+				"defaultValue": " "
+			},
+			"IncrementalDateTimeSql": {
+				"type": "string"
+			},
+			"ContainerName": {
+				"type": "string",
+				"defaultValue": "hiaffinity-datalanding"
+			},
+			"StorageAccount": {
+				"type": "string",
+				"defaultValue": "quueatstdadlslanding001"
+			},
+			"DestinationHostName": {
+				"type": "string",
+				"defaultValue": "quu-ea-tst-da-sqlserver-001.database.windows.net"
+			},
+			"CheckForDeletes": {
+				"type": "string",
+				"defaultValue": "0"
+			}
+		},
+		"variables": {
+			"DestinationTableArray": {
+				"type": "Array"
+			},
+			"FilteredTableArray": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "MetadataAutomation"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:19Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

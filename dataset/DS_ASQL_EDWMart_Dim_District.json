@@ -1,0 +1,36 @@
+{
+	"name": "DS_ASQL_EDWMart_Dim_District",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_mart"
+			}
+		},
+		"folder": {
+			"name": "Billing-model"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "DistrictID",
+				"type": "varchar"
+			},
+			{
+				"name": "District",
+				"type": "varchar"
+			},
+			{
+				"name": "DistrictDisplayName",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "Mart",
+			"table": "Dim_District"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

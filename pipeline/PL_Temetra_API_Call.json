@@ -35,8 +35,14 @@
 					"referenceName": "LS_DBR_ADF_Job_Cluster",
 					"type": "LinkedServiceReference",
 					"parameters": {
-						"databricksclusterid": "0818-004527-fleck168",
-						"databrickssecretname": "databricks-token"
+						"databricksclusterid": {
+							"value": "@pipeline().parameters.databricks_cluster_id",
+							"type": "Expression"
+						},
+						"databrickssecretname": {
+							"value": "@pipeline().parameters.databricks_secret_name",
+							"type": "Expression"
+						}
 					}
 				}
 			}
@@ -44,7 +50,7 @@
 		"parameters": {
 			"databricks_cluster_id": {
 				"type": "string",
-				"defaultValue": "0417-051914-axons909"
+				"defaultValue": "0219-041522-ochre808"
 			},
 			"databricks_secret_name": {
 				"type": "string",
@@ -66,6 +72,8 @@
 		"folder": {
 			"name": "Temetra"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:11Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }

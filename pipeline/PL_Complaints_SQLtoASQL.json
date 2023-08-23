@@ -1,0 +1,901 @@
+{
+	"name": "PL_Complaints_SQLtoASQL",
+	"properties": {
+		"activities": [
+			{
+				"name": "LoadMDSWrapCodes",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "LoadWaterQualityDatabase",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table CustomerComplaints.WrapCodes",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "ID",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "MUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "MUID",
+									"type": "Guid"
+								}
+							},
+							{
+								"source": {
+									"name": "VersionName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VersionName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VersionNumber",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "VersionNumber",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "VersionFlag",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VersionFlag",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ChangeTrackingMask",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "ChangeTrackingMask",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "WRAP Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WRAP Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Wrap Code - Description",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Wrap Code Description",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WRAP Code Level 1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WRAP Code Level 1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WRAP Code Level 2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WRAP Code Level 2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WRAP Code Level 3",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WRAP Code Level 3",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WRAP Code Level 4",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WRAP Code Level 4",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EnterDateTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "EnterDateTime",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "EnterUserName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "EnterUserName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EnterVersionNumber",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "EnterVersionNumber",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "LastChgDateTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "LastChgDateTime",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "LastChgUserName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LastChgUserName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "LastChgVersionNumber",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "LastChgVersionNumber",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "ValidationStatus",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ValidationStatus",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Case_Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Case_Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Case_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Case_Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Case_ID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "Case_ID",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "Interaction_Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Interaction_Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Interaction_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Interaction_Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Interaction_ID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "Interaction_ID",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "WaterQuality_Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WaterQuality_Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WaterQuality_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WaterQuality_Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WaterQuality_ID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "WaterQuality_ID",
+									"type": "Int32"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_SQL_EDW_MDS_WrapCodes",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ASQL_EDWTactical_MDSWrapCodes",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "LoadWaterQualityDatabase",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table CustomerComplaints.WaterQuality_Database",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "Quality category",
+									"type": "String"
+								},
+								"sink": {
+									"name": "QualityCategory",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Entity",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Entity",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Additional comments",
+									"type": "String"
+								},
+								"sink": {
+									"name": "AdditionalComments",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SAS Investigations",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SASInvestigations",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Std Job No",
+									"type": "String"
+								},
+								"sink": {
+									"name": "StdJobNo",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Job description",
+									"type": "String"
+								},
+								"sink": {
+									"name": "JobDescription",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Date/Time Raised",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "DateTimeRaised",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "No",
+									"type": "String"
+								},
+								"sink": {
+									"name": "StreetNumber",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Address",
+									"type": "String"
+								},
+								"sink": {
+									"name": "StreetAddress",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Street code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "StreetCode",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Suburb",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Suburb",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Work Order",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WorkOrder",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Remedy Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "RemedyCode",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "System Status",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SystemStatus",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Count",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "WorkOrderCount",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "Work Request Comments",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WorkRequestComments",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Region",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Region",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CC TYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CCType",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Net Mgmt TYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NetMgmtType",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Assessment",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Assessment",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_ABLB_WaterQuality_Database",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ASQL_EDWTactical_WaterQualityComplaints",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "LoadMDSAttributeGroups",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "LoadMDSWrapCodes",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table CustomerComplaints.RM_Attribute_Value_Groups",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "ID",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "MUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "MUID",
+									"type": "Guid"
+								}
+							},
+							{
+								"source": {
+									"name": "VersionName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VersionName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VersionNumber",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "VersionNumber",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "VersionFlag",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VersionFlag",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ChangeTrackingMask",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "ChangeTrackingMask",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "Attribute Type_Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Attribute Type_Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Attribute Type_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Attribute Type_Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Attribute Type_ID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "Attribute Type_ID",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "Attribute Value Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Attribute Value Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Attribute Value Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Attribute Value Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Group Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Group Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Group Short Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Group Short Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Group Sort Order",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "Group Sort Order",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "Effective From",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "Effective From",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "EnterDateTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "EnterDateTime",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "EnterUserName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "EnterUserName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EnterVersionNumber",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "EnterVersionNumber",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "LastChgDateTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "LastChgDateTime",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "LastChgUserName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LastChgUserName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "LastChgVersionNumber",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "LastChgVersionNumber",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "ValidationStatus",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ValidationStatus",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_SQL_EDW_MDS_Attribute_Value_Groups",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ASQL_Complaints_Attibute_Value_Groups",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Complaints"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:19Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

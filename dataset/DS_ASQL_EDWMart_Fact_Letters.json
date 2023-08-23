@@ -1,0 +1,70 @@
+{
+	"name": "DS_ASQL_EDWMart_Fact_Letters",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_mart"
+			}
+		},
+		"folder": {
+			"name": "Billing-model"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "CustomerID",
+				"type": "varchar"
+			},
+			{
+				"name": "ActionDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "BillNumber",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "LookUpBillNo",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "LetterType",
+				"type": "varchar"
+			},
+			{
+				"name": "RecoverAmount",
+				"type": "decimal",
+				"precision": 11,
+				"scale": 2
+			},
+			{
+				"name": "PartitionYear",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Medium",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "Mart",
+			"table": "Fact_Letters"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,161 @@
+{
+	"name": "PL_Billing_BlobtoMart_Bill",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy Bill blob to EDW Mart",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table Mart.Fact_Bill",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"type": "String",
+									"ordinal": 1
+								},
+								"sink": {
+									"name": "CustomerID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"type": "Decimal",
+									"ordinal": 2
+								},
+								"sink": {
+									"name": "BillNumber",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"type": "DateTime",
+									"ordinal": 3
+								},
+								"sink": {
+									"name": "DateIssued",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"type": "DateTime",
+									"ordinal": 4
+								},
+								"sink": {
+									"name": "DueDate",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"ordinal": 5
+								},
+								"sink": {
+									"name": "PropRefFormatID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"ordinal": 6
+								},
+								"sink": {
+									"name": "Frequency",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"type": "Decimal",
+									"ordinal": 7
+								},
+								"sink": {
+									"name": "Amount",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"type": "Int32",
+									"ordinal": 8
+								},
+								"sink": {
+									"name": "PartitionYear",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"type": "Int32",
+									"ordinal": 9
+								},
+								"sink": {
+									"name": "PaymentsPerBill",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"ordinal": 10
+								},
+								"sink": {
+									"name": "NotificationSent",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_ABLB_Billing_Fact_Bills",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ASQL_EDWMart_Fact_Bill",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Billing-Model"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

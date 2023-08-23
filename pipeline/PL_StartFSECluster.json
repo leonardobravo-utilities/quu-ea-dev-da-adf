@@ -55,7 +55,8 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": "select distinct databricksclusterid,databrickssecretname  from ETL.SourceSystem\nwhere databricksclustername = 'ADF_Job_Cluster_FSE'",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",
@@ -67,6 +68,8 @@
 		"folder": {
 			"name": "FieldServicesEdge"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:11Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }

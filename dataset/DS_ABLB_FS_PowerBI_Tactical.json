@@ -1,0 +1,62 @@
+{
+	"name": "DS_ABLB_FS_PowerBI_Tactical",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"storageaccount": "quueadevdadlslanding001"
+			}
+		},
+		"parameters": {
+			"BlobContainerName": {
+				"type": "string"
+			},
+			"ColumnDelimiter": {
+				"type": "string"
+			},
+			"QuoteCharacter": {
+				"type": "string"
+			},
+			"EscapeCharacter": {
+				"type": "string"
+			},
+			"BlobFolderName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PowerBI Tactical"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().BlobFolderName",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().BlobContainerName",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": {
+				"value": "@dataset().ColumnDelimiter",
+				"type": "Expression"
+			},
+			"escapeChar": {
+				"value": "@dataset().EscapeCharacter",
+				"type": "Expression"
+			},
+			"firstRowAsHeader": true,
+			"quoteChar": {
+				"value": "@dataset().QuoteCharacter",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

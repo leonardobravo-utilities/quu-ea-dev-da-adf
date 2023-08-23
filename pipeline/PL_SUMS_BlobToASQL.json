@@ -1,0 +1,120 @@
+{
+	"name": "PL_SUMS_BlobToASQL",
+	"properties": {
+		"description": "Execute notebook to produce the csv file",
+		"activities": [
+			{
+				"name": "Sums_Prepare_Notebook",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "GetSourceID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/edw_discovery/SUMS/SUMS_Prepare",
+					"baseParameters": {
+						"Load_Type": {
+							"value": "@pipeline().parameters.Load_Type",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_DBR_ADF_Job_Cluster",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"databricksclusterid": {
+							"value": "@activity('GetSourceID').output.Firstrow['databricksclusterid']",
+							"type": "Expression"
+						},
+						"databrickssecretname": {
+							"value": "@activity('GetSourceID').output.Firstrow['databrickssecretname']",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "GetSourceID",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select SourceID,databricksclusterid,databrickssecretname FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "PL_EDWDiscovery_TRFM_BlobToASQL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Sums_Prepare_Notebook",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceID": {
+							"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Source_Name": {
+				"type": "string",
+				"defaultValue": "SUMS"
+			},
+			"Load_Type": {
+				"type": "string",
+				"defaultValue": "Full"
+			}
+		},
+		"folder": {
+			"name": "SUMS"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:22Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

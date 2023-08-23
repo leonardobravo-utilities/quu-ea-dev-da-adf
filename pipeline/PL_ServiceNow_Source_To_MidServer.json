@@ -1,0 +1,78 @@
+{
+	"name": "PL_ServiceNow_Source_To_MidServer",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy_All_Files_MidServer_to_NFUJPRD200",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "FileServerReadSettings",
+							"recursive": true,
+							"wildcardFileName": {
+								"value": "@variables('v_FileType')",
+								"type": "Expression"
+							},
+							"deleteFilesAfterCompletion": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "FileServerWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_FS_MidServer_ServiceNow_Source",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_FS_MidServer_ServiceNow_Destination",
+						"type": "DatasetReference",
+						"parameters": {
+							"filefolder": {
+								"value": "@variables('v_SinkFileFolderName')",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"variables": {
+			"v_FileType": {
+				"type": "String",
+				"defaultValue": "*.csv"
+			},
+			"v_SinkFileFolderName": {
+				"type": "String",
+				"defaultValue": "ServiceNow\\\\Pre-Prod"
+			}
+		},
+		"folder": {
+			"name": "Service Now"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -2,8 +2,11 @@
 	"name": "DS_ASQL_EDWDiscovery",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_ASQL_EDWDiscovery",
-			"type": "LinkedServiceReference"
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_discovery"
+			}
 		},
 		"folder": {
 			"name": "Framework"
@@ -11,5 +14,6 @@
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": []
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }

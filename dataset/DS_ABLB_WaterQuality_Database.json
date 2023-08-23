@@ -1,0 +1,111 @@
+{
+	"name": "DS_ABLB_WaterQuality_Database",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"storageaccount": "quueadevdadlslanding001"
+			}
+		},
+		"folder": {
+			"name": "Complaints"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "WaterQuality_Database.csv",
+				"container": "complaints-datalanding"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Quality category",
+				"type": "String"
+			},
+			{
+				"name": "Entity",
+				"type": "String"
+			},
+			{
+				"name": "Additional comments",
+				"type": "String"
+			},
+			{
+				"name": "SAS Investigations",
+				"type": "String"
+			},
+			{
+				"name": "Std Job No",
+				"type": "String"
+			},
+			{
+				"name": "Job description",
+				"type": "String"
+			},
+			{
+				"name": "Date/Time Raised",
+				"type": "String"
+			},
+			{
+				"name": "No",
+				"type": "String"
+			},
+			{
+				"name": "Address",
+				"type": "String"
+			},
+			{
+				"name": "Street code",
+				"type": "String"
+			},
+			{
+				"name": "Suburb",
+				"type": "String"
+			},
+			{
+				"name": "Work Order",
+				"type": "String"
+			},
+			{
+				"name": "Remedy Code",
+				"type": "String"
+			},
+			{
+				"name": "System Status",
+				"type": "String"
+			},
+			{
+				"name": "Count",
+				"type": "String"
+			},
+			{
+				"name": "Work Request Comments",
+				"type": "String"
+			},
+			{
+				"name": "Region",
+				"type": "String"
+			},
+			{
+				"name": "CC TYPE",
+				"type": "String"
+			},
+			{
+				"name": "Net Mgmt TYPE",
+				"type": "String"
+			},
+			{
+				"name": "Assessment",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

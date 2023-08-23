@@ -2,8 +2,11 @@
 	"name": "DS_ABLB_Temetra_Geospatial_Sink",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_ABLB_quueadadlslanding001",
-			"type": "LinkedServiceReference"
+			"referenceName": "LS_ABLB",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"storageaccount": "quueadevdadlslanding001"
+			}
 		},
 		"parameters": {
 			"FolderPath": {
@@ -20,6 +23,9 @@
 				"type": "string",
 				"defaultValue": "\""
 			}
+		},
+		"folder": {
+			"name": "Temetra"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
@@ -48,5 +54,6 @@
 			}
 		},
 		"schema": []
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }

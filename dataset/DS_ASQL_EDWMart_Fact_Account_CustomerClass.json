@@ -1,0 +1,56 @@
+{
+	"name": "DS_ASQL_EDWMart_Fact_Account_CustomerClass",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_mart"
+			}
+		},
+		"folder": {
+			"name": "Billing-model"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "AccountID",
+				"type": "varchar"
+			},
+			{
+				"name": "ClassID",
+				"type": "varchar"
+			},
+			{
+				"name": "ClassReference",
+				"type": "varchar"
+			},
+			{
+				"name": "DeleteAfterDate",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "EffectiveDate",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "CreatedDate",
+				"type": "datetime2",
+				"scale": 7
+			}
+		],
+		"typeProperties": {
+			"schema": "Mart",
+			"table": "Fact_Account_Customer_Class"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
