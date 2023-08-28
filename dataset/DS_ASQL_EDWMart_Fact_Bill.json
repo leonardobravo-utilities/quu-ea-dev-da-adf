@@ -1,0 +1,74 @@
+{
+	"name": "DS_ASQL_EDWMart_Fact_Bill",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_mart"
+			}
+		},
+		"folder": {
+			"name": "Billing-model"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "CustomerID",
+				"type": "varchar"
+			},
+			{
+				"name": "BillNumber",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "DateIssued",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "DueDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "PropRefFormatID",
+				"type": "varchar"
+			},
+			{
+				"name": "Frequency",
+				"type": "varchar"
+			},
+			{
+				"name": "Amount",
+				"type": "decimal",
+				"precision": 38,
+				"scale": 2
+			},
+			{
+				"name": "PartitionYear",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PaymentsPerBill",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "NotificationSent",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "Mart",
+			"table": "Fact_Bill"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

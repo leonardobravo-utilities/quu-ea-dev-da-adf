@@ -1,0 +1,186 @@
+{
+	"name": "BENTPLNK",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load BENTPLNK",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table HiAffinity.BENTPLNK",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "U##ENTITY_REF",
+									"type": "String"
+								},
+								"sink": {
+									"name": "U##ENTITY_REF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ENTITY_REF",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ENTITY_REF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "U##PERSON_REF",
+									"type": "String"
+								},
+								"sink": {
+									"name": "U##PERSON_REF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PERSON_REF",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PERSON_REF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PERSON_ROLE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PERSON_ROLE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OWNERSHIP_PROP",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "OWNERSHIP_PROP",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "DATESTAMP",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "DATESTAMP",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "USTAMP",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "USTAMP",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "PI_CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PI_CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CDATE",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "CDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "CTIME",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "CTIME",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "CUSER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CUSER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PROGRESS_RECID",
+									"type": "Int64"
+								},
+								"sink": {
+									"name": "PROGRESS_RECID",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "OnPrem_BENTPLNK",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Tactical_BENTPLNK",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "HiAffinity TEMP"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:20Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

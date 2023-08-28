@@ -1,0 +1,36 @@
+{
+	"name": "DS_File_NFUJPRD200_ServiceNow_Archive",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_FS",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"host": "\\\\nfujprd200\\EBI_PROD_LANDING",
+				"username": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+			}
+		},
+		"parameters": {
+			"p_FileFolder": {
+				"type": "string"
+			},
+			"p_FileName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Service Now"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"folderPath": {
+					"value": "@concat(dataset().p_FileFolder,'\\Archive')",
+					"type": "Expression"
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

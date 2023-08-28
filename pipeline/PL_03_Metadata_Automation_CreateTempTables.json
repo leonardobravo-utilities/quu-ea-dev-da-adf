@@ -1,0 +1,753 @@
+{
+	"name": "PL_03_Metadata_Automation_CreateTempTables",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetTableInfo",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "SetSourceID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select st.TABLE_NAME  as SourceTableName from INFORMATION_SCHEMA.TABLES st\nLEFT join (Select * From  ETL.SourceTableDetails where SourceID  =@{activity('GetSourceID').output.firstRow['SourceID']}) t on t.SourceTableName  collate SQL_Latin1_General_CP1_CS_AS = st.Table_Name  collate SQL_Latin1_General_CP1_CS_AS\nwhere st.table_schema  = '@{pipeline().parameters.Schema_Name}'  \nand t.SourceTableName is NULL",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "GetSourceID",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "ReadCSVFile",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select SourceID From etl.SourceSystem where SourceName = '@{pipeline().parameters.Source_Name}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "SetSourceID",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "GetSourceID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "SourceID",
+					"value": {
+						"value": "@string(activity('GetSourceID').output.firstRow['SourceID'])",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ReadCSVFile",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "RemoveFilesIfExists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": false,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings",
+							"skipLineCount": 1
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ABLB_Datalanding",
+						"type": "DatasetReference",
+						"parameters": {
+							"FolderPath": "etlautomation-metadata/ETLAutomation",
+							"TargetFileName": {
+								"value": "@concat('ETLAutomationMetadata','_',pipeline().parameters.Source_Name,'.csv')",
+								"type": "Expression"
+							},
+							"ColumnDelimiter": ",",
+							"QuoteCharacter": "\""
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FilteredRecords",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "GetTableInfo",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/edw_discovery/ETLAutomation/SearchAndFilter",
+					"baseParameters": {
+						"SrcArray": {
+							"value": "@string(activity('ReadCSVFile').output)",
+							"type": "Expression"
+						},
+						"TgtArray": {
+							"value": "@string(activity('GetTableInfo').output)",
+							"type": "Expression"
+						},
+						"SourceName": {
+							"value": "@pipeline().parameters.Source_Name",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_DBR_ADF_Job_Cluster",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"databricksclusterid": {
+							"value": "@pipeline().parameters.databricksclusterid",
+							"type": "Expression"
+						},
+						"databrickssecretname": {
+							"value": "@pipeline().parameters.databrickssecretname",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ForEachTable",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "ReadFilteredCSVFile",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('ReadFilteredCSVFile').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 50,
+					"activities": [
+						{
+							"name": "GetMetadaScript",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderStoredProcedureName": "[dbo].[usp_create_metadatascript]",
+									"storedProcedureParameters": {
+										"BusinessKeysInOrder": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_12),equals(item().Prop_12,'null')),'',item().Prop_12)",
+												"type": "Expression"
+											}
+										},
+										"checkForDeletes": {
+											"type": "Int32",
+											"value": {
+												"value": "@if(or(empty(item().Prop_13),equals(item().Prop_13,'null')),1,item().Prop_13)",
+												"type": "Expression"
+											}
+										},
+										"Container_Name": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_9),equals(item().Prop_9,'null')),'',item().Prop_9)",
+												"type": "Expression"
+											}
+										},
+										"DestinationHostName": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_11),equals(item().Prop_11,'null')),'',item().Prop_11)",
+												"type": "Expression"
+											}
+										},
+										"Incremental_DateTime_Column": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_7),equals(item().Prop_7,'null')),'',item().Prop_7)",
+												"type": "Expression"
+											}
+										},
+										"Incremental_Datetime_SQL": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_8),equals(item().Prop_8,'null')),'',item().Prop_8)",
+												"type": "Expression"
+											}
+										},
+										"Incremental_LoadInd": {
+											"type": "Int32",
+											"value": {
+												"value": "@if(or(empty(item().Prop_6),equals(item().Prop_6,'null')),'',item().Prop_6)",
+												"type": "Expression"
+											}
+										},
+										"joinCondition": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_5),equals(item().Prop_5,'null')),'',item().Prop_5)",
+												"type": "Expression"
+											}
+										},
+										"source_Name": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_0),equals(item().Prop_0,'null')),'',item().Prop_0)",
+												"type": "Expression"
+											}
+										},
+										"source_schema_name": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_3),equals(item().Prop_3,'null')),'',item().Prop_3)",
+												"type": "Expression"
+											}
+										},
+										"StorageAccount": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_10),equals(item().Prop_10,'null')),'',item().Prop_10)",
+												"type": "Expression"
+											}
+										},
+										"table_name": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_1),equals(item().Prop_1,'null')),'',item().Prop_1)",
+												"type": "Expression"
+											}
+										},
+										"target_schema_name": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_2),equals(item().Prop_2,'null')),'',item().Prop_2)",
+												"type": "Expression"
+											}
+										},
+										"WhereFilterSQL": {
+											"type": "String",
+											"value": {
+												"value": "@if(or(empty(item().Prop_4),equals(item().Prop_4,'null')),'',item().Prop_4)",
+												"type": "Expression"
+											}
+										}
+									},
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_ASQL_EDWDiscovery",
+									"type": "DatasetReference"
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "CreateMetadaTableScriptFile",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "GetMetadaScript",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/edw_discovery/ETLAutomation/SaveMetadataFiles",
+								"baseParameters": {
+									"SourceName": {
+										"value": "@pipeline().parameters.Source_Name",
+										"type": "Expression"
+									},
+									"TableName": {
+										"value": "@toLower(item().Prop_1)",
+										"type": "Expression"
+									},
+									"AzureTempTable": {
+										"value": "@activity('GetMetadaScript').output.firstRow['AzureTmpTable']",
+										"type": "Expression"
+									},
+									"DatabricksTempTable": {
+										"value": "@base64(activity('GetMetadaScript').output.firstRow['DatabricksTempTable'])",
+										"type": "Expression"
+									},
+									"Metadatatable": {
+										"value": "@base64(activity('GetMetadaScript').output.firstRow['Metadatatable'])",
+										"type": "Expression"
+									},
+									"ColumnSchemaTable": {
+										"value": "@activity('GetMetadaScript').output.firstRow['ColumnSchemaTable']",
+										"type": "Expression"
+									},
+									"BusinessKeyTable": {
+										"value": "@activity('GetMetadaScript').output.firstRow['BusinessKeyTable']",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_DBR_ADF_Job_Cluster",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"databricksclusterid": {
+										"value": "@pipeline().parameters.databricksclusterid",
+										"type": "Expression"
+									},
+									"databrickssecretname": {
+										"value": "@pipeline().parameters.databrickssecretname",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "CreateTempTable",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "GetMetadaScript",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "sp_executesql",
+								"storedProcedureParameters": {
+									"statement": {
+										"value": {
+											"value": "@activity('GetMetadaScript').output.firstRow['AzureTmpTable']",
+											"type": "Expression"
+										},
+										"type": "string"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_ASQL",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"database_name": "edw_discovery"
+								}
+							}
+						},
+						{
+							"name": "ExecuteDatabrickTableCreation",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "CreateMetadaTableScriptFile",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": {
+									"value": "@concat('/edw_discovery/setup - Do not Use/tables/edw_discovery/',pipeline().parameters.Source_Name,'/',toLower(item().Prop_1))",
+									"type": "Expression"
+								},
+								"baseParameters": {
+									"database": "edw_discovery",
+									"mountpoint": {
+										"value": "@concat('/',item().Prop_9,'/',item().Prop_0,'_',item().Prop_1)",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_DBR_ADF_Job_Cluster",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"databricksclusterid": {
+										"value": "@pipeline().parameters.databricksclusterid",
+										"type": "Expression"
+									},
+									"databrickssecretname": {
+										"value": "@pipeline().parameters.databrickssecretname",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "ExecuteDatabrickTableCreation_temp",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "ExecuteDatabrickTableCreation",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": {
+									"value": "@concat('/edw_discovery/setup - Do not Use/tables/edw_discovery/',pipeline().parameters.Source_Name,'/',toLower(item().Prop_1))",
+									"type": "Expression"
+								},
+								"baseParameters": {
+									"database": "edw_discovery_temp",
+									"mountpoint": {
+										"value": "@concat('/',item().Prop_9,'/',item().Prop_0,'_',item().Prop_1)",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_DBR_ADF_Job_Cluster",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"databricksclusterid": {
+										"value": "@pipeline().parameters.databricksclusterid",
+										"type": "Expression"
+									},
+									"databrickssecretname": {
+										"value": "@pipeline().parameters.databrickssecretname",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "ExecuteDatabrickTableCreation_changedset",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "ExecuteDatabrickTableCreation_temp",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": {
+									"value": "@concat('/edw_discovery/setup - Do not Use/tables/edw_discovery/',pipeline().parameters.Source_Name,'/',toLower(item().Prop_1))",
+									"type": "Expression"
+								},
+								"baseParameters": {
+									"database": "edw_discovery_changedset",
+									"mountpoint": {
+										"value": "@concat('/',item().Prop_9,'/',item().Prop_0,'_',item().Prop_1)",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_DBR_ADF_Job_Cluster",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"databricksclusterid": {
+										"value": "@pipeline().parameters.databricksclusterid",
+										"type": "Expression"
+									},
+									"databrickssecretname": {
+										"value": "@pipeline().parameters.databrickssecretname",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "ReadFilteredCSVFile",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "FilteredRecords",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": false,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings",
+							"skipLineCount": 1
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ABLB_Datalanding",
+						"type": "DatasetReference",
+						"parameters": {
+							"FolderPath": "etlautomation-metadata/ETLAutomation",
+							"TargetFileName": {
+								"value": "@concat('ETLAutomationMetadata','_',pipeline().parameters.Source_Name,'_processed.csv')",
+								"type": "Expression"
+							},
+							"ColumnDelimiter": ",",
+							"QuoteCharacter": "\""
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "MergeFiles",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "ForEachTable",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/edw_discovery/ETLAutomation/MergeFiles",
+					"baseParameters": {
+						"SourceName": {
+							"value": "@pipeline().parameters.Source_Name",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_DBR_ADF_Job_Cluster",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"databricksclusterid": {
+							"value": "@pipeline().parameters.databricksclusterid",
+							"type": "Expression"
+						},
+						"databrickssecretname": {
+							"value": "@pipeline().parameters.databrickssecretname",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "RemoveFilesIfExists",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/edw_discovery/ETLAutomation/RemoveFiles",
+					"baseParameters": {
+						"SourceName": {
+							"value": "@pipeline().parameters.Source_Name",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_DBR_ADF_Job_Cluster",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"databricksclusterid": {
+							"value": "@pipeline().parameters.databricksclusterid",
+							"type": "Expression"
+						},
+						"databrickssecretname": {
+							"value": "@pipeline().parameters.databrickssecretname",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Schema_Name": {
+				"type": "string",
+				"defaultValue": "LIWIS"
+			},
+			"Source_Name": {
+				"type": "string",
+				"defaultValue": "LIWIS"
+			},
+			"databricksclusterid": {
+				"type": "string",
+				"defaultValue": "0219-041522-ochre808"
+			},
+			"databrickssecretname": {
+				"type": "string",
+				"defaultValue": "databricks2-token"
+			}
+		},
+		"variables": {
+			"FilteredTable": {
+				"type": "Array"
+			},
+			"SourceID": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "MetadataAutomation"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:11Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

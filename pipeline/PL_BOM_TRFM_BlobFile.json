@@ -65,6 +65,10 @@
 							"name": "SetFileName",
 							"type": "SetVariable",
 							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "FileName",
@@ -125,14 +129,8 @@
 											"referenceName": "LS_DBR_ADF_Job_Cluster",
 											"type": "LinkedServiceReference",
 											"parameters": {
-												"databricksclusterid": {
-													"value": "@pipeline().parameters.databricksclusterid",
-													"type": "Expression"
-												},
-												"databrickssecretname": {
-													"value": "@pipeline().parameters.databrickssecretname",
-													"type": "Expression"
-												}
+												"databricksclusterid": "1207-062751-cr81ze79",
+												"databrickssecretname": "databricks-token"
 											}
 										}
 									}
@@ -151,7 +149,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"notebookPath": "/edw_discovery/ETL_Change_DateFormat_BOM",
+											"notebookPath": "/edw_discovery/ETL_Change_DateFormat",
 											"baseParameters": {
 												"blobcontainer": {
 													"value": "@pipeline().parameters.blobcontainer",
@@ -180,14 +178,6 @@
 												"STATION_POINT_NAME": {
 													"value": "@pipeline().parameters.STATION_POINT_NAME",
 													"type": "Expression"
-												},
-												"databrickssecretnamee": {
-													"value": "@pipeline().parameters.databrickssecretname",
-													"type": "Expression"
-												},
-												"databricksclusterid": {
-													"value": "@pipeline().parameters.databricksclusterid",
-													"type": "Expression"
 												}
 											}
 										},
@@ -195,14 +185,8 @@
 											"referenceName": "LS_DBR_ADF_Job_Cluster",
 											"type": "LinkedServiceReference",
 											"parameters": {
-												"databricksclusterid": {
-													"value": "@pipeline().parameters.databricksclusterid",
-													"type": "Expression"
-												},
-												"databrickssecretname": {
-													"value": "@pipeline().parameters.databrickssecretname",
-													"type": "Expression"
-												}
+												"databricksclusterid": "1207-062751-cr81ze79",
+												"databrickssecretname": "databricks-token"
 											}
 										}
 									}
@@ -221,6 +205,10 @@
 									]
 								}
 							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "processfile",
@@ -292,6 +280,10 @@
 									]
 								}
 							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "FileSize",
@@ -370,12 +362,6 @@
 			},
 			"ColumnDelimiter": {
 				"type": "string"
-			},
-			"databrickssecretname": {
-				"type": "string"
-			},
-			"databricksclusterid": {
-				"type": "string"
 			}
 		},
 		"variables": {
@@ -396,7 +382,7 @@
 			"name": "BOM"
 		},
 		"annotations": [],
-		"lastPublishTime": "2020-03-17T04:56:53Z"
+		"lastPublishTime": "2022-04-19T00:29:12Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }

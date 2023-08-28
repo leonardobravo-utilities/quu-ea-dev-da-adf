@@ -2,8 +2,11 @@
 	"name": "DS_ABLB_FS_ServiceNow_Sink",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_ABLB_quueadadlslanding001",
-			"type": "LinkedServiceReference"
+			"referenceName": "LS_ABLB",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"storageaccount": "quueadevdadlslanding001"
+			}
 		},
 		"parameters": {
 			"p_snk_blob_container_name": {
@@ -31,5 +34,6 @@
 				}
 			}
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }

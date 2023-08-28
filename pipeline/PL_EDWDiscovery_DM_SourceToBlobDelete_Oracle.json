@@ -1,0 +1,240 @@
+{
+	"name": "PL_EDWDiscovery_DM_SourceToBlobDelete_Oracle",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetIncrementalLoadTableList",
+				"description": "Lookup activity to retrieve the list of partitions stored in the external control table.",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[ETL].[usp_get_tablelist_by_sourceid]",
+						"storedProcedureParameters": {
+							"sourceid": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.SourceID",
+									"type": "Expression"
+								}
+							}
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEachTable",
+				"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GetIncrementalLoadTableList",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetIncrementalLoadTableList').output.value\n\n",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "CheckForDeleteIndicator",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(item().CheckForDeletes,1)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Framework_CopyDBtoBlob_Pipeline",
+										"description": "Execute copy db to blob storage pipeline",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "PL_Framework_DM_SourcetoBlob_Delete_Oracle",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"Data_Source_Table_Name": {
+													"value": "@item().Data_Source_Table_Name",
+													"type": "Expression"
+												},
+												"Data_Source_WaterMarkColumn": {
+													"value": "@item().Data_Source_WaterMarkColumn",
+													"type": "Expression"
+												},
+												"Data_Destination_Folder_Path": {
+													"value": "@item().Data_Destination_Folder_Path_DeleteProcess",
+													"type": "Expression"
+												},
+												"TableID": {
+													"value": "@item().TableID",
+													"type": "Expression"
+												},
+												"Data_Destination_File_Name": {
+													"value": "@item().Data_Destination_File_Name",
+													"type": "Expression"
+												},
+												"SourceServerName": {
+													"value": "@item().SourceServerName",
+													"type": "Expression"
+												},
+												"SourceDatabaseName": {
+													"value": "@item().SourceDatabaseName",
+													"type": "Expression"
+												},
+												"File_Name_Ext": {
+													"value": "@item().File_Name_Ext",
+													"type": "Expression"
+												},
+												"Join_Condition": {
+													"value": "@item().Join_Condition",
+													"type": "Expression"
+												},
+												"Source_Column_List": {
+													"value": "@item().Source_Column_list",
+													"type": "Expression"
+												},
+												"ColumnDelimiter": {
+													"value": "@item().ColumnDelimiter",
+													"type": "Expression"
+												},
+												"QuoteCharacter": {
+													"value": "@item().QuoteCharacter",
+													"type": "Expression"
+												},
+												"source_where_filter": {
+													"value": "@item().Source_Where_Filter",
+													"type": "Expression"
+												},
+												"UserName": {
+													"value": "@item().UserName",
+													"type": "Expression"
+												},
+												"SecretPasswordName": {
+													"value": "@item().SecretPasswordName",
+													"type": "Expression"
+												},
+												"BlobContainer": {
+													"value": "@item().TargetBlobContainer",
+													"type": "Expression"
+												},
+												"BusinessKeyList": {
+													"value": "@item().BusinessKeyColumnList",
+													"type": "Expression"
+												},
+												"DeltaTargetDbName": {
+													"value": "@item().DeltaTargetDbName",
+													"type": "Expression"
+												},
+												"StorageAccount": {
+													"value": "@item().StorageAccount",
+													"type": "Expression"
+												},
+												"RowSource": {
+													"value": "@item().SourceName",
+													"type": "Expression"
+												},
+												"DbHostName": {
+													"value": "@item().DestinationHostName",
+													"type": "Expression"
+												},
+												"AzureTargetTableName": {
+													"value": "@item().AzuresqlTargetTableName",
+													"type": "Expression"
+												},
+												"DeleteProcessCompletionDTM": {
+													"value": "@item().DeleteProcessCompletionDTM",
+													"type": "Expression"
+												},
+												"DeltaStagingTableParquetFilePath": {
+													"value": "@item().DeltaStagingTableParquetFilePath",
+													"type": "Expression"
+												},
+												"AzureSqlTempTableName": {
+													"value": "@item().AzuresqlTempTableName",
+													"type": "Expression"
+												},
+												"DeltaStagingDbName": {
+													"value": "@item().DeltaStagingDbName",
+													"type": "Expression"
+												},
+												"DeltaStageTableName": {
+													"value": "@item().DeltaStagingTableName",
+													"type": "Expression"
+												},
+												"Host_Name": {
+													"value": "@item().Host_Name",
+													"type": "Expression"
+												},
+												"Port_No": {
+													"value": "@item().Port_No",
+													"type": "Expression"
+												},
+												"SID": {
+													"value": "@item().SID",
+													"type": "Expression"
+												},
+												"databricksclusterid": {
+													"value": "@item().databricksclusterid",
+													"type": "Expression"
+												},
+												"databricksclustername": {
+													"value": "@item().databricksclustername",
+													"type": "Expression"
+												},
+												"databrickssecretname": {
+													"value": "@item().databrickssecretname",
+													"type": "Expression"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"SourceID": {
+				"type": "string",
+				"defaultValue": "3"
+			}
+		},
+		"folder": {
+			"name": "EDW_Discovery"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

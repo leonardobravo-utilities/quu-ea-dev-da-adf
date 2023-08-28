@@ -42,15 +42,7 @@
 							"fileExtension": ".csv"
 						}
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
+					"enableStaging": false
 				},
 				"inputs": [
 					{
@@ -64,14 +56,13 @@
 							"FileFolderName": {
 								"value": "@pipeline().parameters.STATION_POINT_NAME",
 								"type": "Expression"
-							},
-							"FileServer": "ftp://ftp.bom.gov.au/"
+							}
 						}
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "DS_ABLB_FS_SUMS",
+						"referenceName": "DS_ABLB_FS_Dataloading",
 						"type": "DatasetReference",
 						"parameters": {
 							"targetblobfoldername": {
@@ -105,10 +96,6 @@
 							"value": "@activity('getlistofblobfile').output.firstrow.TargetBlobContainer",
 							"type": "Expression"
 						},
-						"blobfolderpath": {
-							"value": "@pipeline().parameters.STATION_POINT_NAME",
-							"type": "Expression"
-						},
 						"storageaccount": {
 							"value": "@activity('getlistofblobfile').output.firstrow.StorageAccount",
 							"type": "Expression"
@@ -121,6 +108,10 @@
 							"value": "@activity('getlistofblobfile').output.firstrow.ColumnSchemaList",
 							"type": "Expression"
 						},
+						"ColumnDelimiter": {
+							"value": "@activity('getlistofblobfile').output.firstrow.ColumnDelimiter",
+							"type": "Expression"
+						},
 						"QuoteCharacter": {
 							"value": "@activity('getlistofblobfile').output.firstrow.QuoteCharacter",
 							"type": "Expression"
@@ -129,16 +120,8 @@
 							"value": "@pipeline().parameters.STATION_POINT_NAME",
 							"type": "Expression"
 						},
-						"ColumnDelimiter": {
-							"value": "@activity('getlistofblobfile').output.firstrow.ColumnDelimiter",
-							"type": "Expression"
-						},
-						"databrickssecretname": {
-							"value": "@activity('getlistofblobfile').output.firstrow.databrickssecretname",
-							"type": "Expression"
-						},
-						"databricksclusterid": {
-							"value": "@activity('getlistofblobfile').output.firstrow.databricksclusterid",
+						"blobfolderpath": {
+							"value": "@pipeline().parameters.STATION_POINT_NAME",
 							"type": "Expression"
 						}
 					}
@@ -221,7 +204,7 @@
 			"name": "BOM"
 		},
 		"annotations": [],
-		"lastPublishTime": "2020-03-26T00:04:10Z"
+		"lastPublishTime": "2022-04-19T00:29:16Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }

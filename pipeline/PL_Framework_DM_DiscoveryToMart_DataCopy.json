@@ -33,7 +33,7 @@
 								},
 								"cases": [
 									{
-										"value": "Copy_Activity",
+										"value": "Copy Activity",
 										"activities": [
 											{
 												"name": "Copy Dicovery to Mart Temp - Copy Activity",
@@ -102,7 +102,7 @@
 										]
 									},
 									{
-										"value": "Databricks_Notebook",
+										"value": "Databricks Notebook",
 										"activities": [
 											{
 												"name": "Copy Discovery to Mart Temp - Databricks Notebook",
@@ -242,8 +242,11 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "LS_ASQL_EDWMart",
-								"type": "LinkedServiceReference"
+								"referenceName": "LS_ASQL",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"database_name": "edw_mart"
+								}
 							}
 						}
 					]
@@ -259,6 +262,8 @@
 		"folder": {
 			"name": "FrameWork"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:12Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }

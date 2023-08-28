@@ -1,0 +1,157 @@
+{
+	"name": "DS_SQL_EDW_MDS_Attribute_Value_Groups",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQL_Framework",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"Servername": "prdc04-sql",
+				"Databasename": "edw_mds",
+				"SecretPasswordName": "SVC-EBI-PRDC04-AGT",
+				"UserName": "urbanutilities\\svc-EBI_PRDC04_AGT"
+			}
+		},
+		"folder": {
+			"name": "Complaints"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "MUID",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "VersionName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "VersionNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "VersionFlag",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Name",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Code",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ChangeTrackingMask",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "WRAP Code",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Wrap Code - Description",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Case_Code",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Case_Name",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Case_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Interaction_Code",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Interaction_Name",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Interaction_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "WaterQuality_Code",
+				"type": "nvarchar"
+			},
+			{
+				"name": "WaterQuality_Name",
+				"type": "nvarchar"
+			},
+			{
+				"name": "WaterQuality_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "WRAP Code Level 1",
+				"type": "nvarchar"
+			},
+			{
+				"name": "WRAP Code Level 2",
+				"type": "nvarchar"
+			},
+			{
+				"name": "WRAP Code Level 3",
+				"type": "nvarchar"
+			},
+			{
+				"name": "WRAP Code Level 4",
+				"type": "nvarchar"
+			},
+			{
+				"name": "EnterDateTime",
+				"type": "datetime2",
+				"scale": 3
+			},
+			{
+				"name": "EnterUserName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "EnterVersionNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "LastChgDateTime",
+				"type": "datetime2",
+				"scale": 3
+			},
+			{
+				"name": "LastChgUserName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "LastChgVersionNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ValidationStatus",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "mdm",
+			"table": "vw_RM_Attribute_Value_Groups"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

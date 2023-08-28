@@ -1,0 +1,30 @@
+{
+	"name": "PL_Billing-Model_SourceToBlob",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_EDWDiscovery_DM_SourceToBlob_SqlServer",
+				"description": "",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_SqlServer",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceID": "30"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "Billing-Model"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:22Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

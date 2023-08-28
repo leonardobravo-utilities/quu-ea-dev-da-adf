@@ -65,6 +65,10 @@
 							"name": "SetFileName",
 							"type": "SetVariable",
 							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "FileName",
@@ -386,8 +390,11 @@
 											}
 										},
 										"linkedServiceName": {
-											"referenceName": "LS_ASQL_EDWDiscovery",
-											"type": "LinkedServiceReference"
+											"referenceName": "LS_ASQL",
+											"type": "LinkedServiceReference",
+											"parameters": {
+												"database_name": "edw_discovery"
+											}
 										}
 									},
 									{
@@ -551,8 +558,11 @@
 											}
 										},
 										"linkedServiceName": {
-											"referenceName": "LS_ASQL_EDWDiscovery",
-											"type": "LinkedServiceReference"
+											"referenceName": "LS_ASQL",
+											"type": "LinkedServiceReference",
+											"parameters": {
+												"database_name": "edw_discovery"
+											}
 										}
 									}
 								]
@@ -570,6 +580,10 @@
 									]
 								}
 							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "processfile",
@@ -641,6 +655,10 @@
 									]
 								}
 							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "FileSize",
@@ -684,7 +702,8 @@
 									"type": "Expression"
 								}
 							}
-						}
+						},
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_ASQL_EDWDiscovery",
@@ -851,8 +870,11 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "LS_ASQL_EDWDiscovery",
-								"type": "LinkedServiceReference"
+								"referenceName": "LS_ASQL",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"database_name": "edw_discovery"
+								}
 							}
 						},
 						{
@@ -866,6 +888,10 @@
 									]
 								}
 							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "CDCRun",
@@ -990,7 +1016,8 @@
 		"folder": {
 			"name": "FrameWork"
 		},
-		"annotations": []
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:11Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }

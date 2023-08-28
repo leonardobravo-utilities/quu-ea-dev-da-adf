@@ -1,0 +1,21 @@
+{
+	"name": "LS_ASQL",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"database_name": {
+				"type": "string",
+				"defaultValue": "edw_discovery"
+			},
+			"environment": {
+				"type": "string",
+				"defaultValue": "dev"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=\"@{concat('quu-ea-',linkedService().environment,'-da-sqlserver-001.database.windows.net')}\";Initial Catalog=@{linkedService().database_name}"
+		}
+	}
+}

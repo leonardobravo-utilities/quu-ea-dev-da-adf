@@ -2,8 +2,11 @@
 	"name": "DS_ASQL_EDWMart_Target",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_ASQL_EDWMart",
-			"type": "LinkedServiceReference"
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_mart"
+			}
 		},
 		"parameters": {
 			"SchemaName": {
@@ -29,5 +32,6 @@
 				"type": "Expression"
 			}
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }

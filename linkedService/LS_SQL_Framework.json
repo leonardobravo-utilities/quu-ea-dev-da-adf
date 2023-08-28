@@ -1,18 +1,19 @@
 {
 	"name": "LS_SQL_Framework",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"parameters": {
 			"Servername": {
 				"type": "string",
-				"defaultValue": "PRDC04-SQL"
+				"defaultValue": "QUUEAELPPRD001"
 			},
 			"Databasename": {
 				"type": "string",
-				"defaultValue": "EDW_DISCOVERY"
+				"defaultValue": "DATAMART"
 			},
 			"SecretPasswordName": {
 				"type": "string",
-				"defaultValue": "svc-ebi-prdc04-agt"
+				"defaultValue": "SVC-EBI-PRDC04-AGT"
 			},
 			"UserName": {
 				"type": "string",
@@ -28,7 +29,10 @@
 				"type": "AzureKeyVaultSecret",
 				"store": {
 					"referenceName": "ADF_LS_AKV",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"environment": "dev"
+					}
 				},
 				"secretName": {
 					"value": "@linkedService().SecretPasswordName",
@@ -37,9 +41,8 @@
 			}
 		},
 		"connectVia": {
-			"referenceName": "SelfHostedIntegrationRuntime",
+			"referenceName": "quu-ea-dev-da-selfhostedruntime-002",
 			"type": "IntegrationRuntimeReference"
 		}
-	},
-	"type": "Microsoft.DataFactory/factories/linkedservices"
+	}
 }

@@ -66,8 +66,6 @@
 							"type": "SetVariable",
 							"dependsOn": [],
 							"policy": {
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
 								"secureOutput": false,
 								"secureInput": false
 							},
@@ -332,10 +330,6 @@
 												"checkfordeletesind": {
 													"value": "@pipeline().parameters.checkfordeletesind",
 													"type": "Expression"
-												},
-												"sourcecolumnlist": {
-													"value": "@pipeline().parameters.sourcecolumnlist",
-													"type": "Expression"
 												}
 											}
 										},
@@ -404,8 +398,11 @@
 											}
 										},
 										"linkedServiceName": {
-											"referenceName": "LS_ASQL_EDWDiscovery",
-											"type": "LinkedServiceReference"
+											"referenceName": "LS_ASQL",
+											"type": "LinkedServiceReference",
+											"parameters": {
+												"database_name": "edw_discovery"
+											}
 										}
 									},
 									{
@@ -554,8 +551,6 @@
 								}
 							],
 							"policy": {
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
 								"secureOutput": false,
 								"secureInput": false
 							},
@@ -563,7 +558,7 @@
 							"typeProperties": {
 								"variableName": "processfile",
 								"value": {
-									"value": "@if(and(greater(variables('FileSize'),'0'), or(contains(variables('FileName'),'.csv'),contains(variables('FileName'),'.parquet') )),true,false)",
+									"value": "@if(AND(greater(variables('FileSize'),'0'), contains(variables('FileName'),'.csv') ),true,false)\n\n",
 									"type": "Expression"
 								}
 							}
@@ -631,8 +626,6 @@
 								}
 							],
 							"policy": {
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
 								"secureOutput": false,
 								"secureInput": false
 							},
@@ -767,7 +760,7 @@
 			},
 			"databricksclusterid": {
 				"type": "string",
-				"defaultValue": "0827-051915-duchy366"
+				"defaultValue": "0330-140254-nhlno3g5"
 			},
 			"SourceTableName": {
 				"type": "string"
@@ -786,9 +779,6 @@
 			"incrementalloadind": {
 				"type": "string",
 				"defaultValue": "0"
-			},
-			"sourcecolumnlist": {
-				"type": "string"
 			}
 		},
 		"variables": {
@@ -812,7 +802,7 @@
 			"name": "FrameWork"
 		},
 		"annotations": [],
-		"lastPublishTime": "2021-07-08T01:08:29Z"
+		"lastPublishTime": "2022-04-19T00:29:12Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }

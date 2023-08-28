@@ -1,0 +1,193 @@
+{
+	"name": "PL_Billing_BlobtoSQL_Date",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy Date blob to EDW Mart",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table Mart.Dim_BillingDate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "Date",
+									"type": "DateTime",
+									"format": "d/MM/yyyy",
+									"culture": "en-AU"
+								},
+								"sink": {
+									"name": "Date",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "Day",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "Day",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "Month Number",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "MonthNumber",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "Month Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MonthName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Year",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "Year",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "YYYYMM",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "YYYYMM",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "Day of Week",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DayofWeek",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Weekend",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Weekend",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Financial Quarter Number",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "FinancialQuarterNumber",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "Financial Quarter Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FinancialQuarterName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Financial Year Quarter",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FinancialYearQuarter",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Financial Year",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "FinancialYear",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "Public Holiday",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PublicHoliday",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_ABLB_Billing_Date",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ASQL_EDWMart_Billing_Date",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Billing-Model"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:12Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

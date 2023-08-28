@@ -134,8 +134,11 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "LS_ASQL_EDWDiscovery",
-								"type": "LinkedServiceReference"
+								"referenceName": "LS_ASQL",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"database_name": "edw_discovery"
+								}
 							}
 						},
 						{
@@ -153,7 +156,8 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlMISource",
-									"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2"
+									"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2",
+									"partitionOption": "None"
 								},
 								"dataset": {
 									"referenceName": "DS_ASQL_EDWDiscovery",
@@ -180,7 +184,8 @@
 									"sqlReaderQuery": {
 										"value": "select isnull(@{pipeline().parameters.Control_Table_Column_Name},'1753-01-01') as WatermarkValue from @{pipeline().parameters.Control_Table_Table_Name}\nwhere TableID = @{pipeline().parameters.TableID}",
 										"type": "Expression"
-									}
+									},
+									"partitionOption": "None"
 								},
 								"dataset": {
 									"referenceName": "DS_ASQL_EDWDiscovery",
@@ -370,8 +375,11 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "LS_ASQL_EDWDiscovery",
-								"type": "LinkedServiceReference"
+								"referenceName": "LS_ASQL",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"database_name": "edw_discovery"
+								}
 							}
 						},
 						{
@@ -389,7 +397,8 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlMISource",
-									"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime"
+									"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime",
+									"partitionOption": "None"
 								},
 								"dataset": {
 									"referenceName": "DS_ASQL_EDWDiscovery",
@@ -486,7 +495,8 @@
 		"folder": {
 			"name": "FrameWork"
 		},
-		"annotations": []
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:14Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }

@@ -174,10 +174,6 @@
 									"databrickssecretname": {
 										"value": "@item().databrickssecretname",
 										"type": "Expression"
-									},
-									"sourcecolumnlist": {
-										"value": "@item().Source_Column_list",
-										"type": "Expression"
 									}
 								}
 							}
@@ -228,8 +224,11 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "LS_ASQL_EDWDiscovery",
-								"type": "LinkedServiceReference"
+								"referenceName": "LS_ASQL",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"database_name": "edw_discovery"
+								}
 							}
 						}
 					]
@@ -272,6 +271,8 @@
 		"folder": {
 			"name": "ABN"
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }

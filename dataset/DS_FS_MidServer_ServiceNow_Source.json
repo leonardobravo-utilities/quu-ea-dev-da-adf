@@ -2,13 +2,11 @@
 	"name": "DS_FS_MidServer_ServiceNow_Source",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_FS_ServiceNow_MidServer",
+			"referenceName": "LS_FS",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"p_MidServerLocation": {
-					"value": "@dataset().p_MidServerLocation",
-					"type": "Expression"
-				}
+				"host": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates",
+				"username": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 			}
 		},
 		"parameters": {
@@ -27,5 +25,6 @@
 				"type": "FileServerLocation"
 			}
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }

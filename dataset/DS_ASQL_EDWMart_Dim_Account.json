@@ -1,0 +1,65 @@
+{
+	"name": "DS_ASQL_EDWMart_Dim_Account",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_mart"
+			}
+		},
+		"folder": {
+			"name": "Billing-model"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "CustomerID",
+				"type": "varchar"
+			},
+			{
+				"name": "CustomerName",
+				"type": "varchar"
+			},
+			{
+				"name": "CustomerType",
+				"type": "varchar"
+			},
+			{
+				"name": "MyAccountCustomer",
+				"type": "varchar"
+			},
+			{
+				"name": "PropertyCount",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CustomerCreatedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "FirstBillIssuedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "ClassID",
+				"type": "varchar"
+			},
+			{
+				"name": "EntityID",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "Mart",
+			"table": "Dim_Account"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

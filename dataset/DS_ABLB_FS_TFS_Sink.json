@@ -2,8 +2,11 @@
 	"name": "DS_ABLB_FS_TFS_Sink",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_ABLB_quueadadlslanding001",
-			"type": "LinkedServiceReference"
+			"referenceName": "LS_ABLB",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"storageaccount": "quueadevdadlslanding001"
+			}
 		},
 		"parameters": {
 			"targetblobfoldername": {
@@ -81,5 +84,6 @@
 				"type": "String"
 			}
 		]
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }

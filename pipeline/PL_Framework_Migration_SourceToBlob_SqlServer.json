@@ -45,7 +45,8 @@
 									"sqlReaderQuery": {
 										"value": "select @{pipeline().parameters.Source_Column_List}\nfrom @{pipeline().parameters.Data_Source_Table_Name} \n@{pipeline().parameters.Join_Condition}\n@{pipeline().parameters.source_where_filter}\n",
 										"type": "Expression"
-									}
+									},
+									"partitionOption": "None"
 								},
 								"sink": {
 									"type": "DelimitedTextSink",
@@ -141,8 +142,11 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "LS_ASQL_EDWDiscovery",
-								"type": "LinkedServiceReference"
+								"referenceName": "LS_ASQL",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"database_name": "edw_discovery"
+								}
 							}
 						},
 						{
@@ -160,7 +164,8 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlMISource",
-									"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2"
+									"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime2",
+									"partitionOption": "None"
 								},
 								"dataset": {
 									"referenceName": "DS_ASQL_EDWDiscovery",
@@ -187,7 +192,8 @@
 									"sqlReaderQuery": {
 										"value": "select isnull(@{pipeline().parameters.Control_Table_Column_Name},'1753-01-01') as WatermarkValue from @{pipeline().parameters.Control_Table_Table_Name}\nwhere TableID = @{pipeline().parameters.TableID}",
 										"type": "Expression"
-									}
+									},
+									"partitionOption": "None"
 								},
 								"dataset": {
 									"referenceName": "DS_ASQL_EDWDiscovery",
@@ -212,7 +218,8 @@
 									"sqlReaderQuery": {
 										"value": "select max(@{pipeline().parameters.Data_Source_WaterMarkColumn}) AS NewWatermarkValue from @{pipeline().parameters.Data_Source_Table_Name}\n@{pipeline().parameters.Join_Condition}\n",
 										"type": "Expression"
-									}
+									},
+									"partitionOption": "None"
 								},
 								"dataset": {
 									"referenceName": "DS_SQL_EDWDiscovery_OnPrem",
@@ -268,7 +275,8 @@
 									"sqlReaderQuery": {
 										"value": "select @{pipeline().parameters.Source_Column_List}\n from @{pipeline().parameters.Data_Source_Table_Name} \n@{pipeline().parameters.Join_Condition}\nwhere\n@{pipeline().parameters.Data_Source_WaterMarkColumn} > '@{activity('lkp_getpreviousdatevalue').output.firstRow.WatermarkValue}' \nand @{pipeline().parameters.Data_Source_WaterMarkColumn} <= '@{activity('lkp_getcurrentmaxvalue').output.firstRow.NewWatermarkValue}'\n@{pipeline().parameters.source_where_filter}",
 										"type": "Expression"
-									}
+									},
+									"partitionOption": "None"
 								},
 								"sink": {
 									"type": "DelimitedTextSink",
@@ -371,8 +379,11 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "LS_ASQL_EDWDiscovery",
-								"type": "LinkedServiceReference"
+								"referenceName": "LS_ASQL",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"database_name": "edw_discovery"
+								}
 							}
 						},
 						{
@@ -390,7 +401,8 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlMISource",
-									"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime"
+									"sqlReaderQuery": "select dbo.udf_covert_utc_to_local_Datetime(getdate()) as  localstarttime",
+									"partitionOption": "None"
 								},
 								"dataset": {
 									"referenceName": "DS_ASQL_EDWDiscovery",
@@ -431,7 +443,8 @@
 										"value": "SELECT  \n\t Case WHEN [__$operation] = 1 THEN 'DELETE'\n\t        WHEN [__$operation] = 2 THEN 'INSERT'\n\t\t\tWHEN [__$operation] = 4 THEN ' UPDATE' END as ROW_OPERATION\n    ,@{pipeline().parameters.Source_Column_List}\n  FROM @{concat('cdc.',pipeline().parameters.DeltaTargetTableName,'_CT',' ',  pipeline().parameters.Data_Destination_File_Name)}\n  WHERE [__$operation] !=3\n",
 										"type": "Expression"
 									},
-									"queryTimeout": "02:00:00"
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
 								},
 								"sink": {
 									"type": "DelimitedTextSink",
@@ -590,7 +603,8 @@
 		"folder": {
 			"name": "FrameWork"
 		},
-		"annotations": []
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:20Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }

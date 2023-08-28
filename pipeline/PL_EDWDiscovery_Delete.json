@@ -1,0 +1,141 @@
+{
+	"name": "PL_EDWDiscovery_Delete",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetSourceID",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "Select SourceID FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "GetSourceType",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "GetSourceID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select HostName from etl.SourceSystem\nwhere SourceID=@{activity('GetSourceID').output.Firstrow['SourceID']}",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_ASQL_EDWDiscovery",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "CheckForSourceType",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "GetSourceType",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@if(equals(activity('GetSourceType').output.Firstrow['HostName'],NULL),false,true)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob_Delete_Sqlserver",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_DM_SourceToBlobDelete_SqlServer",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob_Delete_copy1",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_EDWDiscovery_DM_SourceToBlobDelete_Oracle",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"SourceID": {
+										"value": "@activity('GetSourceID').output.Firstrow['SourceID']",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Source_Name": {
+				"type": "string",
+				"defaultValue": "OpenWindows_SIT"
+			}
+		},
+		"folder": {
+			"name": "Delete Process"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-19T00:29:25Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

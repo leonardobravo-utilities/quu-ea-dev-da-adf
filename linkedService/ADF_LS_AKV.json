@@ -1,11 +1,18 @@
 {
 	"name": "ADF_LS_AKV",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
-		"description": "https://quu-ea-prd-da-key-vault.vault.azure.net/",
+		"description": "KeyVault linked service",
+		"parameters": {
+			"environment": {
+				"type": "string",
+				"defaultValue": "dev"
+			}
+		},
 		"annotations": [],
 		"type": "AzureKeyVault",
 		"typeProperties": {
-			"baseUrl": "https://quu-ea-pprd-da-key-vault.vault.azure.net/"
+			"baseUrl": "@{concat('https://quu-ea-', linkedService().environment,'-da-key-vault.vault.azure.net/')}"
 		}
 	}
 }

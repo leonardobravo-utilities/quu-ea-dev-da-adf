@@ -1,0 +1,112 @@
+{
+	"name": "DS_ASQL_EDWTactical_WaterQualityComplaints",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_tactical"
+			}
+		},
+		"folder": {
+			"name": "Complaints"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "QualityCategory",
+				"type": "varchar"
+			},
+			{
+				"name": "Entity",
+				"type": "varchar"
+			},
+			{
+				"name": "AdditionalComments",
+				"type": "varchar"
+			},
+			{
+				"name": "SASInvestigations",
+				"type": "varchar"
+			},
+			{
+				"name": "StdJobNo",
+				"type": "varchar"
+			},
+			{
+				"name": "JobDescription",
+				"type": "varchar"
+			},
+			{
+				"name": "DateTimeRaised",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "StreetNumber",
+				"type": "varchar"
+			},
+			{
+				"name": "StreetAddress",
+				"type": "varchar"
+			},
+			{
+				"name": "StreetCode",
+				"type": "varchar"
+			},
+			{
+				"name": "Suburb",
+				"type": "varchar"
+			},
+			{
+				"name": "WorkOrder",
+				"type": "varchar"
+			},
+			{
+				"name": "RemedyCode",
+				"type": "varchar"
+			},
+			{
+				"name": "SystemStatus",
+				"type": "varchar"
+			},
+			{
+				"name": "WorkOrderCount",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "WorkRequestComments",
+				"type": "varchar"
+			},
+			{
+				"name": "Region",
+				"type": "varchar"
+			},
+			{
+				"name": "CCType",
+				"type": "varchar"
+			},
+			{
+				"name": "NetMgmtType",
+				"type": "varchar"
+			},
+			{
+				"name": "Assessment",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "CustomerComplaints",
+			"table": "WaterQuality_Database"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

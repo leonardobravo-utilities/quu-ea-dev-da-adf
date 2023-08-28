@@ -2,8 +2,12 @@
 	"name": "DS_ASQL_EDWDiscovery_Table",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_ASQL_EDWDiscovery",
-			"type": "LinkedServiceReference"
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database_name": "edw_discovery",
+				"environment": "dev"
+			}
 		},
 		"parameters": {
 			"TableName": {
@@ -21,5 +25,6 @@
 			"schema": "Ellipse9",
 			"table": "MSFPackages"
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }

@@ -2,14 +2,14 @@
 	"name": "DS_ABLB_FS_Dataloading",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_ABLB_quueadadlslanding001",
-			"type": "LinkedServiceReference"
+			"referenceName": "LS_ABLB",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"storageaccount": "quueadevdadlslanding001"
+			}
 		},
 		"parameters": {
 			"targetblobfoldername": {
-				"type": "string"
-			},
-			"targetFileName": {
 				"type": "string"
 			}
 		},
@@ -18,10 +18,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": {
-					"value": "@dataset().targetFileName",
-					"type": "Expression"
-				},
 				"container": {
 					"value": "@dataset().targetblobfoldername",
 					"type": "Expression"
@@ -33,5 +29,6 @@
 			"quoteChar": "\""
 		},
 		"schema": []
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }

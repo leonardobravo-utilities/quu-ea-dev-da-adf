@@ -2,13 +2,11 @@
 	"name": "DS_FS_GlobalScape_FileSize",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_FS_Globalscape",
+			"referenceName": "LS_FS",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"p_ServerPath": {
-					"value": "@dataset().server",
-					"type": "Expression"
-				}
+				"host": "\\\\nfujprd310\\EBI_PROD_LANDING",
+				"username": "urbanutilities\\SVC-EBI_PRDC04_AGT"
 			}
 		},
 		"parameters": {
@@ -16,9 +14,6 @@
 				"type": "string"
 			},
 			"file": {
-				"type": "string"
-			},
-			"server": {
 				"type": "string"
 			}
 		},
@@ -42,5 +37,6 @@
 			"quoteChar": "\""
 		},
 		"schema": []
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }
