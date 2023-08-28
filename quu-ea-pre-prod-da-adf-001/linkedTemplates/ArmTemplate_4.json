@@ -1,0 +1,3167 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "quu-ea-pre-prod-da-adf-001"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Framework_PE_HttpRequest')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Http Requests",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": true,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[HTTPRequest_GetBySource]",
+								"storedProcedureParameters": {
+									"SourceCategory": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.SourceCategory",
+											"type": "Expression"
+										}
+									},
+									"SourceCategoryType": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.SourceCategoryType",
+											"type": "Expression"
+										}
+									},
+									"SourceId": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.SourceID",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "For Each HTTP Request",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Http Requests",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Http Requests').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "HTTP Output Type Switch",
+									"type": "Switch",
+									"dependsOn": [
+										{
+											"activity": "If Teams Message",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"on": {
+											"value": "@item().HTTPOutputType",
+											"type": "Expression"
+										},
+										"cases": [
+											{
+												"value": "JSON",
+												"activities": [
+													{
+														"name": "HTTP Request",
+														"type": "Lookup",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": true,
+															"secureInput": true
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"source": {
+																"type": "JsonSource",
+																"storeSettings": {
+																	"type": "HttpReadSettings",
+																	"requestMethod": {
+																		"value": "@{item().HTTPMethod}",
+																		"type": "Expression"
+																	},
+																	"additionalHeaders": {
+																		"value": "@{item().HTTPHeader}",
+																		"type": "Expression"
+																	},
+																	"requestBody": {
+																		"value": "@{item().HTTPBody}",
+																		"type": "Expression"
+																	},
+																	"requestTimeout": {
+																		"value": "@{item().RequestTimeout}",
+																		"type": "Expression"
+																	}
+																},
+																"formatSettings": {
+																	"type": "JsonReadSettings"
+																}
+															},
+															"dataset": {
+																"referenceName": "DS_HTTP_JSON",
+																"type": "DatasetReference",
+																"parameters": {
+																	"BaseURL": {
+																		"value": "@{item().HTTPURL}",
+																		"type": "Expression"
+																	}
+																}
+															},
+															"firstRowOnly": {
+																"value": "@item().FirstRowOnly",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"value": "DelimitedText",
+												"activities": [
+													{
+														"name": "HTTP Request_CSV",
+														"type": "Lookup",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": true,
+															"secureInput": true
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"source": {
+																"type": "DelimitedTextSource",
+																"storeSettings": {
+																	"type": "HttpReadSettings",
+																	"requestMethod": {
+																		"value": "@{item().HTTPMethod}",
+																		"type": "Expression"
+																	},
+																	"additionalHeaders": {
+																		"value": "@{item().HTTPHeader}",
+																		"type": "Expression"
+																	},
+																	"requestBody": {
+																		"value": "@{if(equals(item().HTTPBody,'ADFReplaced'),variables('RequestBody'),item().HTTPBody)}",
+																		"type": "Expression"
+																	},
+																	"requestTimeout": {
+																		"value": "@{item().RequestTimeout}",
+																		"type": "Expression"
+																	}
+																},
+																"formatSettings": {
+																	"type": "DelimitedTextReadSettings"
+																}
+															},
+															"dataset": {
+																"referenceName": "DS_HTTP_DelimitedText",
+																"type": "DatasetReference",
+																"parameters": {
+																	"BaseURL": {
+																		"value": "@item().HTTPURL",
+																		"type": "Expression"
+																	}
+																}
+															},
+															"firstRowOnly": {
+																"value": "@item().FirstRowOnly",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								},
+								{
+									"name": "If Teams Message",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@{bool(if(and(equals(item().Category,'Teams'),equals(item().HTTPBody,'ADFReplaced')),true,false))}",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Set Teams Message",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "RequestBody",
+													"value": {
+														"value": "{\n    \"@type\": \"MessageCard\",\n    \"@context\": \"http://schema.org/extensions\",\n    \"themeColor\": \"0076D7\",\n    \"summary\": \"Pipeline status alert message​​​​\",\n    \"sections\": [\n        {\n            \"activityTitle\": \"@{concat('Source:',item().SourceName,'|Status:', pipeline().parameters.SourceCategoryType,'|Trigger:', pipeline().parameters.PipelineTriggerName, '|Start:',formatDateTime(addHours(pipeline().parameters.PipelineStartTime,10), 'yyyy-MM-dd HH:mm:ss'),'|End:',formatDateTime(addHours(pipeline().parameters.PipelineEndTime,10), 'yyyy-MM-dd HH:mm:ss'))}\",\n            \"markdown\": true\n        }\n    ]\n}",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "Set Error Array_Post Teams",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "If Teams Message",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorMessage",
+										"value": {
+											"value": "@{concat('HTTPTrigger-Switch: ',activity('If Teams Message').error['Message'])}",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set Error Array",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "HTTP Output Type Switch",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorMessage",
+										"value": {
+											"value": "@{concat('HTTPTrigger-Switch: ',activity('HTTP Output Type Switch').error['Message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "For Each HTTP Request",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@{bool(if(empty(variables('ErrorMessage')),true,false))}",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Raise Error",
+									"type": "Fail",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"message": {
+											"value": "@{replace(replace(replace(replace(string(variables('ErrorMessage')),'[',''),']',''),'\"',''),',|','\\n')}",
+											"type": "Expression"
+										},
+										"errorCode": "500"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceID": {
+						"type": "int"
+					},
+					"SourceCategoryType": {
+						"type": "string"
+					},
+					"PipelineRunId": {
+						"type": "string"
+					},
+					"PipelineName": {
+						"type": "string"
+					},
+					"PipelineStartTime": {
+						"type": "string"
+					},
+					"PipelineMessage": {
+						"type": "string"
+					},
+					"PipelineEndTime": {
+						"type": "string"
+					},
+					"PipelineTriggerName": {
+						"type": "string"
+					},
+					"PipelineTriggerId": {
+						"type": "string"
+					},
+					"SourceCategory": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"RequestBody": {
+						"type": "String"
+					},
+					"ErrorMessage": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "FrameWork"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Framework_TRFM_BlobToASQL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetBlobStorageMetadata",
+						"description": "check if any files need to process in the blob container",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_ABLB_DataLanding_FileExists",
+								"type": "DatasetReference",
+								"parameters": {
+									"blobcontainer": {
+										"value": "@pipeline().parameters.blobcontainer",
+										"type": "Expression"
+									},
+									"blobfolderpath": {
+										"value": "@pipeline().parameters.blobfolderpath",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "CheckAnyCsvFilesAndExecuteDatabricks",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "lkp_Sort_Collection",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('lkp_Sort_Collection').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "SetFileName",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FileName",
+										"value": {
+											"value": "@replace(string(item().FileName),'\\\"\\\"','')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "executedatabricksnotebook",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "SetProcessFile",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@variables('processfile')",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "CopyFileToArchive_Empty",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "DelimitedTextSource",
+														"storeSettings": {
+															"type": "AzureBlobStorageReadSettings",
+															"recursive": false,
+															"wildcardFolderPath": {
+																"value": "@{pipeline().parameters.blobfolderpath}",
+																"type": "Expression"
+															},
+															"wildcardFileName": {
+																"value": "@{variables('FileName')}",
+																"type": "Expression"
+															},
+															"enablePartitionDiscovery": false
+														},
+														"formatSettings": {
+															"type": "DelimitedTextReadSettings"
+														}
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobStorageWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".csv"
+														}
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "DS_ABLB_DataLanding_FileExists",
+														"type": "DatasetReference",
+														"parameters": {
+															"blobcontainer": {
+																"value": "@pipeline().parameters.blobcontainer",
+																"type": "Expression"
+															},
+															"blobfolderpath": {
+																"value": "@pipeline().parameters.blobfolderpath",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "DS_ABLB_DataLanding_FileExists",
+														"type": "DatasetReference",
+														"parameters": {
+															"blobcontainer": {
+																"value": "@pipeline().parameters.blobcontainer",
+																"type": "Expression"
+															},
+															"blobfolderpath": {
+																"value": "@concat(pipeline().parameters.blobfolderpath,'/Archived/')",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"name": "DeleteSourceFile_Empty",
+												"type": "Delete",
+												"dependsOn": [
+													{
+														"activity": "CopyFileToArchive_Empty",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataset": {
+														"referenceName": "DS_ABLB_DataLanding_FileExists",
+														"type": "DatasetReference",
+														"parameters": {
+															"blobcontainer": {
+																"value": "@pipeline().parameters.blobcontainer",
+																"type": "Expression"
+															},
+															"blobfolderpath": {
+																"value": "@pipeline().parameters.blobfolderpath",
+																"type": "Expression"
+															}
+														}
+													},
+													"enableLogging": false,
+													"storeSettings": {
+														"type": "AzureBlobStorageReadSettings",
+														"recursive": false,
+														"wildcardFileName": {
+															"value": "@{variables('FileName')}",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										],
+										"ifTrueActivities": [
+											{
+												"name": "ETL_Merge",
+												"type": "DatabricksNotebook",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 1,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"notebookPath": {
+														"value": "@pipeline().parameters.ETLMergeNotebookPath",
+														"type": "Expression"
+													},
+													"baseParameters": {
+														"blobcontainer": {
+															"value": "@pipeline().parameters.blobcontainer",
+															"type": "Expression"
+														},
+														"storageaccount": {
+															"value": "@pipeline().parameters.storageaccount",
+															"type": "Expression"
+														},
+														"blobfilename": {
+															"value": "@concat(pipeline().parameters.blobfilename,',',variables('FileName'))",
+															"type": "Expression"
+														},
+														"columnlist": {
+															"value": "@pipeline().parameters.columnlist",
+															"type": "Expression"
+														},
+														"businesskeylist": {
+															"value": "@pipeline().parameters.businesskeylist",
+															"type": "Expression"
+														},
+														"deltastagingdbname": {
+															"value": "@pipeline().parameters.deltastagingdbname",
+															"type": "Expression"
+														},
+														"deltatargetdbname": {
+															"value": "@pipeline().parameters.deltatargetdbname",
+															"type": "Expression"
+														},
+														"deltastagetablename": {
+															"value": "@pipeline().parameters.deltastagetablename",
+															"type": "Expression"
+														},
+														"ColumnDelimiter": {
+															"value": "@pipeline().parameters.ColumnDelimiter",
+															"type": "Expression"
+														},
+														"QuoteCharacter": {
+															"value": "@base64(pipeline().parameters.QuoteCharacter)",
+															"type": "Expression"
+														},
+														"azuresqldbetllastmodifieddtm": {
+															"value": "@formatDateTime(pipeline().parameters.azuresqldbetllastmodifieddtm,'yyyy-MM-dd HH:mm:ss.fff')",
+															"type": "Expression"
+														},
+														"tableid": {
+															"value": "@pipeline().parameters.tableid",
+															"type": "Expression"
+														},
+														"deltastagingtableparquetfilepath": {
+															"value": "@pipeline().parameters.deltastagingtableparquetfilepath",
+															"type": "Expression"
+														},
+														"DbHostName": {
+															"value": "@pipeline().parameters.DbHostName",
+															"type": "Expression"
+														},
+														"azuresqltemptablename": {
+															"value": "@pipeline().parameters.azuresqltemptablename",
+															"type": "Expression"
+														},
+														"RowExecutionID": {
+															"value": "@pipeline().RunId",
+															"type": "Expression"
+														},
+														"RowSource": {
+															"value": "@pipeline().parameters.RowSource",
+															"type": "Expression"
+														},
+														"skipcsvrows": {
+															"value": "@pipeline().parameters.skipcsvrows",
+															"type": "Expression"
+														},
+														"ETLMergeNotebookPath": {
+															"value": "@pipeline().parameters.ETLMergeNotebookPath",
+															"type": "Expression"
+														},
+														"skipchangedset": {
+															"value": "@pipeline().parameters.skipchangedset",
+															"type": "Expression"
+														},
+														"skipbottomrows": {
+															"value": "@pipeline().parameters.skipbottomrows",
+															"type": "Expression"
+														},
+														"incrementalloadind": {
+															"value": "@pipeline().parameters.incrementalloadind",
+															"type": "Expression"
+														},
+														"checkfordeletesind": {
+															"value": "@pipeline().parameters.checkfordeletesind",
+															"type": "Expression"
+														},
+														"sourcecolumnlist": {
+															"value": "@pipeline().parameters.sourcecolumnlist",
+															"type": "Expression"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "LS_DBR_ADF_Job_Cluster",
+													"type": "LinkedServiceReference",
+													"parameters": {
+														"databricksclusterid": {
+															"value": "@pipeline().parameters.databricksclusterid",
+															"type": "Expression"
+														},
+														"databrickssecretname": {
+															"value": "@pipeline().parameters.databrickssecretname",
+															"type": "Expression"
+														}
+													}
+												}
+											},
+											{
+												"name": "SqlServerStoredProcedureMergeData",
+												"description": "execute merge store procedure to merge data from temp into target table in azure sql db",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "ETL_Merge",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": {
+														"value": "@pipeline().parameters.StoredProcNameMergeAzuresqltable",
+														"type": "Expression"
+													},
+													"storedProcedureParameters": {
+														"table_source": {
+															"value": {
+																"value": "@pipeline().parameters.azuresqltemptablename",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"table_target": {
+															"value": {
+																"value": "@pipeline().parameters.azuresqltargettablename",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"tableid": {
+															"value": {
+																"value": "@pipeline().parameters.tableid",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "LS_ASQL_EDWDiscovery",
+													"type": "LinkedServiceReference"
+												}
+											},
+											{
+												"name": "CopyFileToArchive",
+												"type": "Copy",
+												"dependsOn": [
+													{
+														"activity": "SqlServerStoredProcedureMergeData",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "DelimitedTextSource",
+														"storeSettings": {
+															"type": "AzureBlobStorageReadSettings",
+															"recursive": false,
+															"wildcardFolderPath": {
+																"value": "@{pipeline().parameters.blobfolderpath}",
+																"type": "Expression"
+															},
+															"wildcardFileName": {
+																"value": "@{variables('FileName')}",
+																"type": "Expression"
+															},
+															"enablePartitionDiscovery": false
+														},
+														"formatSettings": {
+															"type": "DelimitedTextReadSettings"
+														}
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobStorageWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".csv"
+														}
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "DS_ABLB_DataLanding_FileExists",
+														"type": "DatasetReference",
+														"parameters": {
+															"blobcontainer": {
+																"value": "@pipeline().parameters.blobcontainer",
+																"type": "Expression"
+															},
+															"blobfolderpath": {
+																"value": "@pipeline().parameters.blobfolderpath",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "DS_ABLB_DataLanding_FileExists",
+														"type": "DatasetReference",
+														"parameters": {
+															"blobcontainer": {
+																"value": "@pipeline().parameters.blobcontainer",
+																"type": "Expression"
+															},
+															"blobfolderpath": {
+																"value": "@concat(pipeline().parameters.blobfolderpath,'/Archived/')",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"name": "DeleteSourceFile",
+												"type": "Delete",
+												"dependsOn": [
+													{
+														"activity": "CopyFileToArchive",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataset": {
+														"referenceName": "DS_ABLB_DataLanding_FileExists",
+														"type": "DatasetReference",
+														"parameters": {
+															"blobcontainer": {
+																"value": "@pipeline().parameters.blobcontainer",
+																"type": "Expression"
+															},
+															"blobfolderpath": {
+																"value": "@pipeline().parameters.blobfolderpath",
+																"type": "Expression"
+															}
+														}
+													},
+													"enableLogging": false,
+													"storeSettings": {
+														"type": "AzureBlobStorageReadSettings",
+														"recursive": false,
+														"wildcardFileName": {
+															"value": "@{variables('FileName')}",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "SetProcessFile",
+									"description": "Process file if the file is csv and the file size is > 0 else do nothing",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "SetFileSize",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "processfile",
+										"value": {
+											"value": "@if(and(greater(variables('FileSize'),'0'), or(contains(variables('FileName'),'.csv'),contains(variables('FileName'),'.parquet') )),true,false)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "RetrieveFileSize",
+									"type": "GetMetadata",
+									"dependsOn": [
+										{
+											"activity": "SetFileName",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "DS_ABLB_DataLanding_FizeSize",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.blobcontainer",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@pipeline().parameters.blobfolderpath",
+													"type": "Expression"
+												},
+												"file": {
+													"value": "@variables('FileName')",
+													"type": "Expression"
+												}
+											}
+										},
+										"fieldList": [
+											"size"
+										],
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "SetFileSize",
+									"description": "Assign the file size value to the variable",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "RetrieveFileSize",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FileSize",
+										"value": {
+											"value": "@string(activity('RetrieveFileSize').output.size)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "lkp_Sort_Collection",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "GetBlobStorageMetadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[usp_sort_blob_file_name]",
+								"storedProcedureParameters": {
+									"json": {
+										"type": "String",
+										"value": {
+											"value": "@string(activity('GetBlobStorageMetadata').output)",
+											"type": "Expression"
+										}
+									}
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"blobcontainer": {
+						"type": "string"
+					},
+					"storageaccount": {
+						"type": "string"
+					},
+					"blobfilename": {
+						"type": "string"
+					},
+					"columnlist": {
+						"type": "string"
+					},
+					"businesskeylist": {
+						"type": "string"
+					},
+					"deltastagingdbname": {
+						"type": "string"
+					},
+					"deltatargetdbname": {
+						"type": "string"
+					},
+					"deltastagetablename": {
+						"type": "string"
+					},
+					"ColumnDelimiter": {
+						"type": "string"
+					},
+					"azuresqldbetllastmodifieddtm": {
+						"type": "string"
+					},
+					"tableid": {
+						"type": "string"
+					},
+					"QuoteCharacter": {
+						"type": "string"
+					},
+					"azuresqltemptablename": {
+						"type": "string"
+					},
+					"blobfolderpath": {
+						"type": "string"
+					},
+					"deltastagingtableparquetfilepath": {
+						"type": "string"
+					},
+					"DbHostName": {
+						"type": "string"
+					},
+					"RowSource": {
+						"type": "string"
+					},
+					"azuresqltargettablename": {
+						"type": "string"
+					},
+					"skipcsvrows": {
+						"type": "string",
+						"defaultValue": "0"
+					},
+					"skipbottomrows": {
+						"type": "string",
+						"defaultValue": "0"
+					},
+					"ETLMergeNotebookPath": {
+						"type": "string",
+						"defaultValue": "/edw_discovery/ETL_Merge"
+					},
+					"StoredProcNameMergeAzuresqltable": {
+						"type": "string",
+						"defaultValue": "ETL.[usp_merge_azuresqltable]"
+					},
+					"databricksclustername": {
+						"type": "string",
+						"defaultValue": "ADF_Job_Cluster"
+					},
+					"databricksclusterid": {
+						"type": "string",
+						"defaultValue": "0827-051915-duchy366"
+					},
+					"SourceTableName": {
+						"type": "string"
+					},
+					"skipchangedset": {
+						"type": "string",
+						"defaultValue": "0"
+					},
+					"databrickssecretname": {
+						"type": "string"
+					},
+					"checkfordeletesind": {
+						"type": "string",
+						"defaultValue": "0"
+					},
+					"incrementalloadind": {
+						"type": "string",
+						"defaultValue": "0"
+					},
+					"sourcecolumnlist": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"processfile": {
+						"type": "Boolean"
+					},
+					"FileNames": {
+						"type": "Array"
+					},
+					"FileName": {
+						"type": "String"
+					},
+					"FileSize": {
+						"type": "String"
+					},
+					"CDCRun": {
+						"type": "Boolean"
+					}
+				},
+				"folder": {
+					"name": "FrameWork"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-07-08T01:08:29Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Framework_TRFM_BlobToASQL_Delete')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Copy new or updated rows only from database using external control table",
+				"activities": [
+					{
+						"name": "CheckSourceRNKFileExists",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "GetSourceRNKFileDetails",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@activity('GetSourceRNKFileDetails').output.exists",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "GenerateSourceDeletedRNKFile",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/edw_discovery/ETL_Create_Delete_File",
+										"baseParameters": {
+											"blobcontainer": {
+												"value": "@pipeline().parameters.BlobContainer",
+												"type": "Expression"
+											},
+											"blobfilename": {
+												"value": "@concat(pipeline().parameters.Data_Destination_Folder_Path_DeleteProcess,',',pipeline().parameters.Data_Destination_File_Name, '_source' ,pipeline().parameters.File_Name_Ext)",
+												"type": "Expression"
+											},
+											"columnlist": {
+												"value": "@pipeline().parameters.Source_Column_List",
+												"type": "Expression"
+											},
+											"businesskeylist": {
+												"value": "@pipeline().parameters.BusinessKeyList",
+												"type": "Expression"
+											},
+											"deltatargetdbname": {
+												"value": "@pipeline().parameters.DeltaTargetDbName",
+												"type": "Expression"
+											},
+											"storageaccount": {
+												"value": "@pipeline().parameters.StorageAccount",
+												"type": "Expression"
+											},
+											"columndelimiter": {
+												"value": "@pipeline().parameters.ColumnDelimiter",
+												"type": "Expression"
+											},
+											"quotecharacter": {
+												"value": "@base64(pipeline().parameters.QuoteCharacter)",
+												"type": "Expression"
+											},
+											"rowsource": {
+												"value": "@pipeline().parameters.RowSource",
+												"type": "Expression"
+											},
+											"dbhostname": {
+												"value": "@pipeline().parameters.DbHostName",
+												"type": "Expression"
+											},
+											"skipcsvrows": "0",
+											"azuretargettablename": {
+												"value": "@pipeline().parameters.AzureTargetTableName",
+												"type": "Expression"
+											},
+											"filetype": {
+												"value": "@toLower(variables('BlobFileType'))",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_DBR_ADF_Job_Cluster",
+										"type": "LinkedServiceReference",
+										"parameters": {
+											"databricksclusterid": {
+												"value": "@pipeline().parameters.databricksclusterid",
+												"type": "Expression"
+											},
+											"databrickssecretname": {
+												"value": "@pipeline().parameters.databrickssecretname",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "GetSourceRNKFileDetails",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Set Blob File Type",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_FS_ABLB_DataLanding_Binary_FileExists",
+								"type": "DatasetReference",
+								"parameters": {
+									"blobcontainer": {
+										"value": "@pipeline().parameters.BlobContainer",
+										"type": "Expression"
+									},
+									"blobfolderpath": {
+										"value": "@replace(pipeline().parameters.Data_Destination_Folder_Path_DeleteProcess, pipeline().parameters.BlobContainer, '')",
+										"type": "Expression"
+									},
+									"blobfilename": {
+										"value": "@concat(\npipeline().parameters.Data_Destination_File_Name, '_source'\n,pipeline().parameters.File_Name_Ext)\n",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					},
+					{
+						"name": "GetSourceDeletedRNKFileDetails",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "CheckSourceRNKFileExists",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_FS_ABLB_DataLanding_Binary_FileExists",
+								"type": "DatasetReference",
+								"parameters": {
+									"blobcontainer": {
+										"value": "@pipeline().parameters.BlobContainer",
+										"type": "Expression"
+									},
+									"blobfolderpath": {
+										"value": "@replace(pipeline().parameters.Data_Destination_Folder_Path_DeleteProcess, pipeline().parameters.BlobContainer, '')",
+										"type": "Expression"
+									},
+									"blobfilename": {
+										"value": "@concat(\npipeline().parameters.Data_Destination_File_Name, '_source_deleted_records'\n,pipeline().parameters.File_Name_Ext)\n",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					},
+					{
+						"name": "CheckDeletedRNKFileExists",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "GetSourceDeletedRNKFileDetails",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@activity('GetSourceDeletedRNKFileDetails').output.exists",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "DeleteRecordsFromDeltaTable",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/edw_discovery/ETL_Merge_Delete",
+										"baseParameters": {
+											"blobcontainer": {
+												"value": "@pipeline().parameters.BlobContainer",
+												"type": "Expression"
+											},
+											"blobfilename": {
+												"value": "@concat(pipeline().parameters.Data_Destination_Folder_Path_DeleteProcess,',',pipeline().parameters.Data_Destination_File_Name, '_source_deleted_records' ,pipeline().parameters.File_Name_Ext)",
+												"type": "Expression"
+											},
+											"columnlist": {
+												"value": "@pipeline().parameters.Source_Column_List",
+												"type": "Expression"
+											},
+											"businesskeylist": {
+												"value": "@pipeline().parameters.BusinessKeyList",
+												"type": "Expression"
+											},
+											"deltastagingdbname": {
+												"value": "@pipeline().parameters.DeltaStagingDbName",
+												"type": "Expression"
+											},
+											"deltatargetdbname": {
+												"value": "@pipeline().parameters.DeltaTargetDbName",
+												"type": "Expression"
+											},
+											"deltastagetablename": {
+												"value": "@pipeline().parameters.DeltaStageTableName",
+												"type": "Expression"
+											},
+											"azuresqltempdeletetablename": {
+												"value": "@pipeline().parameters.AzureSqlTempDeleteTableName",
+												"type": "Expression"
+											},
+											"storageaccount": {
+												"value": "@pipeline().parameters.StorageAccount",
+												"type": "Expression"
+											},
+											"ColumnDelimiter": {
+												"value": "@pipeline().parameters.ColumnDelimiter",
+												"type": "Expression"
+											},
+											"QuoteCharacter": {
+												"value": "@base64(pipeline().parameters.QuoteCharacter)",
+												"type": "Expression"
+											},
+											"azuresqldbetllastmodifieddtm": {
+												"value": "@pipeline().parameters.DeleteProcessCompletionDTM",
+												"type": "Expression"
+											},
+											"deltastagingtableparquetfilepath": {
+												"value": "@pipeline().parameters.DeltaStagingTableParquetFilePath",
+												"type": "Expression"
+											},
+											"DbHostName": {
+												"value": "@pipeline().parameters.DbHostName",
+												"type": "Expression"
+											},
+											"RowSource": {
+												"value": "@pipeline().parameters.RowSource",
+												"type": "Expression"
+											},
+											"skipcsvrows": "0",
+											"azuresqltargettablename": {
+												"value": "@pipeline().parameters.AzureTargetTableName",
+												"type": "Expression"
+											},
+											"filetype": {
+												"value": "@toLower(variables('BlobFileType'))",
+												"type": "Expression"
+											},
+											"SourceId": {
+												"value": "@string(pipeline().parameters.SourceId)",
+												"type": "Expression"
+											},
+											"TableId": {
+												"value": "@string(pipeline().parameters.TableID)",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_DBR_ADF_Job_Cluster",
+										"type": "LinkedServiceReference",
+										"parameters": {
+											"databricksclusterid": {
+												"value": "@pipeline().parameters.databricksclusterid",
+												"type": "Expression"
+											},
+											"databrickssecretname": {
+												"value": "@pipeline().parameters.databrickssecretname",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "DeleteRecordsFromAzureSQLTable",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "DeleteRecordsFromDeltaTable",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[ETL].[usp_delete_from_azuresqltable]",
+										"storedProcedureParameters": {
+											"sourceid": {
+												"value": {
+													"value": "@pipeline().parameters.SourceId",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"table_source": {
+												"value": {
+													"value": "@pipeline().parameters.AzureSqlTempDeleteTableName",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"table_target": {
+												"value": {
+													"value": "@pipeline().parameters.AzureTargetTableName",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"tableid": {
+												"value": {
+													"value": "@pipeline().parameters.TableID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_EDWDiscovery",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Set Blob File Type",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "BlobFileType",
+							"value": {
+								"value": "@split(pipeline().parameters.File_Name_Ext, '.')[1]",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"Data_Source_Table_Name": {
+						"type": "String",
+						"defaultValue": "dbo.MSF660"
+					},
+					"Data_Source_WaterMarkColumn": {
+						"type": "String",
+						"defaultValue": "CASE WHEN LAST_MOD_DATE <> '' AND LAST_MOD_TIME<>'' THEN (CAST(LAST_MOD_DATE AS DATETIME) + CAST(stuff(stuff(LAST_MOD_TIME ,3,0,':'),6,0,':') AS DATETIME)) END"
+					},
+					"Data_Destination_Folder_Path": {
+						"type": "String",
+						"defaultValue": "ellipse9-datalanding/MSF660"
+					},
+					"TableID": {
+						"type": "string",
+						"defaultValue": "1"
+					},
+					"Data_Destination_File_Name": {
+						"type": "string",
+						"defaultValue": "MSF660"
+					},
+					"SourceServerName": {
+						"type": "string",
+						"defaultValue": "NFUJDEV073"
+					},
+					"SourceDatabaseName": {
+						"type": "string",
+						"defaultValue": "Datamart"
+					},
+					"File_Name_Ext": {
+						"type": "string",
+						"defaultValue": ".csv"
+					},
+					"Join_Condition": {
+						"type": "string",
+						"defaultValue": " "
+					},
+					"Source_Column_List": {
+						"type": "string",
+						"defaultValue": "*"
+					},
+					"ColumnDelimiter": {
+						"type": "string",
+						"defaultValue": ","
+					},
+					"QuoteCharacter": {
+						"type": "string",
+						"defaultValue": "¬"
+					},
+					"source_where_filter": {
+						"type": "string",
+						"defaultValue": " "
+					},
+					"UserName": {
+						"type": "string"
+					},
+					"SecretPasswordName": {
+						"type": "string"
+					},
+					"BlobContainer": {
+						"type": "string"
+					},
+					"BusinessKeyList": {
+						"type": "string"
+					},
+					"DeltaTargetDbName": {
+						"type": "string"
+					},
+					"StorageAccount": {
+						"type": "string"
+					},
+					"RowSource": {
+						"type": "string"
+					},
+					"DbHostName": {
+						"type": "string"
+					},
+					"AzureTargetTableName": {
+						"type": "string"
+					},
+					"DeltaStagingTableParquetFilePath": {
+						"type": "string"
+					},
+					"DeleteProcessCompletionDTM": {
+						"type": "string"
+					},
+					"DeltaStagingDbName": {
+						"type": "string"
+					},
+					"DeltaStageTableName": {
+						"type": "string"
+					},
+					"AzureSqlTempDeleteTableName": {
+						"type": "string"
+					},
+					"Host_Name": {
+						"type": "string"
+					},
+					"Port_No": {
+						"type": "string"
+					},
+					"SID": {
+						"type": "string"
+					},
+					"databricksclustername": {
+						"type": "string"
+					},
+					"databricksclusterid": {
+						"type": "string"
+					},
+					"databrickssecretname": {
+						"type": "string"
+					},
+					"CheckForDeletes": {
+						"type": "string"
+					},
+					"File_Name_DateTime_Ind": {
+						"type": "string"
+					},
+					"Data_Destination_Folder_Path_DeleteProcess": {
+						"type": "string"
+					},
+					"SourceId": {
+						"type": "string"
+					},
+					"IsInitialLoad": {
+						"type": "int"
+					}
+				},
+				"variables": {
+					"BlobFileType": {
+						"type": "String"
+					},
+					"MaxCopyDIU": {
+						"type": "String"
+					},
+					"MaxCopyDCP": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "FrameWork"
+				},
+				"annotations": [],
+				"lastPublishTime": "2020-03-25T05:00:23Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Framework_TRFM_TransformDateForEachtable')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetBlobStorageMetadata",
+						"description": "check if any files need to process in the blob container",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_ABLB_DataLanding_FileExists",
+								"type": "DatasetReference",
+								"parameters": {
+									"blobcontainer": {
+										"value": "@pipeline().parameters.targetblobcontainer",
+										"type": "Expression"
+									},
+									"blobfolderpath": {
+										"value": "@pipeline().parameters.targetblobfilefolder",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "CheckAnyCsvFilesAndExecuteDatabricks",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "lkp_Sort_Collection",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('lkp_Sort_Collection').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "SetFileName",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FileName",
+										"value": {
+											"value": "@replace(string(item().FileName),'\\\"\\\"','')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "executedatabricksnotebook",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "SetProcessFile",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@variables('processfile')",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "MoveEmptyFile",
+												"type": "DatabricksNotebook",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"notebookPath": "/edw_discovery/FileTransfer",
+													"baseParameters": {
+														"blobcontainer": {
+															"value": "@pipeline().parameters.targetblobcontainer",
+															"type": "Expression"
+														},
+														"storageaccount": {
+															"value": "@pipeline().parameters.storageaccount",
+															"type": "Expression"
+														},
+														"blobfilename": {
+															"value": "@concat(pipeline().parameters.blobfilename,',',variables('FileName'))",
+															"type": "Expression"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "LS_DBR_ADF_Job_Cluster",
+													"type": "LinkedServiceReference",
+													"parameters": {
+														"databricksclusterid": {
+															"value": "@pipeline().parameters.databricksclusterid",
+															"type": "Expression"
+														},
+														"databrickssecretname": {
+															"value": "@pipeline().parameters.databrickssecretname",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										],
+										"ifTrueActivities": [
+											{
+												"name": "ETL_Change_DateFormat",
+												"type": "DatabricksNotebook",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"notebookPath": "/edw_discovery/ETL_Change_DateFormat",
+													"baseParameters": {
+														"blobcontainer": {
+															"value": "@pipeline().parameters.targetblobcontainer",
+															"type": "Expression"
+														},
+														"storageaccount": {
+															"value": "@pipeline().parameters.storageaccount",
+															"type": "Expression"
+														},
+														"blobfilename": {
+															"value": "@concat(pipeline().parameters.blobfilename,',',variables('FileName'))",
+															"type": "Expression"
+														},
+														"columnlist": {
+															"value": "@pipeline().parameters.sourcecolumnlist",
+															"type": "Expression"
+														},
+														"ColumnDelimiter": {
+															"value": "@pipeline().parameters.ColumnDelimiter",
+															"type": "Expression"
+														},
+														"QuoteCharacter": {
+															"value": "@base64(pipeline().parameters.QuoteCharacter)",
+															"type": "Expression"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "LS_DBR_ADF_Job_Cluster",
+													"type": "LinkedServiceReference",
+													"parameters": {
+														"databricksclusterid": {
+															"value": "@pipeline().parameters.databricksclusterid",
+															"type": "Expression"
+														},
+														"databrickssecretname": {
+															"value": "@pipeline().parameters.databrickssecretname",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "SetProcessFile",
+									"description": "Process file if the file is csv and the file size is > 0 else do nothing",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "SetFileSize",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "processfile",
+										"value": {
+											"value": "@if(AND(greater(variables('FileSize'),'0'), contains(variables('FileName'),'.csv') ),true,false)\n\n",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "RetrieveFileSize",
+									"type": "GetMetadata",
+									"dependsOn": [
+										{
+											"activity": "SetFileName",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "DS_ABLB_DataLanding_FizeSize",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.targetblobcontainer",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@pipeline().parameters.targetblobfilefolder",
+													"type": "Expression"
+												},
+												"file": {
+													"value": "@variables('FileName')",
+													"type": "Expression"
+												}
+											}
+										},
+										"fieldList": [
+											"size"
+										],
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "SetFileSize",
+									"description": "Assign the file size value to the variable",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "RetrieveFileSize",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FileSize",
+										"value": {
+											"value": "@string(activity('RetrieveFileSize').output.size)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "lkp_Sort_Collection",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "GetBlobStorageMetadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[usp_sort_blob_file_name]",
+								"storedProcedureParameters": {
+									"json": {
+										"type": "String",
+										"value": {
+											"value": "@string(activity('GetBlobStorageMetadata').output)",
+											"type": "Expression"
+										}
+									}
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"TableID": {
+						"type": "string",
+						"defaultValue": "5166"
+					},
+					"SourceColumn": {
+						"type": "string",
+						"defaultValue": "Month_date"
+					},
+					"targetblobcontainer": {
+						"type": "string",
+						"defaultValue": "daptiv-datalanding"
+					},
+					"targetblobfilefolderpath": {
+						"type": "string",
+						"defaultValue": "daptiv-datalanding/Daptiv/monthly_actuals"
+					},
+					"ColumnDelimiter": {
+						"type": "string",
+						"defaultValue": ","
+					},
+					"QuoteCharacter": {
+						"type": "string",
+						"defaultValue": "¬"
+					},
+					"sourcecolumnlist": {
+						"type": "string",
+						"defaultValue": "[[External_ID],[Financial_Year],[Months],[Month_Name],[Month_date],[Monthly_Actuals],[Category],[Expenditure_Type]"
+					},
+					"storageaccount": {
+						"type": "string",
+						"defaultValue": "quueatstdadlslanding001"
+					},
+					"targetblobfilefolder": {
+						"type": "string",
+						"defaultValue": "Daptiv/monthly_actuals"
+					},
+					"databricksclusterid": {
+						"type": "string",
+						"defaultValue": "1202-224447-p84nrrmi"
+					},
+					"databrickssecretname": {
+						"type": "string",
+						"defaultValue": "databricks-token"
+					},
+					"blobfilename": {
+						"type": "string",
+						"defaultValue": "daptiv-datalanding/Daptiv/monthly_actuals,monthly_actuals.csv"
+					}
+				},
+				"variables": {
+					"processfile": {
+						"type": "Boolean"
+					},
+					"FileNames": {
+						"type": "String"
+					},
+					"FileName": {
+						"type": "String"
+					},
+					"FileSize": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "FrameWork"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_SUMS_Daily_Consumption_And_Analysis')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SUMS_Daily_Consumption",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "GetSourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/SUMS/SUMS_DailyConsumption",
+							"baseParameters": {
+								"Load_Type": {
+									"value": "@pipeline().parameters.Load_Type",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@activity('GetSourceID').output.Firstrow['databricksclusterid']",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@activity('GetSourceID').output.Firstrow['databrickssecretname']",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "GetSourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SourceID,databricksclusterid,databrickssecretname FROM etl.SourceSystem where \n SourceName='@{pipeline().parameters.Source_Name}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "SUMS_MovingAnalysis",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "SUMS_Daily_Consumption",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/SUMS/SUMS_MovingAnalysis",
+							"baseParameters": {
+								"Load_Type": {
+									"value": "@pipeline().parameters.Load_Type",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@activity('GetSourceID').output.Firstrow['databricksclusterid']",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@activity('GetSourceID').output.Firstrow['databrickssecretname']",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SUMS_KCA_Consumption",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "SUMS_MovingAnalysis",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/SUMS/SUMS_KCA_Consumption"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@activity('GetSourceID').output.Firstrow['databricksclusterid']",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@activity('GetSourceID').output.Firstrow['databrickssecretname']",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"Source_Name": {
+						"type": "string",
+						"defaultValue": "SUMS"
+					},
+					"Load_Type": {
+						"type": "string",
+						"defaultValue": "Full"
+					}
+				},
+				"folder": {
+					"name": "SUMS"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_StartFSECluster')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Start FSE Cluster",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Get FSE Cluster ID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/FSE/Start FSE Cluster"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@activity('Get FSE Cluster ID').output.firstrow.databricksclusterid",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@activity('Get FSE Cluster ID').output.firstrow.databrickssecretname",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Get FSE Cluster ID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "select distinct databricksclusterid,databrickssecretname  from ETL.SourceSystem\nwhere databricksclustername = 'ADF_Job_Cluster_FSE'",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "FieldServicesEdge"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_24HR_STATS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Temetra_24HR_STATS",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/Temetra/Temetra_24Hr_Stats"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"databricks_cluster_id": {
+						"type": "string"
+					},
+					"databricks_secret_name": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Temetra/backup"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_API_Call')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "3_Temetra_API_Response_Management",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/Temetra/3_Temetra_API_Response_Management",
+							"baseParameters": {
+								"Load_Type": {
+									"value": "@pipeline().parameters.param_load_type",
+									"type": "Expression"
+								},
+								"InitialStartDate": {
+									"value": "@pipeline().parameters.param_startdate",
+									"type": "Expression"
+								},
+								"InitialEndDate": {
+									"value": "@pipeline().parameters.param_enddate",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": "0818-004527-fleck168",
+								"databrickssecretname": "databricks-token"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"databricks_cluster_id": {
+						"type": "string",
+						"defaultValue": "0417-051914-axons909"
+					},
+					"databricks_secret_name": {
+						"type": "string",
+						"defaultValue": "databricks-token"
+					},
+					"param_load_type": {
+						"type": "string",
+						"defaultValue": "Incremental"
+					},
+					"param_startdate": {
+						"type": "string",
+						"defaultValue": "20200101"
+					},
+					"param_enddate": {
+						"type": "string",
+						"defaultValue": "20201231"
+					}
+				},
+				"folder": {
+					"name": "Temetra"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_API_Response')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Execute Temetra_API_Response databricks notebook for API data ingestion",
+				"activities": [
+					{
+						"name": "Temetra_API_Response",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/Temetra/Temetra_API_Response"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"databricks_cluster_id": {
+						"type": "string"
+					},
+					"databricks_secret_name": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Temetra/backup"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_DeviceList_Generate')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "1_Temetra_DeviceList_Generate",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/Temetra/1_Temetra_DeviceList_Generate"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": "0818-004527-fleck168",
+								"databrickssecretname": "databricks-token"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"databricks_cluster_id": {
+						"type": "string"
+					},
+					"databricks_secret_name": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Temetra"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Hourly_Consumption')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Execute Temetra_Hourly_Consumption Notebook in databricks",
+				"activities": [
+					{
+						"name": "4_Temetra_Hourly_Consumption",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/Temetra/4_Temetra_Hourly_Consumption",
+							"baseParameters": {
+								"Load_Type": {
+									"value": "@pipeline().parameters.Load_Type",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Load Temp to Target",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "4_Temetra_Hourly_Consumption",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[ETL].[usp_load_target_table]",
+							"storedProcedureParameters": {
+								"isDebugFlag": {
+									"value": "false",
+									"type": "Boolean"
+								},
+								"isTruncateBeforeLoad": {
+									"value": "true",
+									"type": "Boolean"
+								},
+								"sourceObject": {
+									"value": "Temp.Temetra_Hourly_Consumption",
+									"type": "String"
+								},
+								"targetObject": {
+									"value": "Mart.Temetra_Hourly_Consumption",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"databricks_cluster_id": {
+						"type": "string",
+						"defaultValue": "0417-051914-axons909"
+					},
+					"databricks_secret_name": {
+						"type": "string",
+						"defaultValue": "databricks2-token"
+					},
+					"Load_Type": {
+						"type": "string",
+						"defaultValue": "Full"
+					}
+				},
+				"folder": {
+					"name": "Temetra"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Potential_Leaks')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Execute Temetra_Potential_Leaks databricks notebook",
+				"activities": [
+					{
+						"name": "Temetra_Potential_Leaks",
+						"description": "/edw_discovery/Temetra/Temetra_Potential_Leaks",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/edw_discovery/Temetra/Temetra_Potential_Leaks"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DBR_ADF_Job_Cluster",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"databricksclusterid": {
+									"value": "@pipeline().parameters.databricks_cluster_id",
+									"type": "Expression"
+								},
+								"databrickssecretname": {
+									"value": "@pipeline().parameters.databricks_secret_name",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"databricks_cluster_id": {
+						"type": "string"
+					},
+					"databricks_secret_name": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Temetra/backup"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_WorkOrder_Model_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "PL_EDW_Mart_WorkOrder",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDW_Mart_WorkOrder",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sourcename": "Ellipse9"
+							}
+						}
+					},
+					{
+						"name": "PL_WorkOrder_FinanceTransaction",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_EDW_Mart_WorkOrder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDW_Mart_FinanceTransaction",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sourcename": "Ellipse9",
+								"incrementaldays": "5"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "WorkOrder-Model"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADF_DS_SF')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SF",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SalesforceObject",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_GlobalScape_Binary_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"GSfolderpath": {
+						"type": "string",
+						"defaultValue": "NOPV\\pre-prod"
+					},
+					"GSfilename": {
+						"type": "string",
+						"defaultValue": "Bank_Details_Check_2023_02_08.xlsx"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().GSfilename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().GSfolderpath",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_API')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_API",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"APIBaseURL": "https://auapi.envizi.com/api/data",
+						"APIReport": "monthlydatasummaryallmeasures",
+						"APICallParameter": "End_Period",
+						"APICallParameterValue": "Current_Month"
+					}
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_BFS_GlobalScape_ServiceNow')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"p_FileFolder": {
+						"type": "string"
+					},
+					"p_FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().p_FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().p_FileFolder",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_Archive')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Archive folder in GlobalScape",
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@concat(dataset().filefolder,'\\Archive')",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "tag_id",
+						"type": "String"
+					},
+					{
+						"name": "time",
+						"type": "String"
+					},
+					{
+						"name": "counter",
+						"type": "String"
+					},
+					{
+						"name": "event",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_BinaryFile_Archive')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@concat(dataset().filefolder,'\\Archive')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_BinaryFile_source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

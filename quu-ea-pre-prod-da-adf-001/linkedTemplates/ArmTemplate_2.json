@@ -1,0 +1,746 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "quu-ea-pre-prod-da-adf-001"
+		},
+		"LS_ASQL_EDWDiscovery_Dev_Test_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_EDWDiscovery_Dev_Test'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=quu-ea-tst-da-sqlserver-001.database.windows.net;Initial Catalog=edw_discovery;User ID=QuutstdaAdmin"
+		},
+		"LS_API_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://auapi.envizi.com/api/data/_Envizi-monthlydatasummaryallmeasures?End_Period=CURRENT_MONTH&Period=7"
+		},
+		"LS_API_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "Analytics-Support@urbanutilities.com.au"
+		},
+		"LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "@linkedService().databricksclusterid"
+		},
+		"LS_FS_Globalscape_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "@{linkedService().p_ServerPath}"
+		},
+		"LS_FS_Globalscape_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\NFUJPRD202\\FDrive"
+		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_FS_NFUJPRD202_GDrive_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\nfujprd202\\GDrive"
+		},
+		"LS_FS_NFUJPRD202_GDrive_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_srcLanding_FileExists')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"blobcontainer": {
+						"type": "string"
+					},
+					"blobfolderpath": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().blobfolderpath",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().blobcontainer",
+							"type": "Expression"
+						}
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_srclanding_json_source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Sourceblobfoldername": {
+						"type": "string"
+					},
+					"Sourceblobfilename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().Sourceblobfilename",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().Sourceblobfoldername",
+							"type": "Expression"
+						}
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ASQL_EDWDiscovery')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWDiscovery",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ASQL_EDWDiscovery_Table')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWDiscovery",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TableName": {
+						"type": "string",
+						"defaultValue": "[[Ellipse9].[MSFPackages]"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "Ellipse9",
+					"table": "MSFPackages"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ASQL_EDWMart_Target')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_EDWMart",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"SchemaName": {
+						"type": "string"
+					},
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().SchemaName",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Blob_ExcelFile_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"DirectoryName": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					},
+					"SheetName": {
+						"type": "string"
+					},
+					"ContainerName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": {
+						"value": "@dataset().SheetName",
+						"type": "Expression"
+					},
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().DirectoryName",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().ContainerName",
+							"type": "Expression"
+						}
+					},
+					"firstRowAsHeader": true
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_ABLB_DataLanding_Binary_FileExists')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"blobcontainer": {
+						"type": "string"
+					},
+					"blobfolderpath": {
+						"type": "string"
+					},
+					"blobfilename": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().blobfilename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().blobfolderpath",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().blobcontainer",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_ABLB_srcLanding_Binary_FileExists')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"blobcontainer": {
+						"type": "string"
+					},
+					"blobfolderpath": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().blobfolderpath",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().blobcontainer",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_FTP')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_FTP",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"Host": {
+							"value": "@dataset().FileServer",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"FileFolderPath": {
+						"type": "string",
+						"defaultValue": "anon/gen/clim_data/IDCKWCDEA0/tables/qld/brisbane"
+					},
+					"FileFolderName": {
+						"type": "string"
+					},
+					"FileServer": {
+						"type": "string",
+						"defaultValue": "ftp://ftp.bom.gov.au/"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FtpServerLocation",
+						"folderPath": {
+							"value": "@concat(dataset().FileFolderPath,dataset().FileFolderName)",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_HTTP_CSV_IncludeHeader')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_HTTP",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"BaseURL": {
+							"value": "@dataset().HTTPURL",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"HTTPURL": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation"
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_HTTP_DelimitedText')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_HTTP",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"BaseURL": {
+							"value": "@dataset().BaseURL",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"BaseURL": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_HTTP_JSON')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_HTTP",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"BaseURL": {
+							"value": "@dataset().BaseURL",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"BaseURL": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_HTTP_ZipBin_Parameter')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_HTTP_Parameter",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"s_url": {
+							"value": "@dataset().s_url_base",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"s_url_base": {
+						"type": "string",
+						"defaultValue": "http://www.bom.gov.au/"
+					},
+					"s_url_relative": {
+						"type": "string",
+						"defaultValue": "fwo/IDQ65389/IDQ65389%2E540363%2Etbl.shtml"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation",
+						"relativeUrl": {
+							"value": "@dataset().s_url_relative",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Temetra_Geospatial_Meters_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_HTTPS_Temetra_Geospatial_API_EndPoint",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"temetra_api_endpoint": "https://au.temetra.com/api//file",
+						"networkmeterload": "1",
+						"auth_token": "1c4be2ef9009863ac5c9af1b55051a"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation"
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\"",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_API')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"APIBaseURL": {
+						"type": "string",
+						"defaultValue": "https://auapi.envizi.com/api/data"
+					},
+					"APIReport": {
+						"type": "string",
+						"defaultValue": "monthlydatasummaryallmeasures"
+					},
+					"APICallParameter": {
+						"type": "string",
+						"defaultValue": "End_Period"
+					},
+					"APICallParameterValue": {
+						"type": "string",
+						"defaultValue": "Current_Month"
+					}
+				},
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('LS_API_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Basic",
+					"userName": "[parameters('LS_API_properties_typeProperties_userName')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "Envizi-API-Password"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ASQL_EDWDiscovery_Dev_Test')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_ASQL_EDWDiscovery_Dev_Test_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "dev-test-edw-discovery-admin-password"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_DBR_ADF_Job_Cluster')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Azure Databricks Access Token",
+				"parameters": {
+					"databricksclusterid": {
+						"type": "string",
+						"defaultValue": "0417-051914-axons909"
+					},
+					"databrickssecretname": {
+						"type": "string",
+						"defaultValue": "databricks-token"
+					}
+				},
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://australiaeast.azuredatabricks.net",
+					"accessToken": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": {
+							"value": "@linkedService().databrickssecretname",
+							"type": "Expression"
+						}
+					},
+					"existingClusterId": "[parameters('LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_Globalscape')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"p_ServerPath": {
+						"type": "string",
+						"defaultValue": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_Globalscape_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_Globalscape_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SVC-EBI-PRDC04-AGT"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_NFUJPRD202')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_NFUJPRD202_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SVC-EBI-PRDC04-AGT"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_NFUJPRD202_GDrive')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FS_NFUJPRD202_GDrive_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FS_NFUJPRD202_GDrive_properties_typeProperties_userId')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ADF_LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "svc-ebi-prdc04-agt"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

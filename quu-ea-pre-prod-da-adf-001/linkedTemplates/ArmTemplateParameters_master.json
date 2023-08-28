@@ -1,0 +1,865 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "quu-ea-pre-prod-da-adf-001"
+		},
+		"LS_ABLB_quueaprdicndlslanding001_connectionString": {
+			"value": ""
+		},
+		"LS_ASQL_EDWDiscovery_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=quu-ea-prd-da-sqlserver-001.database.windows.net;Initial Catalog=edw_discovery"
+		},
+		"LS_ASQL_EDWDiscovery_Dev_Test_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=quu-ea-tst-da-sqlserver-001.database.windows.net;Initial Catalog=edw_discovery;User ID=QuutstdaAdmin"
+		},
+		"LS_ASQL_EDWMart_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=quu-ea-prd-da-sqlserver-001.database.windows.net;Initial Catalog=edw_mart"
+		},
+		"LS_ASQL_EDWTactical_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=quu-ea-prd-da-sqlserver-001.database.windows.net;Initial Catalog=edw_tactical"
+		},
+		"LS_MySQL_NetAppManagement_connectionString": {
+			"value": "Server=@{linkedService().Servername};Port=3306;Database=@{linkedService().Databasename};User=@{linkedService().Username};SSLMode=1;UseSystemTrustStore=0"
+		},
+		"LS_ORAC_Framework_connectionString": {
+			"value": "host=@{linkedService().HostName};port=@{linkedService().PortNo};sid=@{linkedService().SID};user id=@{linkedService().UserName}"
+		},
+		"LS_SQL_Framework_connectionString": {
+			"value": "Integrated Security=True;Data Source=@{linkedService().Servername};Initial Catalog=@{linkedService().Databasename}"
+		},
+		"ADF_LS_AKV_properties_typeProperties_baseUrl": {
+			"value": "https://quu-ea-pprd-da-key-vault.vault.azure.net/"
+		},
+		"LS_ABLB_quueadadlslanding001_properties_typeProperties_serviceEndpoint": {
+			"value": "https://quueaprddadlslanding001.blob.core.windows.net"
+		},
+		"LS_ABLB_quueaprddasrclanding001_properties_typeProperties_serviceEndpoint": {
+			"value": "https://quueaprddasrclanding001.blob.core.windows.net/"
+		},
+		"LS_API_properties_typeProperties_url": {
+			"value": "https://auapi.envizi.com/api/data/_Envizi-monthlydatasummaryallmeasures?End_Period=CURRENT_MONTH&Period=7"
+		},
+		"LS_API_properties_typeProperties_userName": {
+			"value": "Analytics-Support@urbanutilities.com.au"
+		},
+		"LS_DBR_ADF_Job_Cluster_properties_typeProperties_existingClusterId": {
+			"value": "@linkedService().databricksclusterid"
+		},
+		"LS_FS_FTP_properties_typeProperties_host": {
+			"value": "@{linkedService().Host}"
+		},
+		"LS_FS_Globalscape_properties_typeProperties_host": {
+			"value": "@{linkedService().p_ServerPath}"
+		},
+		"LS_FS_Globalscape_properties_typeProperties_userId": {
+			"value": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_host": {
+			"value": "\\\\NFUJPRD202\\FDrive"
+		},
+		"LS_FS_NFUJPRD202_properties_typeProperties_userId": {
+			"value": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_FS_NFUJPRD202_GDrive_properties_typeProperties_host": {
+			"value": "\\\\nfujprd202\\GDrive"
+		},
+		"LS_FS_NFUJPRD202_GDrive_properties_typeProperties_userId": {
+			"value": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_FS_NFUJPRD301_properties_typeProperties_host": {
+			"value": "\\\\NFUJPRD301\\EBI_PROD_LANDING"
+		},
+		"LS_FS_NFUJPRD301_properties_typeProperties_userId": {
+			"value": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_FS_ServiceNow_MidServer_properties_typeProperties_host": {
+			"value": "@{linkedService().p_MidServerLocation}"
+		},
+		"LS_FS_ServiceNow_MidServer_properties_typeProperties_userId": {
+			"value": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_FS_globalscape_PowerBI_file_properties_typeProperties_host": {
+			"value": "\\\\NFUJPRD310\\Power_BI"
+		},
+		"LS_FS_globalscape_PowerBI_file_properties_typeProperties_userId": {
+			"value": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_HTTP_properties_typeProperties_url": {
+			"value": "@{linkedService().BaseURL}"
+		},
+		"LS_HTTPS_Temetra_Geospatial_API_EndPoint_properties_typeProperties_url": {
+			"value": "@{concat(linkedService().temetra_api_endpoint,'?networkmeterload=',linkedService().networkmeterload,'&auth=',linkedService().auth_token)}"
+		},
+		"LS_HTTP_Parameter_properties_typeProperties_url": {
+			"value": "@{linkedService().s_url}"
+		},
+		"LS_SF_properties_typeProperties_environmentUrl": {
+			"value": "https://login.salesforce.com"
+		},
+		"LS_SF_properties_typeProperties_username": {
+			"value": "analytics-support@urbanutilities.com.au"
+		},
+		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_connectionString_secretName": {
+			"value": "ellipse-analytics-connection-string"
+		},
+		"LS_SQL_ELLIPSE_ANALYTICS_properties_typeProperties_userName": {
+			"value": "URBANUTILITIES\\SVC-EBI_PRDC04_AGT"
+		},
+		"LS_SQL_Framework_properties_typeProperties_userName": {
+			"value": "@{linkedService().UserName}"
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "BOM Rainfall"
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "BOM_Daily_Rainfall"
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
+			"value": "BOM Weather Data"
+		},
+		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_SourceName": {
+			"value": "BOM-FORECAST"
+		},
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databricksclusterid": {
+			"value": "0417-051914-axons909"
+		},
+		"Bom_Forecast_Daily_Trigger_properties_PL_BOM_Forecast_Main_parameters_databrickssecretname": {
+			"value": "databricks-token"
+		},
+		"Chloroclam_Daily_Trigger_properties_PL_Evoqua_Main_parameters_SourceName": {
+			"value": "Evoqua-metadata"
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_SourceName": {
+			"value": "CHRIS21"
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_EmailTo": {
+			"value": "DL-IS-Analytics-Data-Foundation@urbanutilities.com.au"
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_LogicAppURL": {
+			"value": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU"
+		},
+		"Chris21_Weekly_Trigger_Monday_properties_PL_Chris21_Main_parameters_TriggerName": {
+			"value": "Chris21_Weekly_Trigger_Monday"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_SourceName": {
+			"value": "CHRIS21"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_EmailTo": {
+			"value": "DL-IS-Analytics-Data-Foundation@urbanutilities.com.au"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_LogicAppURL": {
+			"value": "https://prod-08.australiaeast.logic.azure.com:443/workflows/b473972d5dc743d8a7fe7451183104e4/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K1XqCE2ZWAsChqL1-cjnP57avlNPOmrYgj4cTAXJ2uU"
+		},
+		"Chris21_Weekly_Trigger_Thursday_properties_PL_Chris21_Main_parameters_TriggerName": {
+			"value": "Chris21_Weekly_Trigger_Thursday"
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "Daptiv"
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "Daptiv_Daily_Trigger"
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_SourceName": {
+			"value": "EAMS Integration"
+		},
+		"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"EAMS_Integration_Daily_Trigger_properties_PL_EAMS_Integration_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_SourceName": {
+			"value": "Ellipse9"
+		},
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": true
+		},
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": true
+		},
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": true
+		},
+		"Ellipse9_WorkOrderModel_Daily_Trigger_properties_PL_Ellipse9_DataModel_Main_parameters_TriggerName": {
+			"value": "Ellipse9_Daily_Trigger"
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "Envizi"
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "Envizi_Monthly_Trigger"
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
+			"value": "Field Service Edge"
+		},
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"FSE_Daily_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_SourceName": {
+			"value": "Field Service Edge Hourly_Refresh"
+		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"FSE_Hourly_Trigger_properties_PL_FSE_Source_To_ASQL_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "GIS_SQLServer_SDCM_SQL"
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "GIS_SDCM_Daily_Trigger"
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "GIS_SQLServer_SDPROC_SQL"
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "GIS_SDPROC_Weekly_Trigger"
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "GIS_SQLServer_SDUV_SQL"
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "GIS_SDUV_Daily_Trigger"
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName": {
+			"value": "GIS_Oracle_SD_MANAGED"
+		},
+		"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"GIS_SD_MANAGED_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"GIS_SD_REFERENCE_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_SourceName": {
+			"value": "GIS_Oracle_SD_REFERENCE"
+		},
+		"GIS_SD_REFERENCE_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"GIS_SD_REFERENCE_Daily_Trigger_properties_PL_GIS_Source_To_ASQL_Oracle_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetServerName": {
+			"value": "PRDC04-SQL"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetDatabaseName": {
+			"value": "EDW_Discovery"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetUserName": {
+			"value": "urbanutilities\\svc-EBI_PRDC04_AGT"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_TargetSecretPasswordName": {
+			"value": "SVC-EBI-PRDC04-AGT"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceHostName": {
+			"value": "hcxdbprdmir.corporate.urbanutilities.internal"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourcePortNo": {
+			"value": "1901"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceSID": {
+			"value": "HCXPRD"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceUserName": {
+			"value": "ebi_hiaffinity_user"
+		},
+		"HiAffinity_BPackage_Daily_Trigger_properties_PL_EDWDiscovery_DM_SourceToASQL_HiAffinity_parameters_SourceSecretPasswordName": {
+			"value": "Hiaffinity-PRD-Password"
+		},
+		"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_DataSources": {
+			"value": [
+				"QUU.BoM.RF3.IDR66"
+			]
+		},
+		"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_SourceName": {
+			"value": "Hydronet"
+		},
+		"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_DestinationTable": {
+			"value": "Hydronet.Location"
+		},
+		"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_TriggerName": {
+			"value": "Hydronet_PreReq_Daily"
+		},
+		"Hydronet_Locations_Daily_Trigger_properties_PL_Hydronet_Locations_Main_parameters_KeyVaultPath": {
+			"value": "https://quu-ea-prd-da-key-vault.vault.azure.net/secrets/<secretname>?api-version=7.0"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_StartDate": {
+			"value": "1900-01-01"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_EndDate": {
+			"value": "1900-01-01"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DaysPerFile": {
+			"value": 90
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_LocationCodes": {
+			"value": "1326,1327"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_LocationCodesExclude": {
+			"value": "@coalesce(null)"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_TimeZone": {
+			"value": "+1000"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DataSources": {
+			"value": [
+				"QUU.BoM.RF3.IDR66"
+			]
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_SourceName": {
+			"value": "Hydronet"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_DestinationTable": {
+			"value": "Hydronet.Rainfall_Exceedance"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_VariableCodes": {
+			"value": [
+				"EY_30min",
+				"EY_1hr",
+				"EY_2hr",
+				"EY_3hr",
+				"EY_4.5hr",
+				"EY_6hr",
+				"EY_9hr",
+				"EY_12hr",
+				"EY_18hr",
+				"EY_24hr",
+				"EY_36hr",
+				"EY_48hr",
+				"EY_72hr",
+				"EY_168hr"
+			]
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_TriggerName": {
+			"value": "Hydronet_Daily_Trigger"
+		},
+		"Hydronet_TimeSeries_Daily_Trigger_properties_PL_Hydronet_TimeSeries_Main_parameters_KeyVaultPath": {
+			"value": "https://quu-ea-prd-da-key-vault.vault.azure.net/secrets/<secretname>?api-version=7.0"
+		},
+		"ICN_Payment_Extract_Daily_Trigger_properties_PL_File_Export_To_NFUJPRD202_parameters_FileExportName": {
+			"value": "ICN"
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "Ixom"
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "Ixom_Daily_Trigger"
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_SourceName": {
+			"value": "Kantar"
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_Additional_MappingParam": {
+			"value": null
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"Kantar_Monthly_Trigger_properties_PL_Kantar_DataModel_Main_parameters_TriggerName": {
+			"value": "Kantar_Monthly_Trigger"
+		},
+		"LIMS_Daily_Trigger_properties_PL_LIMS_Source_To_ASQL_parameters_Source_Name": {
+			"value": "LIMS"
+		},
+		"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_SourceName": {
+			"value": "LIWIS"
+		},
+		"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"LIWIS_Daily_Trigger_properties_PL_LIWIS_SourceToAsql_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Liwis_DataModel_Daily_Trigger_properties_PL_EDW_Mart_LIWIS_parameters_sourcename": {
+			"value": "LIWIS"
+		},
+		"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_SourceName": {
+			"value": "MDSProd"
+		},
+		"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"MDS_Daily_Trigger_properties_PL_MDSProd_SourceToASQL_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "NOPV-Digital"
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_Additional_MappingParam": {
+			"value": ",\"collectionReference\": \"$['Entry']['attribute']\",\"mapComplexValuesToString\": true"
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "NOPV_Digital_Daily_Trigger"
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "NOPV"
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "NOPV_Daily_Trigger"
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_SourceName": {
+			"value": "NetworkAccess"
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"NetworkAccess_Daily_Trigger_properties_PL_NetworkAccess_Main_parameters_Additional_MappingParam": {
+			"value": ",\"collectionReference\": \"$['Entry']['attribute']\",\"mapComplexValuesToString\": true"
+		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_SourceName": {
+			"value": "OpenWindows"
+		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"OpenWindows_Daily_Trigger_properties_PL_Openwindows_SourceToASQL_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "Promaster"
+		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "Promaster_Monthly_Trigger"
+		},
+		"Promaster_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"QAO_File_Export_Monthly_Trigger_properties_PL_File_Export_To_globalscape_parameters_FileExportName": {
+			"value": "QAO"
+		},
+		"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_SourceName": {
+			"value": "REFERENCE"
+		},
+		"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"REF_Daily_Trigger_properties_PL_Reference_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Source_Name": {
+			"value": "SILO"
+		},
+		"SILO_Daily_Trigger_properties_PL_Silo_Weather_Observations_parameters_Silo_load_type": {
+			"value": "Incremental"
+		},
+		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "SUMS"
+		},
+		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "SUMS_Hourly_Trigger"
+		},
+		"SUMS_Hourly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"SUMS_Mart_Daily_Trigger_properties_PL_SUMS_Daily_Consumption_And_Analysis_parameters_Source_Name": {
+			"value": "SUMS"
+		},
+		"SUMS_Mart_Daily_Trigger_properties_PL_SUMS_Daily_Consumption_And_Analysis_parameters_Load_Type": {
+			"value": "Incremental"
+		},
+		"Salesforce_Daily_Trigger_properties_PL_Salesforce_DM_SourcetoBlob_Master_parameters_Source_Name": {
+			"value": "SalesForce"
+		},
+		"Salesforce_Daily_Trigger_properties_PL_Salesforce_DM_SourcetoBlob_Master_parameters_SourceToBlob": {
+			"value": true
+		},
+		"Salesforce_Daily_Trigger_properties_PL_Salesforce_DM_SourcetoBlob_Master_parameters_BlobtoAsql": {
+			"value": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_SourceName": {
+			"value": "ServiceNow"
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlySourceToGSFileServer": {
+			"value": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyGSFileServerToBlob": {
+			"value": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"ServiceNow_Daily_Trigger_properties_PL_ServiceNow_Main_parameters_p_MidServerLocation": {
+			"value": "\\\\NFUJPRD281\\c$\\Utils\\PROD2\\ServiceNow MID Server NFUJPRD281_Kusanagi\\agent\\export\\updates"
+		},
+		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_cluster_id": {
+			"value": "0818-004527-fleck168"
+		},
+		"TEMETRA_Daily_Trigger_properties_PL_Temetra_Main_parameters_databricks_secret_name": {
+			"value": "databricks-token"
+		},
+		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "Takadu-Reporting-API"
+		},
+		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"Takadu_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "Takadu-Reporting-API-Week"
+		},
+		"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"Takadu_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_sourcename": {
+			"value": "TEMETRA-GEOSPATIAL-DEVICES"
+		},
+		"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_cluster_id": {
+			"value": "0818-004527-fleck168"
+		},
+		"Temetra_Geospatial_Devices_Daily_Trigger_properties_PL_Temetra_Geospatial_File_Bulk_Load_parameters_databricks_secret_name": {
+			"value": "databricks-token"
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "UrbanHQ"
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "UrbanHQ_Monthly_Trigger"
+		},
+		"UrbanHQ_EDW_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"value": "UrbanHQ"
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"value": false
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"value": false
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"value": false
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"value": "UrbanHQ_Daily_Trigger"
+		},
+		"UrbanHQ_EDW_daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"value": "Trigger"
+		},
+		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_SourceName": {
+			"value": "UrbanHQ"
+		},
+		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"UrbanHQ_daily_Trigger_properties_PL_UrbanHQ_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+			"value": "WWI_SEC"
+		},
+		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+			"value": "WWI"
+		},
+		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+			"value": "eDNA_SEC"
+		},
+		"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+			"value": "eDNA"
+		},
+		"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+			"value": true
+		},
+		"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_SourceName": {
+			"value": "eForms"
+		},
+		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_OnlyBlobtoASQL": {
+			"value": true
+		},
+		"eForms_daily_trigger_properties_PL_eForms_Main_parameters_additional_param": {
+			"value": ",\"collectionReference\": \"$['Entry']['PhotoTable']\""
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

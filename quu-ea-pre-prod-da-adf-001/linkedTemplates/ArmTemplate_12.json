@@ -1,0 +1,4011 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "quu-ea-pre-prod-da-adf-001"
+		},
+		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "WWI_SEC"
+		},
+		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "WWI"
+		},
+		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "eDNA_SEC"
+		},
+		"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "eDNA"
+		},
+		"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "BOM Weather Data"
+		},
+		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "BOM Rainfall"
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "BOM_Daily_Rainfall"
+		},
+		"BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"type": "string",
+			"defaultValue": "Trigger"
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Daptiv"
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "Daptiv_Daily_Trigger"
+		},
+		"Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"type": "string",
+			"defaultValue": "Trigger"
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Envizi"
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "Envizi_Monthly_Trigger"
+		},
+		"Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"type": "string",
+			"defaultValue": "Trigger"
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "GIS_SQLServer_SDCM_SQL"
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "GIS_SDCM_Daily_Trigger"
+		},
+		"GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"type": "string",
+			"defaultValue": "Trigger"
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "GIS_SQLServer_SDPROC_SQL"
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "GIS_SDPROC_Weekly_Trigger"
+		},
+		"GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"type": "string",
+			"defaultValue": "Trigger"
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "GIS_SQLServer_SDUV_SQL"
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "GIS_SDUV_Daily_Trigger"
+		},
+		"GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"type": "string",
+			"defaultValue": "Trigger"
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "Ixom"
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "Ixom_Daily_Trigger"
+		},
+		"Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"type": "string",
+			"defaultValue": "Trigger"
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "NOPV-Digital"
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_Additional_MappingParam": {
+			"type": "string",
+			"defaultValue": ",\"collectionReference\": \"$['Entry']['attribute']\",\"mapComplexValuesToString\": true"
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "NOPV_Digital_Daily_Trigger"
+		},
+		"NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"type": "string",
+			"defaultValue": "Trigger"
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName": {
+			"type": "string",
+			"defaultValue": "NOPV"
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName": {
+			"type": "string",
+			"defaultValue": "NOPV_Daily_Trigger"
+		},
+		"NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory": {
+			"type": "string",
+			"defaultValue": "Trigger"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/WWI_Daily_Scondary_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_WWI_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('WWI_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-06-05T06:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"hours": [
+								7
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/WWI_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_WWI_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('WWI_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-06-05T06:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"hours": [
+								6
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/eDNA_Daily_Scondary_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_WWI_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('eDNA_Daily_Scondary_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-05-24T06:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"hours": [
+								7
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/eDNA_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_WWI_Main",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('eDNA_Daily_Trigger_properties_PL_WWI_Main_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-05-24T06:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"hours": [
+								6
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_SourceToBlob')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SourceToBlob_CommandType",
+						"type": "Switch",
+						"dependsOn": [
+							{
+								"activity": "fetchSwitchCommandType",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"on": {
+								"value": "@activity('fetchSwitchCommandType').output.firstRow.ADFAction",
+								"type": "Expression"
+							},
+							"cases": [
+								{
+									"value": "DATABRICKS_NOTEBOOK",
+									"activities": [
+										{
+											"name": "Execute DM_SourcetoBlob_Databricks",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Databricks",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"SourceID": {
+														"value": "@pipeline().parameters.SourceID",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "DB_SQL",
+									"activities": [
+										{
+											"name": "Execute DM_SourcetoBlob_SQLDatabase",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_SqlServer",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"SourceID": {
+														"value": "@pipeline().parameters.SourceID",
+														"type": "Expression"
+													},
+													"TriggerName": {
+														"value": "@pipeline().parameters.TriggerName",
+														"type": "Expression"
+													},
+													"ProcessType": {
+														"value": "@pipeline().parameters.ProcessType",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "BLOB_EXCEL_FILE",
+									"activities": [
+										{
+											"name": "Exec DM_SourcetoBlob_Blob_ConfigExcelWorkbooks",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Blob_ConfigExcelWorkbooks",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"SourceID": {
+														"value": "@pipeline().parameters.SourceID",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "GLOBALSCAPE_CSV_FILE",
+									"activities": [
+										{
+											"name": "Execute DM_SourcetoBlob_GlobalScape_CSVFile",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_GlobalScape_CSVFile",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"SourceID": {
+														"value": "@pipeline().parameters.SourceID",
+														"type": "Expression"
+													},
+													"TriggerName": {
+														"value": "@pipeline().parameters.TriggerName",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "API",
+									"activities": [
+										{
+											"name": "Execute DM_SourcetoBlob_API",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_API",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"SourceID": {
+														"value": "@pipeline().parameters.SourceID",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "GLOBALSCAPE_EXCEL_FILE",
+									"activities": [
+										{
+											"name": "Exec DM_SourcetoBlob_GlobalScape_ConfigExcelWorkbooks",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_GlobalScape_ConfigExcelWorkbooks",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"SourceID": {
+														"value": "@pipeline().parameters.SourceID",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "DB_ORACLE",
+									"activities": [
+										{
+											"name": "Execute DM_SourcetoBlob_OracleDatabase",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_Oracle",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"SourceID": {
+														"value": "@pipeline().parameters.SourceID",
+														"type": "Expression"
+													},
+													"TriggerName": {
+														"value": "@pipeline().parameters.TriggerName",
+														"type": "Expression"
+													},
+													"ProcessType": {
+														"value": "@pipeline().parameters.ProcessType",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "HTTP_CSV_FILE",
+									"activities": [
+										{
+											"name": "Execute file copy",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "PL_EDWDiscovery_DM_SourcetoBlob_HTTP",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"SourceID": {
+														"value": "@pipeline().parameters.SourceID",
+														"type": "Expression"
+													},
+													"TriggerName": {
+														"value": "@pipeline().parameters.TriggerName",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "BLOB_JSON_FILE",
+									"activities": [
+										{
+											"name": "Execute SourceToBlob_BlobJSONtoCSVFile",
+											"description": "Executes the PL_EDWDiscovery_DM_SourceToBlob_BlobJSONtoCSVFile pipeline",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "PL_EDWDiscovery_DM_SourceToBlob_BlobJSONtoCSVFile",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"SourceId": {
+														"value": "@pipeline().parameters.SourceID",
+														"type": "Expression"
+													},
+													"Additional_MappingParam": {
+														"value": "@pipeline().parameters.Additional_MappingParam",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "fetchSwitchCommandType",
+						"description": "Based on SourceType and LoadType SQL procedure will fetch switch command type",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "EXEC etl.usp_get_switch_command_type '@{pipeline().parameters.SourceID}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceID": {
+						"type": "int"
+					},
+					"LoadTypeName": {
+						"type": "string"
+					},
+					"Additional_MappingParam": {
+						"type": "string"
+					},
+					"TriggerName": {
+						"type": "string"
+					},
+					"ProcessType": {
+						"type": "string",
+						"defaultValue": "SourceToBlob"
+					}
+				},
+				"folder": {
+					"name": "EDW_Discovery"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-04-27T05:48:52Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BOM_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_BOM_SourceToAsql",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('BOM_Daily_Trigger_properties_PL_BOM_SourceToAsql_parameters_OnlyBlobtoASQL')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Month",
+						"interval": 1,
+						"startTime": "2020-03-23T20:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"monthDays": [
+								3,
+								4,
+								5,
+								6,
+								7,
+								8,
+								9,
+								10,
+								11,
+								12,
+								13,
+								14,
+								15,
+								17,
+								18,
+								19,
+								20,
+								21,
+								16,
+								22,
+								23,
+								24,
+								25,
+								26,
+								27,
+								28,
+								-1,
+								31,
+								30,
+								29
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_EDWDiscovery_SourceToDiscovery_Master')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Source ID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT\n  srcSys.SourceID\n, ldTyp.LoadTypeName AS SourceToBlobLoadTypeName\nFROM ETL.SourceSystem srcSys\nLEFT JOIN ETL.LoadType ldTyp ON ldTyp.LoadTypeId = srcSys.LoadTypeId\nWHERE srcSys.SourceName = '@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Is Source to Blob Load Required",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Get Source ID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlySourceToBlob",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_SourceToBlob",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"LoadTypeName": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+												"type": "Expression"
+											},
+											"Additional_MappingParam": {
+												"value": "@pipeline().parameters.Additional_MappingParam",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
+											},
+											"ProcessType": {
+												"value": "SourceToBlob",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "Execute PL_Framework_TRFM_TransformSourceDate",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_TRFM_TransformSourceDate",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceName": {
+												"value": "@pipeline().parameters.SourceName",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "CaptureError2a",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "ExecutePL_EDWOnPrem_DM_SourcetoBlob",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity2a: ', activity('ExecutePL_EDWOnPrem_DM_SourcetoBlob').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "CaptureError2b",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Execute PL_Framework_TRFM_TransformSourceDate",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity2b: ', activity('Execute PL_Framework_TRFM_TransformSourceDate').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Is Blob to ASQL Required - No Failure",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Source To Blob Delete Required - No Failure",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyBlobtoASQL",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_TRFM_BLOBToASQL - No Failure",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@if(equals(pipeline().parameters.TriggerName, ''), pipeline().TriggerName, pipeline().parameters.TriggerName)",
+												"type": "Expression"
+											},
+											"ProcessType": {
+												"value": "BlobToASQL",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "CaptureError4a_Success",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "ExecutePL_TRFM_BLOBToASQL - No Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity4a_Success: ', activity('ExecutePL_TRFM_BLOBToASQL - No Failure').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Is Blob to ASQL Required - Has Failure",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Source To Blob Delete Required - Has Failure",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@and(pipeline().parameters.OnlyBlobtoASQL, pipeline().parameters.AllowPartialUpdateOfDiscovery)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecutePL_TRFM_BLOBToASQL - Has Failure",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
+											},
+											"ProcessType": {
+												"value": "BlobToASQL",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "CaptureError4a_failure",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "ExecutePL_TRFM_BLOBToASQL - Has Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity4a_failure: ', activity('ExecutePL_TRFM_BLOBToASQL - Has Failure').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Is Source To Blob Delete Required - No Failure",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Source to Blob Load Required",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyExtractDeletedRecordsFromSourceToBlob",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Extract Deleted Records from SourceToBlob - No Failure",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_SourceToBlob",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"LoadTypeName": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+												"type": "Expression"
+											},
+											"Additional_MappingParam": {
+												"value": "@pipeline().parameters.Additional_MappingParam",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
+											},
+											"ProcessType": {
+												"value": "SourceToBlobDelete",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "CaptureError3a_Success",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Extract Deleted Records from SourceToBlob - No Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity3a_Success: ', activity('Extract Deleted Records from SourceToBlob - No Failure').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Is Source To Blob Delete Required - Has Failure",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Source to Blob Load Required",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@and(pipeline().parameters.OnlyExtractDeletedRecordsFromSourceToBlob, pipeline().parameters.AllowPartialUpdateOfDiscovery)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Extract Deleted Records from SourceToBlob - Has Failure",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_SourceToBlob",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"LoadTypeName": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceToBlobLoadTypeName']",
+												"type": "Expression"
+											},
+											"Additional_MappingParam": {
+												"value": "@pipeline().parameters.Additional_MappingParam",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
+											},
+											"ProcessType": {
+												"value": "SourceToBlobDelete",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "CaptureError3a_failure",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Extract Deleted Records from SourceToBlob - Has Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity3_failure: ', activity('Extract Deleted Records from SourceToBlob - Has Failure').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Is Blob To ASQL Delete Required - No Failure",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Blob to ASQL Required - No Failure",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.OnlyDeleteRecordsFromBlobToASQL",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Delete Records from Delta and ASQL - No Failure",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
+											},
+											"ProcessType": {
+												"value": "BlobToASQLDelete",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "CaptureError5a_success",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Delete Records from Delta and ASQL - No Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity5_Success: ', activity('Delete Records from Delta and ASQL - No Failure').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Is Blob To ASQL Delete Required - Has Failure",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Blob to ASQL Required - Has Failure",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@and(pipeline().parameters.OnlyDeleteRecordsFromBlobToASQL, pipeline().parameters.AllowPartialUpdateOfDiscovery)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Delete Records from Delta and ASQL - Has Failure",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_TRFM_BlobToASQL",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow['SourceID']",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
+											},
+											"ProcessType": {
+												"value": "BlobToASQLDelete",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "CaptureError5a_failure",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Delete Records from Delta and ASQL - Has Failure",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('Activity5_failure: ', activity('Delete Records from Delta and ASQL - Has Failure').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CaptureError1",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Source ID",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity1: ', activity('Get Source ID').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError2",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Source to Blob Load Required",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity2: ', activity('Is Source to Blob Load Required').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError3_Success",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Source To Blob Delete Required - No Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity3_Success: ', activity('Is Source To Blob Delete Required - No Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError4_Success",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Blob to ASQL Required - No Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity4_Success: ', activity('Is Blob to ASQL Required - No Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError5_success",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Blob To ASQL Delete Required - No Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity5_Success: ', activity('Is Blob To ASQL Delete Required - No Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError3_failure",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Source To Blob Delete Required - Has Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity3_failure: ', activity('Is Source To Blob Delete Required - Has Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError4_failure",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Blob to ASQL Required - Has Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity4_failure: ', activity('Is Blob to ASQL Required - Has Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError5_failure",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Is Blob To ASQL Delete Required - Has Failure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity5_failure: ', activity('Is Blob To ASQL Delete Required - Has Failure').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "If Errors Caught",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Is Blob To ASQL Delete Required - No Failure",
+								"dependencyConditions": [
+									"Completed",
+									"Skipped"
+								]
+							},
+							{
+								"activity": "Is Blob To ASQL Delete Required - Has Failure",
+								"dependencyConditions": [
+									"Completed",
+									"Skipped"
+								]
+							},
+							{
+								"activity": "CaptureError5_failure",
+								"dependencyConditions": [
+									"Completed",
+									"Skipped"
+								]
+							},
+							{
+								"activity": "CaptureError5_success",
+								"dependencyConditions": [
+									"Completed",
+									"Skipped"
+								]
+							},
+							{
+								"activity": "CaptureError1",
+								"dependencyConditions": [
+									"Skipped",
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@{empty(variables('ErrorArray'))}",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "HTTP Trigger",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_PE_HttpRequest",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow.SourceID",
+												"type": "Expression"
+											},
+											"SourceCategoryType": "Failed",
+											"PipelineRunId": {
+												"value": "@pipeline().RunId",
+												"type": "Expression"
+											},
+											"PipelineName": {
+												"value": "@pipeline().Pipeline",
+												"type": "Expression"
+											},
+											"PipelineStartTime": {
+												"value": "@pipeline().TriggerTime",
+												"type": "Expression"
+											},
+											"PipelineMessage": {
+												"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+												"type": "Expression"
+											},
+											"PipelineEndTime": {
+												"value": "@utcnow()",
+												"type": "Expression"
+											},
+											"PipelineTriggerName": {
+												"value": "@pipeline().TriggerName",
+												"type": "Expression"
+											},
+											"PipelineTriggerId": {
+												"value": "@pipeline().TriggerId",
+												"type": "Expression"
+											},
+											"SourceCategory": {
+												"value": "@pipeline().parameters.HttpTriggerCategory",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "Raise Failure",
+									"type": "Fail",
+									"dependsOn": [
+										{
+											"activity": "HTTP Trigger",
+											"dependencyConditions": [
+												"Completed"
+											]
+										},
+										{
+											"activity": "Append Error Array",
+											"dependencyConditions": [
+												"Skipped",
+												"Completed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"message": {
+											"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+											"type": "Expression"
+										},
+										"errorCode": "500"
+									}
+								},
+								{
+									"name": "Append Error Array",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "HTTP Trigger",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('HTTP Trigger: ', activity('HTTP Trigger').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "HTTP Triggers",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_PE_HttpRequest",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get Source ID').output.firstRow.SourceID",
+												"type": "Expression"
+											},
+											"SourceCategoryType": "Succeeded",
+											"PipelineRunId": {
+												"value": "@pipeline().RunId",
+												"type": "Expression"
+											},
+											"PipelineName": {
+												"value": "@pipeline().Pipeline",
+												"type": "Expression"
+											},
+											"PipelineStartTime": {
+												"value": "@pipeline().TriggerTime",
+												"type": "Expression"
+											},
+											"PipelineMessage": {
+												"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),',[',''),']',''),'\"',''),'[','')}",
+												"type": "Expression"
+											},
+											"PipelineEndTime": {
+												"value": "@utcnow()",
+												"type": "Expression"
+											},
+											"PipelineTriggerName": {
+												"value": "@pipeline().TriggerName",
+												"type": "Expression"
+											},
+											"PipelineTriggerId": {
+												"value": "@pipeline().TriggerId",
+												"type": "Expression"
+											},
+											"SourceCategory": {
+												"value": "@pipeline().parameters.HttpTriggerCategory",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "GIS_SQLServer_SDCM_SQL"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"AllowPartialUpdateOfDiscovery": {
+						"type": "bool",
+						"defaultValue": false
+					},
+					"Additional_MappingParam": {
+						"type": "string"
+					},
+					"OnlyExtractDeletedRecordsFromSourceToBlob": {
+						"type": "bool",
+						"defaultValue": false
+					},
+					"OnlyDeleteRecordsFromBlobToASQL": {
+						"type": "bool",
+						"defaultValue": false
+					},
+					"TriggerName": {
+						"type": "string",
+						"defaultValue": "GIS_SDCM_Daily_Trigger"
+					},
+					"HttpTriggerCategory": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"hasFailedFlag": {
+						"type": "Boolean",
+						"defaultValue": false
+					},
+					"ErrorArray": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "EDW_Discovery"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-09-06T05:55:01Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToBlob')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Ellipse9_DataModel_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute PL_Ellipse9_Main",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Get SourceID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								},
+								"OnlySourceToBlob": {
+									"value": "@pipeline().parameters.OnlySourceToBlob",
+									"type": "Expression"
+								},
+								"OnlyBlobtoASQL": {
+									"value": "@pipeline().parameters.OnlyBlobtoASQL",
+									"type": "Expression"
+								},
+								"AllowPartialUpdateOfDiscovery": {
+									"value": "@pipeline().parameters.AllowPartialUpdateOfDiscovery",
+									"type": "Expression"
+								},
+								"Additional_MappingParam": {
+									"value": "NULL",
+									"type": "Expression"
+								},
+								"OnlyExtractDeletedRecordsFromSourceToBlob": {
+									"value": "@pipeline().parameters.OnlyExtractDeletedRecordsFromSourceToBlob",
+									"type": "Expression"
+								},
+								"OnlyDeleteRecordsFromBlobToASQL": {
+									"value": "@pipeline().parameters.OnlyDeleteRecordsFromBlobToASQL",
+									"type": "Expression"
+								},
+								"TriggerName": {
+									"value": "@pipeline().parameters.TriggerName",
+									"type": "Expression"
+								},
+								"HttpTriggerCategory": "EDW_Completion"
+							}
+						}
+					},
+					{
+						"name": "Execute PL_WorkOrder_Model_Main",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute PL_Ellipse9_Main",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_WorkOrder_Model_Main",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "CaptureError1",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute PL_Ellipse9_Main",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity1: ', activity('Execute PL_Ellipse9_Main').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CaptureError2",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute PL_WorkOrder_Model_Main",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ErrorArray",
+							"value": {
+								"value": "@{concat('Activity1: ', activity('Execute PL_WorkOrder_Model_Main').Error['message'])}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "If Errors Caught",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Execute PL_WorkOrder_Model_Main",
+								"dependencyConditions": [
+									"Completed"
+								]
+							},
+							{
+								"activity": "CaptureError2",
+								"dependencyConditions": [
+									"Completed",
+									"Skipped"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@{empty(variables('ErrorArray'))}",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "HTTP Trigger",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_PE_HttpRequest",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get SourceID').output.firstRow.SourceID",
+												"type": "Expression"
+											},
+											"SourceCategoryType": "Failed",
+											"PipelineRunId": {
+												"value": "@pipeline().RunId",
+												"type": "Expression"
+											},
+											"PipelineName": {
+												"value": "@pipeline().Pipeline",
+												"type": "Expression"
+											},
+											"PipelineStartTime": {
+												"value": "@pipeline().TriggerTime",
+												"type": "Expression"
+											},
+											"PipelineMessage": {
+												"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+												"type": "Expression"
+											},
+											"PipelineEndTime": {
+												"value": "@utcnow()",
+												"type": "Expression"
+											},
+											"PipelineTriggerName": {
+												"value": "@pipeline().TriggerName",
+												"type": "Expression"
+											},
+											"PipelineTriggerId": {
+												"value": "@pipeline().TriggerId",
+												"type": "Expression"
+											},
+											"SourceCategory": "Trigger"
+										}
+									}
+								},
+								{
+									"name": "Raise Failure",
+									"type": "Fail",
+									"dependsOn": [
+										{
+											"activity": "HTTP Trigger",
+											"dependencyConditions": [
+												"Completed"
+											]
+										},
+										{
+											"activity": "Append Error Array",
+											"dependencyConditions": [
+												"Skipped",
+												"Completed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"message": {
+											"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),'[',''),']',''),'\"',''),',|','\\n')}",
+											"type": "Expression"
+										},
+										"errorCode": "500"
+									}
+								},
+								{
+									"name": "Append Error Array",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "HTTP Trigger",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ErrorArray",
+										"value": {
+											"value": "@{concat('HTTP Trigger: ', activity('HTTP Trigger').Error['message'])}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "HTTP Triggers",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Framework_PE_HttpRequest",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceID": {
+												"value": "@activity('Get SourceID').output.firstRow.SourceID",
+												"type": "Expression"
+											},
+											"SourceCategoryType": "Succeeded",
+											"PipelineRunId": {
+												"value": "@pipeline().RunId",
+												"type": "Expression"
+											},
+											"PipelineName": {
+												"value": "@pipeline().Pipeline",
+												"type": "Expression"
+											},
+											"PipelineStartTime": {
+												"value": "@pipeline().TriggerTime",
+												"type": "Expression"
+											},
+											"PipelineMessage": {
+												"value": "@{replace(replace(replace(replace(string(variables('ErrorArray')),',[',''),']',''),'\"',''),'[','')}",
+												"type": "Expression"
+											},
+											"PipelineEndTime": {
+												"value": "@utcnow()",
+												"type": "Expression"
+											},
+											"PipelineTriggerName": {
+												"value": "@pipeline().TriggerName",
+												"type": "Expression"
+											},
+											"PipelineTriggerId": {
+												"value": "@pipeline().TriggerId",
+												"type": "Expression"
+											},
+											"SourceCategory": "Trigger"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Get SourceID",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT\r\n  srcSys.SourceID\r\nFROM ETL.SourceSystem srcSys\r\nWHERE srcSys.SourceName = '@{pipeline().parameters.SourceName}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "Ellipse9"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"AllowPartialUpdateOfDiscovery": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyExtractDeletedRecordsFromSourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyDeleteRecordsFromBlobToASQL": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"TriggerName": {
+						"type": "string",
+						"defaultValue": "Ellipse9_Daily_Trigger"
+					}
+				},
+				"variables": {
+					"ErrorArray": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Ellipse9"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-05-24T06:00:02Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Hydronet_Locations_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Obtain Auth Token",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Auth-ClientID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Auth-ClientSecret",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "API-URL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": true,
+							"secureInput": true
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://login.hydronet.com/auth/realms/hydronet/protocol/openid-connect/token",
+							"method": "POST",
+							"headers": {
+								"content-type": "application/x-www-form-urlencoded"
+							},
+							"body": {
+								"value": "@{concat('grant_type=client_credentials&client_id=',activity('Auth-ClientID').output.value,'&client_secret=',activity('Auth-ClientSecret').output.value,'&')}",
+								"type": "Expression"
+							},
+							"httpRequestTimeout": "00:10:00"
+						}
+					},
+					{
+						"name": "Get Locations",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Obtain Auth Token",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": true
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@{concat(activity('API-URL').output.value,'entity/locations/get')}",
+								"type": "Expression"
+							},
+							"method": "POST",
+							"headers": {
+								"Authorization": {
+									"value": "Bearer @{activity('Obtain Auth Token').output.access_token}",
+									"type": "Expression"
+								},
+								"Content-type": "application/json"
+							},
+							"body": {
+								"value": "@{concat('{\"DataSourceCodes\":',pipeline().parameters.DataSources,'}')}",
+								"type": "Expression"
+							},
+							"httpRequestTimeout": "00:10:00"
+						}
+					},
+					{
+						"name": "Copy Locations to Blob as CSV",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Get Locations",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "GetColumnMappings",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[Hydronet_GetLocations]",
+								"storedProcedureParameters": {
+									"JsonString": {
+										"type": "String",
+										"value": {
+											"value": "@replace(string(activity('Get Locations').output.Locations),variables('ReplaceChar'),variables('ReplaceCharWith'))",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"value": "@activity('GetColumnMappings').output.firstRow.json_output",
+								"type": "Expression"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ABLB_Datalanding_IncludeHeader",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderPath": {
+										"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].FolderName",
+										"type": "Expression"
+									},
+									"TargetFileName": {
+										"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].FileName",
+										"type": "Expression"
+									},
+									"ColumnDelimiter": {
+										"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].ColumnDelimiter",
+										"type": "Expression"
+									},
+									"QuoteCharacter": {
+										"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].QuoteCharacter",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Obtain Destination File Details",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWDiscovery",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"parameters": [
+										{
+											"name": "SourceName",
+											"type": "String",
+											"value": {
+												"value": "@pipeline().parameters.SourceName",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										},
+										{
+											"name": "DestinationTable",
+											"type": "String",
+											"value": {
+												"value": "@pipeline().parameters.DestinationTable",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										}
+									],
+									"type": "Query",
+									"text": "/*\nDECLARE @SourceName VARCHAR(100) = 'Hydronet',\n\t\t@DestinationTable VARCHAR(200) = 'Hydronet.Location'\n*/\nDECLARE @SQL NVARCHAR(MAX) = '\nSELECT st.TableId,TargetBlobFilePath AS FolderName, TargetBlobFileName + CASE WHEN st.[File_Name_DateTime_Ind] = 1 THEN ''_'' + CONVERT(VARCHAR(10),dbo.udf_getLocalDTM(),112) ELSE '''' END + TargetBlobFileNameExt AS FileName, QuoteCharacter, ColumnDelimiter\nFROM ETL.SourceTableDetails st\nWHERE EXISTS\n(\n\tSELECT *\n\tFROM ETL.SourceSystem ss\n\tWHERE st.SourceID = ss.SourceID\n\tAND ss.SourceName = @SourceName\n)\nAND AzuresqlTargetTableName = @DestinationTable'\n\nEXEC sp_executesql\t@SQL, \n\t\t\t\t\tN'@SourceName VARCHAR(100), @DestinationTable VARCHAR(200)', \n\t\t\t\t\t@SourceName = @SourceName, \n\t\t\t\t\t@DestinationTable = @DestinationTable"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "Auth-ClientID",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": true,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@{replace(pipeline().parameters.KeyVaultPath,'<secretname>','Hydronet-API-ClientID')}",
+								"type": "Expression"
+							},
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "Auth-ClientSecret",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": true,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@{replace(pipeline().parameters.KeyVaultPath,'<secretname>','Hydronet-API-ClientSecret')}",
+								"type": "Expression"
+							},
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "API-URL",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": true,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@{replace(pipeline().parameters.KeyVaultPath,'<secretname>','HydroNet-Base-URL')}",
+								"type": "Expression"
+							},
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "Land to Destination",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Copy Locations to Blob as CSV",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								},
+								"OnlySourceToBlob": false,
+								"OnlyBlobtoASQL": true,
+								"AllowPartialUpdateOfDiscovery": false,
+								"OnlyExtractDeletedRecordsFromSourceToBlob": false,
+								"OnlyDeleteRecordsFromBlobToASQL": false,
+								"TriggerName": {
+									"value": "@pipeline().parameters.TriggerName",
+									"type": "Expression"
+								},
+								"HttpTriggerCategory": "Trigger"
+							}
+						}
+					},
+					{
+						"name": "GetColumnMappings",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Obtain Destination File Details",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[usp_getColumnMapping_json_to_csv]",
+								"storedProcedureParameters": {
+									"additional_param": {
+										"type": "String",
+										"value": ""
+									},
+									"TableID": {
+										"type": "Int32",
+										"value": {
+											"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].TableId",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"DataSources": {
+						"type": "string",
+						"defaultValue": [
+							"QUU.BoM.RF3.IDR66"
+						]
+					},
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "Hydronet"
+					},
+					"DestinationTable": {
+						"type": "string",
+						"defaultValue": "Hydronet.Location"
+					},
+					"TriggerName": {
+						"type": "string",
+						"defaultValue": "Hydronet_PreReq_Daily"
+					},
+					"KeyVaultPath": {
+						"type": "string",
+						"defaultValue": "https://quu-ea-prd-da-key-vault.vault.azure.net/secrets/<secretname>?api-version=7.0"
+					}
+				},
+				"variables": {
+					"ReplaceChar": {
+						"type": "String",
+						"defaultValue": "'"
+					},
+					"ReplaceCharWith": {
+						"type": "String",
+						"defaultValue": "''"
+					}
+				},
+				"folder": {
+					"name": "Hydronet"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Hydronet_TimeSeries_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "For Each Processing Set",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Location Codes",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Get Processing Set",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "GetColumnMappings",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Processing Set').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "TimeseriesToCSV",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Obtain Token",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 3,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": true
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"additionalColumns": [
+												{
+													"name": "DataSourceCode",
+													"value": {
+														"value": "@item().DataSourceGroup",
+														"type": "Expression"
+													}
+												}
+											],
+											"storeSettings": {
+												"type": "HttpReadSettings",
+												"requestMethod": "POST",
+												"additionalHeaders": {
+													"value": "Authorization:Bearer @{activity('Obtain Token').output.access_token}\ncontent-type:application/json",
+													"type": "Expression"
+												},
+												"requestBody": {
+													"value": "@{concat('{\n              \"Readers\": [\n    {\n                             \"DataSourceCode\": \"',item().DataSourceGroup,'\",\n                             \"Settings\": {\n                                           \"StructureType\": \"TimeSeries\",\n                                           \"StartDate\": \"',item().JobStartDate,'\",\n                                           \"EndDate\": \"',item().JobEndDate,'\",\n                                           \"VariableCodes\": ', string(pipeline().parameters.VariableCodes),',\n                                           \"LocationCodes\": [',activity('Get Location Codes').output.firstRow.LocationList,'],\n                                           \"ReadQuality\": false,\n                                           \"Interval\": {\n                                                          \"Type\": \"None\"\n                                           },\n                                           \"ReadAccumulated\": false,\n                                           \"CalculationType\":\"None\"\n                             }\n              }],\n              \"Exporter\": {\n                             \"DataFormatCode\": \"hydronet.csv.simple\"\n              },\n\t      \"TimeZoneOffset\": \"',pipeline().parameters.TimeZone,'\"\n}')}",
+													"type": "Expression"
+												},
+												"requestTimeout": ""
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"value": "@json(replace(string(activity('GetColumnMappings').output.firstRow.json_output),'\"path\"','\"name\"'))",
+											"type": "Expression"
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_HTTP_CSV_IncludeHeader",
+											"type": "DatasetReference",
+											"parameters": {
+												"HTTPURL": {
+													"value": "@{concat(activity('API-URL').output.value,'timeseries/get?=')}",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ABLB_Datalanding_IncludeHeader",
+											"type": "DatasetReference",
+											"parameters": {
+												"FolderPath": {
+													"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].FolderName",
+													"type": "Expression"
+												},
+												"TargetFileName": {
+													"value": "@item().FileName",
+													"type": "Expression"
+												},
+												"ColumnDelimiter": {
+													"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].ColumnDelimiter",
+													"type": "Expression"
+												},
+												"QuoteCharacter": {
+													"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].QuoteCharacter",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Obtain Token",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 5,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": true,
+										"secureInput": true
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "https://login.hydronet.com/auth/realms/hydronet/protocol/openid-connect/token",
+										"method": "POST",
+										"headers": {
+											"content-type": "application/x-www-form-urlencoded"
+										},
+										"body": {
+											"value": "@{concat('grant_type=client_credentials&client_id=',activity('Auth-ClientID').output.value,'&client_secret=',activity('Auth-ClientSecret').output.value,'&')}",
+											"type": "Expression"
+										},
+										"httpRequestTimeout": "00:10:00"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Obtain Auth Token",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Auth-ClientID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Auth-ClientSecret",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "API-URL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 5,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": true,
+							"secureInput": true
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://login.hydronet.com/auth/realms/hydronet/protocol/openid-connect/token",
+							"method": "POST",
+							"headers": {
+								"content-type": "application/x-www-form-urlencoded"
+							},
+							"body": {
+								"value": "@{concat('grant_type=client_credentials&client_id=',activity('Auth-ClientID').output.value,'&client_secret=',activity('Auth-ClientSecret').output.value,'&')}",
+								"type": "Expression"
+							},
+							"httpRequestTimeout": "00:10:00"
+						}
+					},
+					{
+						"name": "Get Data Source Settings",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Obtain Auth Token",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 5,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": true
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@{concat(activity('API-URL').output.value,'entity/datasources/get')}",
+								"type": "Expression"
+							},
+							"method": "POST",
+							"headers": {
+								"Authorization": {
+									"value": "Bearer @{activity('Obtain Auth Token').output.access_token}",
+									"type": "Expression"
+								},
+								"Content-type": "application/json"
+							},
+							"body": {
+								"value": "@{concat('{\"DataSourceCodes\":',string(pipeline().parameters.DataSources),',\"RelationDepth\":0, \"TimeZoneOffset\": \"',pipeline().parameters.TimeZone,'\"}')}",
+								"type": "Expression"
+							},
+							"httpRequestTimeout": "00:10:00"
+						}
+					},
+					{
+						"name": "Get Processing Set",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Get Data Source Settings",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Obtain Destination File Details",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[Hydronet_GetTimeSeriesDateRange]",
+								"storedProcedureParameters": {
+									"APIDataJSONString": {
+										"type": "String",
+										"value": {
+											"value": "@string(activity('Get Data Source Settings').output.DataSources)",
+											"type": "Expression"
+										}
+									},
+									"DaysPerFile": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.DaysPerFile",
+											"type": "Expression"
+										}
+									},
+									"RequestEndDateTime": {
+										"type": "DateTime",
+										"value": {
+											"value": "@pipeline().parameters.EndDate",
+											"type": "Expression"
+										}
+									},
+									"FileExtension": {
+										"type": "String",
+										"value": ".csv"
+									},
+									"LabelSeperator": {
+										"type": "String",
+										"value": "|"
+									},
+									"LocationFilter": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.LocationCodes",
+											"type": "Expression"
+										}
+									},
+									"RequestStartDateTime": {
+										"type": "DateTime",
+										"value": {
+											"value": "@pipeline().parameters.StartDate",
+											"type": "Expression"
+										}
+									},
+									"TableID": {
+										"type": "Int32",
+										"value": {
+											"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].TableID",
+											"type": "Expression"
+										}
+									},
+									"TimeZone": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.TimeZone",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Get Location Codes",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[Hydronet_GetTimeSeriesLocations]",
+								"storedProcedureParameters": {
+									"LocationExclude": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.LocationCodesExclude",
+											"type": "Expression"
+										}
+									},
+									"LocationFilter": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.LocationCodes",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "Auth-ClientID",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 5,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": true,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@{replace(pipeline().parameters.KeyVaultPath,'<secretname>','Hydronet-API-ClientID')}",
+								"type": "Expression"
+							},
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "Auth-ClientSecret",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 5,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": true,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@{replace(pipeline().parameters.KeyVaultPath,'<secretname>','Hydronet-API-ClientSecret')}",
+								"type": "Expression"
+							},
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "API-URL",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 5,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": true,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@{replace(pipeline().parameters.KeyVaultPath,'<secretname>','HydroNet-Base-URL')}",
+								"type": "Expression"
+							},
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "Obtain Destination File Details",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWDiscovery",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"parameters": [
+										{
+											"name": "SourceName",
+											"type": "String",
+											"value": {
+												"value": "@pipeline().parameters.SourceName",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										},
+										{
+											"name": "DestinationTable",
+											"type": "String",
+											"value": {
+												"value": "@pipeline().parameters.DestinationTable",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										}
+									],
+									"type": "Query",
+									"text": "DECLARE @SQL NVARCHAR(MAX) = '\nSELECT st.TableID, TargetBlobFilePath AS FolderName, TargetBlobFileName + ''_'' + CONVERT(VARCHAR(10),dbo.udf_getLocalDTM(),112) + TargetBlobFileNameExt AS FileName, QuoteCharacter, ColumnDelimiter\nFROM ETL.SourceTableDetails st\nWHERE EXISTS\n(\n\tSELECT *\n\tFROM ETL.SourceSystem ss\n\tWHERE st.SourceID = ss.SourceID\n\tAND ss.SourceName = @SourceName\n)\nAND AzuresqlTargetTableName = @DestinationTable'\n\nEXEC sp_executesql\t@SQL, \n\t\t\t\t\tN'@SourceName VARCHAR(100), @DestinationTable VARCHAR(200)', \n\t\t\t\t\t@SourceName = @SourceName, \n\t\t\t\t\t@DestinationTable = @DestinationTable"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "If rows to process greater than zero",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "For Each Processing Set",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(activity('Get Processing Set').output.count,0)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Set the Source Watermark",
+									"description": "The last watermark that we have processed up until. If only a portion of records have been retrieved this should always represent the max source date captured",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 3,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[ETL].[usp_update_incrementaldatevalue]",
+										"storedProcedureParameters": {
+											"LastModifiedDTM": {
+												"value": {
+													"value": "@activity('Get Processing Set').output.value[0].IncrementalWaterMark",
+													"type": "Expression"
+												},
+												"type": "DateTime"
+											},
+											"TableID": {
+												"value": {
+													"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].TableID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_EDWDiscovery",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Land to Destination",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "Set the Source Watermark",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"SourceName": {
+												"value": "@pipeline().parameters.SourceName",
+												"type": "Expression"
+											},
+											"OnlySourceToBlob": false,
+											"OnlyBlobtoASQL": true,
+											"AllowPartialUpdateOfDiscovery": false,
+											"OnlyExtractDeletedRecordsFromSourceToBlob": false,
+											"OnlyDeleteRecordsFromBlobToASQL": false,
+											"TriggerName": {
+												"value": "@pipeline().parameters.TriggerName",
+												"type": "Expression"
+											},
+											"HttpTriggerCategory": "Trigger"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "GetColumnMappings",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Obtain Destination File Details",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[ETL].[usp_getColumnMapping_json_to_csv]",
+								"storedProcedureParameters": {
+									"additional_param": {
+										"type": "String",
+										"value": ""
+									},
+									"TableID": {
+										"type": "Int32",
+										"value": {
+											"value": "@activity('Obtain Destination File Details').output.resultSets[0].rows[0].TableId",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_ASQL_EDWDiscovery",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"StartDate": {
+						"type": "string",
+						"defaultValue": "1900-01-01"
+					},
+					"EndDate": {
+						"type": "string",
+						"defaultValue": "1900-01-01"
+					},
+					"DaysPerFile": {
+						"type": "int",
+						"defaultValue": 90
+					},
+					"LocationCodes": {
+						"type": "string",
+						"defaultValue": "1326,1327"
+					},
+					"LocationCodesExclude": {
+						"type": "string",
+						"defaultValue": "@coalesce(null)"
+					},
+					"TimeZone": {
+						"type": "string",
+						"defaultValue": "+1000"
+					},
+					"DataSources": {
+						"type": "array",
+						"defaultValue": [
+							"QUU.BoM.RF3.IDR66"
+						]
+					},
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "Hydronet"
+					},
+					"DestinationTable": {
+						"type": "string",
+						"defaultValue": "Hydronet.Rainfall_Exceedance"
+					},
+					"VariableCodes": {
+						"type": "array",
+						"defaultValue": [
+							"EY_30min",
+							"EY_1hr",
+							"EY_2hr",
+							"EY_3hr",
+							"EY_4.5hr",
+							"EY_6hr",
+							"EY_9hr",
+							"EY_12hr",
+							"EY_18hr",
+							"EY_24hr",
+							"EY_36hr",
+							"EY_48hr",
+							"EY_72hr",
+							"EY_168hr"
+						]
+					},
+					"TriggerName": {
+						"type": "string",
+						"defaultValue": "Hydronet_Daily_Trigger"
+					},
+					"KeyVaultPath": {
+						"type": "string",
+						"defaultValue": "https://quu-ea-prd-da-key-vault.vault.azure.net/secrets/<secretname>?api-version=7.0"
+					}
+				},
+				"variables": {
+					"DataSourceSettings": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Hydronet"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Kantar_DataModel_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute PL_Kantar_Main",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"SourceName": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								},
+								"OnlySourceToBlob": {
+									"value": "@pipeline().parameters.OnlySourceToBlob",
+									"type": "Expression"
+								},
+								"OnlyBlobtoASQL": {
+									"value": "@pipeline().parameters.OnlyBlobtoASQL",
+									"type": "Expression"
+								},
+								"AllowPartialUpdateOfDiscovery": {
+									"value": "@pipeline().parameters.AllowPartialUpdateOfDiscovery",
+									"type": "Expression"
+								},
+								"Additional_MappingParam": {
+									"value": "@pipeline().parameters.Additional_MappingParam",
+									"type": "Expression"
+								},
+								"OnlyExtractDeletedRecordsFromSourceToBlob": {
+									"value": "@pipeline().parameters.OnlyExtractDeletedRecordsFromSourceToBlob",
+									"type": "Expression"
+								},
+								"OnlyDeleteRecordsFromBlobToASQL": {
+									"value": "@pipeline().parameters.OnlyDeleteRecordsFromBlobToASQL",
+									"type": "Expression"
+								},
+								"TriggerName": {
+									"value": "@pipeline().parameters.TriggerName",
+									"type": "Expression"
+								},
+								"HttpTriggerCategory": "EDW_Completion"
+							}
+						}
+					},
+					{
+						"name": "Execute PL_Kantar_Model_Main",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute PL_Kantar_Main",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EDW_Mart_Kantar",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sourcename": {
+									"value": "@pipeline().parameters.SourceName",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SourceName": {
+						"type": "string",
+						"defaultValue": "Kantar"
+					},
+					"OnlySourceToBlob": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"OnlyBlobtoASQL": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"AllowPartialUpdateOfDiscovery": {
+						"type": "bool",
+						"defaultValue": false
+					},
+					"Additional_MappingParam": {
+						"type": "string"
+					},
+					"OnlyExtractDeletedRecordsFromSourceToBlob": {
+						"type": "bool",
+						"defaultValue": false
+					},
+					"OnlyDeleteRecordsFromBlobToASQL": {
+						"type": "bool",
+						"defaultValue": false
+					},
+					"TriggerName": {
+						"type": "string",
+						"defaultValue": "Kantar_Monthly_Trigger"
+					}
+				},
+				"folder": {
+					"name": "Kantar"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-05-24T06:00:02Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BOM_Daily_Rainfall')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "BOM_Daily_Rainfall",
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
+							"HttpTriggerCategory": "[parameters('BOM_Daily_Rainfall_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-05-23T01:17:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								11
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Daptiv_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
+							"HttpTriggerCategory": "[parameters('Daptiv_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-04-07T11:30:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								11
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Envizi_Monthly_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
+							"HttpTriggerCategory": "[parameters('Envizi_Monthly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Month",
+						"interval": 1,
+						"startTime": "2022-10-21T00:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"hours": [
+								5
+							],
+							"monthDays": [
+								1
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GIS_SDCM_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
+							"HttpTriggerCategory": "[parameters('GIS_SDCM_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-01-20T19:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								20
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GIS_SDPROC_Weekly_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
+							"HttpTriggerCategory": "[parameters('GIS_SDPROC_Weekly_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Week",
+						"interval": 1,
+						"startTime": "2023-01-31T19:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								1
+							],
+							"weekDays": [
+								"Tuesday"
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GIS_SDUV_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
+							"HttpTriggerCategory": "[parameters('GIS_SDUV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-01-20T22:00:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								22
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Ixom_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
+							"HttpTriggerCategory": "[parameters('Ixom_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-07-14T04:59:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								6
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/NOPVDigital_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "run the NOPV datasets from blob json files into EDW_Discovery",
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"Additional_MappingParam": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_Additional_MappingParam')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
+							"HttpTriggerCategory": "[parameters('NOPVDigital_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-06-03T03:15:00",
+						"timeZone": "E. Australia Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/NOPV_Daily_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EDWDiscovery_SourceToDiscovery_Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"SourceName": "[parameters('NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_SourceName')]",
+							"OnlySourceToBlob": "[parameters('NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlySourceToBlob')]",
+							"OnlyBlobtoASQL": "[parameters('NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyBlobtoASQL')]",
+							"AllowPartialUpdateOfDiscovery": "[parameters('NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_AllowPartialUpdateOfDiscovery')]",
+							"OnlyExtractDeletedRecordsFromSourceToBlob": "[parameters('NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyExtractDeletedRecordsFromSourceToBlob')]",
+							"OnlyDeleteRecordsFromBlobToASQL": "[parameters('NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_OnlyDeleteRecordsFromBlobToASQL')]",
+							"TriggerName": "[parameters('NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_TriggerName')]",
+							"HttpTriggerCategory": "[parameters('NOPV_Daily_Trigger_properties_PL_EDWDiscovery_SourceToDiscovery_Master_parameters_HttpTriggerCategory')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-12-08T22:57:00",
+						"timeZone": "E. Australia Standard Time",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								8
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EDWDiscovery_SourceToDiscovery_Master')]"
+			]
+		}
+	]
+}

@@ -1,0 +1,1010 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "quu-ea-pre-prod-da-adf-001"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_Chris21_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Chris21"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_FileExists')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": {
+							"value": "@dataset().p_ServerName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"p_FileFolder": {
+						"type": "string"
+					},
+					"p_FileName": {
+						"type": "string"
+					},
+					"p_ServerName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().p_FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().p_FileFolder",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_FileSize')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": {
+							"value": "@dataset().server",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					},
+					"file": {
+						"type": "string"
+					},
+					"server": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().file",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_SUMS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": {
+							"value": "@dataset().server",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string",
+						"defaultValue": "SUMS"
+					},
+					"server": {
+						"type": "string",
+						"defaultValue": "\\\\Nfujprd200\\EBI_PROD_LANDING"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "SUMS"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_SUMS_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": {
+							"value": "@dataset().folderlocation",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					},
+					"folderlocation": {
+						"type": "string",
+						"defaultValue": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"folder": {
+					"name": "SUMS"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\"",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_ServiceNow')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"p_FileFolder": {
+						"type": "string",
+						"defaultValue": "ServiceNow\\Pre-Prod"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().p_FileFolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_GlobalScape_TFS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Tanker Filling Station Card Services"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_MidServer_ServiceNow_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"filefolder": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": {
+							"value": "@dataset().filefolder",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_MidServer_ServiceNow_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_ServiceNow_MidServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_MidServerLocation": {
+							"value": "@dataset().p_MidServerLocation",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"p_MidServerLocation": {
+						"type": "string",
+						"defaultValue": "\\\\NFUJPRD281\\c$\\Utils\\PROD\\export\\updates"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_NFUJPRD301_ICN')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_NFUJPRD301",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": "ICN\\Target"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FS_globalscape_urbanHQ')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_globalscape_PowerBI_file",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileFolder": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "UrbanHQ"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FileFolder",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_File_NFUJPRD202')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_NFUJPRD202",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TargetFilePath": {
+						"type": "string"
+					},
+					"TargetFileName": {
+						"type": "string"
+					},
+					"ColumnDelimiter": {
+						"type": "string"
+					},
+					"QuoteCharacter": {
+						"type": "string"
+					},
+					"EscapeCharacter": {
+						"type": "string"
+					},
+					"FirstRowHeader": {
+						"type": "int"
+					}
+				},
+				"folder": {
+					"name": "File Extract"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().TargetFileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().TargetFilePath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().ColumnDelimiter",
+						"type": "Expression"
+					},
+					"escapeChar": {
+						"value": "@dataset().EscapeCharacter",
+						"type": "Expression"
+					},
+					"firstRowAsHeader": {
+						"value": "@equals(dataset().FirstRowHeader,1)",
+						"type": "Expression"
+					},
+					"quoteChar": {
+						"value": "@dataset().QuoteCharacter",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_File_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"DirectoryName": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					},
+					"ColumnDelimiter": {
+						"type": "string"
+					},
+					"QuoteCharacter": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().DirectoryName",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_File_globalscape')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"TargetFilePath": {
+						"type": "string"
+					},
+					"TargetFileName": {
+						"type": "string"
+					},
+					"ColumnDelimiter": {
+						"type": "string"
+					},
+					"QuoteCharacter": {
+						"type": "string"
+					},
+					"EscapeCharacter": {
+						"type": "string"
+					},
+					"FirstRowHeader": {
+						"type": "int"
+					}
+				},
+				"folder": {
+					"name": "File Extract"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().TargetFileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().TargetFilePath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().ColumnDelimiter",
+						"type": "Expression"
+					},
+					"escapeChar": {
+						"value": "@dataset().EscapeCharacter",
+						"type": "Expression"
+					},
+					"firstRowAsHeader": {
+						"value": "@equals(dataset().FirstRowHeader,1)",
+						"type": "Expression"
+					},
+					"quoteChar": {
+						"value": "@dataset().QuoteCharacter",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Files_NFUJPRD202_GDrive')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_NFUJPRD202_GDrive",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TargetFilePath": {
+						"type": "string"
+					},
+					"TargetFileName": {
+						"type": "string"
+					},
+					"ColumnDelimiter": {
+						"type": "string"
+					},
+					"QuoteCharacter": {
+						"type": "string"
+					},
+					"EscapeCharacter": {
+						"type": "string"
+					},
+					"FirstRowHeader": {
+						"type": "int"
+					}
+				},
+				"folder": {
+					"name": "PowerBI Tactical"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().TargetFileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().TargetFilePath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().ColumnDelimiter",
+						"type": "Expression"
+					},
+					"escapeChar": {
+						"value": "@dataset().EscapeCharacter",
+						"type": "Expression"
+					},
+					"firstRowAsHeader": {
+						"value": "@equals(dataset().FirstRowHeader,1)",
+						"type": "Expression"
+					},
+					"quoteChar": {
+						"value": "@dataset().QuoteCharacter",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_GlobalScape_ExcelFile_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_Globalscape",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"p_ServerPath": "\\\\Nfujprd310\\ebi_prod_landing"
+					}
+				},
+				"parameters": {
+					"Filefolder": {
+						"type": "string",
+						"defaultValue": "NOPV"
+					},
+					"SheetName": {
+						"type": "string",
+						"defaultValue": "Bank_Details_Check"
+					},
+					"FileName": {
+						"type": "string",
+						"defaultValue": "Bank_Details_Check_2023_02_08.xlsx"
+					}
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": {
+						"value": "@dataset().SheetName",
+						"type": "Expression"
+					},
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().Filefolder",
+							"type": "Expression"
+						}
+					},
+					"firstRowAsHeader": true
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ICN_Payment_Extract_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_NFUJPRD202",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FilePath": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ICN Payment Extract"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FilePath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_MySQL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_MySQL_NetAppManagement",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"Databasename": {
+							"value": "@dataset().Databasename",
+							"type": "Expression"
+						},
+						"SecretPasswordName": {
+							"value": "@dataset().SecretPasswordName",
+							"type": "Expression"
+						},
+						"Servername": {
+							"value": "@dataset().Servername",
+							"type": "Expression"
+						},
+						"Username": {
+							"value": "@dataset().UserName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"Databasename": {
+						"type": "string"
+					},
+					"SecretPasswordName": {
+						"type": "string"
+					},
+					"Servername": {
+						"type": "string"
+					},
+					"UserName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "MySqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Oracle_Framework')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ORAC_Framework",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"HostName": {
+							"value": "@dataset().HostName",
+							"type": "Expression"
+						},
+						"PortNo": {
+							"value": "@dataset().PortNo",
+							"type": "Expression"
+						},
+						"SID": {
+							"value": "@dataset().SID",
+							"type": "Expression"
+						},
+						"UserName": {
+							"value": "@dataset().UserName",
+							"type": "Expression"
+						},
+						"SecretName": {
+							"value": "@dataset().SecretPasswordName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"HostName": {
+						"type": "string"
+					},
+					"PortNo": {
+						"type": "string"
+					},
+					"SID": {
+						"type": "string"
+					},
+					"UserName": {
+						"type": "string"
+					},
+					"SecretPasswordName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "OracleTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Oracle_OnPrem')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ORAC_Framework",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"HostName": {
+							"value": "@dataset().HostName",
+							"type": "Expression"
+						},
+						"PortNo": {
+							"value": "@dataset().PortNo",
+							"type": "Expression"
+						},
+						"SID": {
+							"value": "@dataset().SID",
+							"type": "Expression"
+						},
+						"UserName": {
+							"value": "@dataset().UserName",
+							"type": "Expression"
+						},
+						"SecretName": {
+							"value": "@dataset().SecretPasswordName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"HostName": {
+						"type": "string",
+						"defaultValue": "QNDCPRD137.corporate.urbanutilities.internal"
+					},
+					"PortNo": {
+						"type": "string",
+						"defaultValue": "1521"
+					},
+					"SID": {
+						"type": "string",
+						"defaultValue": "SDCM"
+					},
+					"UserName": {
+						"type": "string",
+						"defaultValue": "EBI_TECHM_USERS"
+					},
+					"SecretPasswordName": {
+						"type": "string",
+						"defaultValue": "gis-ebi-techm-users"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "OracleTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		}
+	]
+}

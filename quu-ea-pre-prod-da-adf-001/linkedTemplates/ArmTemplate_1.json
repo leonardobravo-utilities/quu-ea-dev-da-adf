@@ -1,0 +1,1936 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "quu-ea-pre-prod-da-adf-001"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_EDW_Mart_WorkOrder')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "dim_burstmain",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_BurstMain]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": "Ellipse5",
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_date",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_Date]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": null,
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_maintenancetype",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_MaintenanceType]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_product",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_Product]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_servicearea",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_ServiceArea]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "MDS",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_userstatus",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_UserStatus]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_workcategory",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_WorkCategory]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_workgroup",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_burstmain",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_WorkGroup]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_workordertype",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_date",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_WorkOrderType]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_workpriority",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_maintenancetype",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_WorkPriority]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_legalentity",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_product",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_LegalEntity]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_workorderattributes",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_servicearea",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_WorkOrderAttributes]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_workordercomment",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_userstatus",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_WorkOrderComment]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_workrequestcomment",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_workcategory",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_WorkRequestComment]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_location",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_workgroup",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "dim_workordertype",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "dim_workpriority",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "dim_legalentity",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "dim_workorderattributes",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "dim_workordercomment",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "dim_workrequestcomment",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_Location]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_equipment",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_location",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_Equipment]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_workrequest",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_location",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_WorkRequest]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "dim_workorder",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_equipment",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "dim_workrequest",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Dim_WorkOrder]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "fact_workorder",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "dim_workorder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Mart].[usp_load_Fact_WorkOrder]",
+							"storedProcedureParameters": {
+								"from_dtm": {
+									"value": null,
+									"type": "DateTime"
+								},
+								"isdeltaload": {
+									"value": "0",
+									"type": "Byte"
+								},
+								"row_execution_id": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"sourcename": {
+									"value": {
+										"value": "@pipeline().parameters.sourcename",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"to_dtm": {
+									"value": null,
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_EDWMart",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"sourcename": {
+						"type": "string",
+						"defaultValue": "Ellipse9"
+					}
+				},
+				"folder": {
+					"name": "WorkOrder-Model"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Temetra_Analysis_Service')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "PL_Process_ssas_Model_Temetra",
+						"description": "Process Temetra Model analysis service",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_ProcessModel",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"TenantID": "855f3711-2ce2-4c7e-af5b-a513f6f2ae6d",
+								"ClientID": "89ad5ef1-4924-43a2-9dca-37e65f827ef8",
+								"ClientSecret": "[QG2xdpLS5T1l9-/MoK-?ALgjk/Enf.-",
+								"SubscriptionID": "3ae58716-8913-4137-b029-844b270cb4a0",
+								"Region": "australiaeast",
+								"Server": "quueaprddaaas001",
+								"DatabaseName": "Temetra"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "Temetra/backup"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_BinZip_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"blob_directory": {
+						"type": "string"
+					},
+					"blob_container": {
+						"type": "string"
+					},
+					"storage_account": {
+						"type": "string",
+						"defaultValue": "quueaprddadlslanding001"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().blob_directory",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().blob_container",
+							"type": "Expression"
+						}
+					},
+					"compression": {
+						"type": "ZipDeflate"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_Binary_Sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"blob_container": {
+						"type": "string"
+					},
+					"storage_account": {
+						"type": "string",
+						"defaultValue": "quueaprddasrclanding001"
+					},
+					"blob_folder": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().blob_folder",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().blob_container",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_Binary_Sink_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"blob_directory": {
+						"type": "string"
+					},
+					"blob_File": {
+						"type": "string"
+					},
+					"blob_storageaccount": {
+						"type": "string",
+						"defaultValue": "quueaprddadlslanding001"
+					},
+					"blob_container": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().blob_File",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().blob_directory",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().blob_container",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_CSVFile_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"src_blobcontainer": {
+						"type": "string"
+					},
+					"src_blobfolder": {
+						"type": "string"
+					},
+					"delimiter": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().src_blobfolder",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().src_blobcontainer",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().delimiter",
+						"type": "Expression"
+					},
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_CSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"target_storageaccount": {
+						"type": "string"
+					},
+					"target_blobcontainer": {
+						"type": "string"
+					},
+					"target_blobfolder": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().target_blobfolder",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().target_blobcontainer",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_FileExists')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"blobcontainer": {
+						"type": "string"
+					},
+					"blobfolderpath": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().blobfolderpath",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().blobcontainer",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_FizeSize')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					},
+					"directory": {
+						"type": "string"
+					},
+					"file": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().file",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directory",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_DataLanding_ICN')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprdicndlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "icn-filelanding"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_Datalanding')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"TargetFileName": {
+						"type": "string"
+					},
+					"ColumnDelimiter": {
+						"type": "string",
+						"defaultValue": ","
+					},
+					"QuoteCharacter": {
+						"type": "string",
+						"defaultValue": "\""
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().TargetFileName",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().FolderPath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().ColumnDelimiter",
+						"type": "Expression"
+					},
+					"rowDelimiter": "\n",
+					"escapeChar": "º",
+					"quoteChar": {
+						"value": "@dataset().QuoteCharacter",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_Datalanding_IncludeHeader')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"TargetFileName": {
+						"type": "string"
+					},
+					"ColumnDelimiter": {
+						"type": "string",
+						"defaultValue": ","
+					},
+					"QuoteCharacter": {
+						"type": "string",
+						"defaultValue": "\""
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().TargetFileName",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().FolderPath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().ColumnDelimiter",
+						"type": "Expression"
+					},
+					"escapeChar": "º",
+					"firstRowAsHeader": true,
+					"quoteChar": {
+						"value": "@dataset().QuoteCharacter",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_EDWDiscovery_Delta_Parquet_Sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"TargetFileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Framework"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().TargetFileName",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().FolderPath\n",
+							"type": "Expression"
+						}
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_Chris21_Sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"targetblobfoldername": {
+						"type": "string"
+					},
+					"targetblobfilename": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Chris21"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().targetblobfilename",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().targetblobfoldername",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"quoteChar": "¬"
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_Dataloading')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"targetblobfoldername": {
+						"type": "string"
+					},
+					"targetFileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().targetFileName",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().targetblobfoldername",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_SUMS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"targetblobfoldername": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "SUMS"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": {
+							"value": "@dataset().targetblobfoldername",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_ServiceNow_Sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"p_snk_blob_container_name": {
+						"type": "string"
+					},
+					"p_snk_blob_file_name": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Service Now"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().p_snk_blob_file_name",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().p_snk_blob_container_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_Srclanding_Binary_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueaprddasrclanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"blobcontainer": {
+						"type": "string",
+						"defaultValue": "sharepoint-datalanding"
+					},
+					"blobfolderpath": {
+						"type": "string",
+						"defaultValue": "kantar-datalanding"
+					},
+					"blobfilename": {
+						"type": "string",
+						"defaultValue": "KANTAR Data File Example 250123.xlsx"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().blobfilename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().blobfolderpath",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().blobcontainer",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_FS_TFS_Sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"targetblobfoldername": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Tanker Filling Station Card Services"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": {
+							"value": "@dataset().targetblobfoldername",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABLB_Temetra_Geospatial_Sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_quueadadlslanding001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"TargetFileName": {
+						"type": "string"
+					},
+					"ColumnDelimiter": {
+						"type": "string",
+						"defaultValue": ","
+					},
+					"QuoteCharacter": {
+						"type": "string",
+						"defaultValue": "\""
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().TargetFileName",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().FolderPath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().ColumnDelimiter",
+						"type": "Expression"
+					},
+					"rowDelimiter": "\n",
+					"escapeChar": "º",
+					"firstRowAsHeader": true,
+					"quoteChar": {
+						"value": "@dataset().QuoteCharacter",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		}
+	]
+}
