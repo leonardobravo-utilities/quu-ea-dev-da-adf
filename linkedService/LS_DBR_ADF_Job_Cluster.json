@@ -1,12 +1,10 @@
 {
 	"name": "LS_DBR_ADF_Job_Cluster",
-	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
-		"description": "Azure Databricks Access Token",
 		"parameters": {
 			"databricksclusterid": {
 				"type": "string",
-				"defaultValue": "0330-140254-nhlno3g5"
+				"defaultValue": "0417-051914-axons909"
 			},
 			"databrickssecretname": {
 				"type": "string",
@@ -21,10 +19,7 @@
 				"type": "AzureKeyVaultSecret",
 				"store": {
 					"referenceName": "ADF_LS_AKV",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"environment": "dev"
-					}
+					"type": "LinkedServiceReference"
 				},
 				"secretName": {
 					"value": "@linkedService().databrickssecretname",
@@ -32,6 +27,7 @@
 				}
 			},
 			"existingClusterId": "@linkedService().databricksclusterid"
-		}
+		},
+		"description": "Azure Databricks Access Token"
 	}
 }

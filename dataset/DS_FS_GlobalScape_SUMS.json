@@ -2,17 +2,26 @@
 	"name": "DS_FS_GlobalScape_SUMS",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_FS",
+			"referenceName": "LS_FS_Globalscape",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"host": "\\\\nfujprd310\\EBI_PROD_LANDING",
-				"username": "urbanutilities\\SVC-EBI_PRDC04_AGT"
+				"p_ServerPath": {
+					"value": "@dataset().server",
+					"type": "Expression"
+				}
 			}
 		},
 		"parameters": {
 			"filefolder": {
 				"type": "string",
-				"defaultValue": "\\\\Nfujprd200\\EBI_PROD_LANDING\\SUMS"
+				"defaultValue": "SUMS"
+			},
+			"server": {
+				"type": "string",
+				"defaultValue": "\\\\Nfujprd200\\EBI_PROD_LANDING"
+			},
+			"filename": {
+				"type": "string"
 			}
 		},
 		"folder": {
@@ -23,6 +32,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "FileServerLocation",
+				"fileName": {
+					"value": "@dataset().filename",
+					"type": "Expression"
+				},
 				"folderPath": {
 					"value": "@dataset().filefolder",
 					"type": "Expression"
@@ -53,6 +66,5 @@
 				"type": "String"
 			}
 		]
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }
